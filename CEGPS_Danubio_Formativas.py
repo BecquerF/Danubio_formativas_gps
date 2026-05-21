@@ -357,8 +357,6 @@ def actualizar(
             else "Métrica"
         ),
 
-        pattern_shape="Métrica",
-
         orientation="h",
 
         barmode="group",
@@ -372,16 +370,20 @@ def actualizar(
         ]
     )
 
-    # Ajuste automático del ancho
-    cantidad_metricas = len(metricas_seleccionadas)
+    cantidad_metricas = max(
+        len(metricas_seleccionadas),
+        1
+    )
 
-    ancho_barra = max(
-        0.10,
-        0.8 / cantidad_metricas
+    altura_categoria = cantidad_metricas * 45
+
+    altura_grafico = max(
+        650,
+        len(promedio[referencia].unique())
+        * altura_categoria
     )
 
     fig.update_traces(
-        width=ancho_barra,
         opacity=0.75
     )
 
@@ -402,7 +404,8 @@ def actualizar(
         },
 
         yaxis={
-            "showgrid":False
+            "showgrid":False,
+            "automargin":True
         },
 
         legend={
@@ -410,10 +413,10 @@ def actualizar(
             "y":1.05
         },
 
-        height=max(
-            650,
-            len(promedio[referencia].unique())*45
-        )
+        bargap=0.35,
+        bargroupgap=0.15,
+
+        height=altura_grafico
     )
 
     return fig

@@ -33,12 +33,13 @@ df = df.drop(columns=columnas_eliminar, errors="ignore")
 
 app = Dash(__name__)
 server = app.server
+app.title = "CARGA EXTERNA - DANUBIO FORMATIVAS 2026"
 
 metricas = [
     "Distance",
     "Player Load",
     "Max Velocity",
-    "Desaceleration Efforts",
+    "Deceleration Efforts",
     "Acceleration Efforts",
     "Accel + Decel Efforts",
     "Accel + Decel Efforts Per Minute",
@@ -67,6 +68,7 @@ ultima_actualizacion = datetime.now().strftime(
 
 app.layout = html.Div([
 
+    # HEADER
     html.Div([
 
         html.Img(
@@ -75,8 +77,8 @@ app.layout = html.Div([
                 "width":"100%",
                 "borderRadius":"0px",
                 "marginBottom":"20px",
-                "maxheight":"150px",
-                "objectFit":"contain"   
+                "maxHeight":"150px",
+                "objectFit":"contain"
             }
         ),
 
@@ -85,15 +87,17 @@ app.layout = html.Div([
             style={
                 "color":"#dcdcdc",
                 "textAlign":"right",
-                "padding":"10px"
+                "padding":"10px",
+                "fontSize":"13px"
             }
         )
 
     ]),
 
+    # CONTENEDOR PRINCIPAL
     html.Div([
 
-        # IZQUIERDA
+        # IZQUIERDA → GRÁFICO
         html.Div([
 
             dcc.Graph(
@@ -112,7 +116,7 @@ app.layout = html.Div([
             "verticalAlign":"top"
         }),
 
-        # DERECHA
+        # DERECHA → FILTROS
         html.Div([
 
             # Categorías
@@ -133,6 +137,7 @@ app.layout = html.Div([
                             .unique()
                         )
                     ],
+
                     inline=False
                 )
 
@@ -141,12 +146,13 @@ app.layout = html.Div([
             style={
 
                 "background":"#2C2C2CE0",
+                "color":"white",
                 "padding":"15px",
                 "borderRadius":"15px",
                 "marginBottom":"15px"
             }),
 
-            # Métricas
+            # MÉTRICAS
             html.Div([
 
                 html.H4(
@@ -156,11 +162,14 @@ app.layout = html.Div([
 
                 dcc.Checklist(
                     id="metrica",
+
                     options=[
                         {"label":m,"value":m}
                         for m in metricas
                     ],
+
                     value=["Distance"],
+
                     inline=False
                 )
 
@@ -169,12 +178,13 @@ app.layout = html.Div([
             style={
 
                 "background":"#2C2C2CE0",
+                "color":"white",
                 "padding":"15px",
                 "borderRadius":"15px",
                 "marginBottom":"15px"
             }),
 
-            # Referencia
+            # REFERENCIAS
             html.Div([
 
                 html.H4(
@@ -184,6 +194,7 @@ app.layout = html.Div([
 
                 dcc.RadioItems(
                     id="referencia",
+
                     options=[
                         {
                             "label":r,
@@ -191,6 +202,7 @@ app.layout = html.Div([
                         }
                         for r in referencias
                     ],
+
                     value="Category"
                 )
 
@@ -199,6 +211,7 @@ app.layout = html.Div([
             style={
 
                 "background":"#2C2C2CE0",
+                "color":"white",
                 "padding":"15px",
                 "borderRadius":"15px"
             })
@@ -221,10 +234,10 @@ style={
 
     "backgroundColor":"#1a1a1a",
     "padding":"20px",
+
     "fontFamily":
     '"ITC Avant Garde Gothic", Century Gothic, sans-serif'
 })
-
 
 @app.callback(
     Output("grafico1","figure"),
@@ -249,65 +262,98 @@ def actualizar(
             .isin(categorias)
         ]
 
-    promedio=(
-        dff.groupby(
-            referencia
-        )[metricas_seleccionadas]
-        .mean()
-        .reset_index()
-    )
+ # Agrupación dinámica
+columnas_agrupacion = [referencia]
 
-    promedio=pd.melt(
+# Mantener categoría como segundo nivel
+if categorias and referencia != "Category":
+    columnas_agrupacion.append("Category")
 
-        promedio,
-        id_vars=[referencia],
-        value_vars=metricas_seleccionadas,
-        var_name="Métrica",
-        value_name="Valor"
-    )
+promedio = (
+    dff.groupby(columnas_agrupacion)[metricas_seleccionadas]
+    .mean()
+    .reset_index()
+)
 
-    fig=px.bar(
+# Convertir formato ancho a largo
+promedio = pd.melt(
 
-        promedio,
+    promedio,
 
-        x="Valor",
-        y=referencia,
+    id_vars=columnas_agrupacion,
+    value_vars=metricas_seleccionadas,
 
-        color="Métrica",
+    var_name="Métrica",
+    value_name="Valor"
+)
 
-        orientation="h",
+fig = px.bar(
 
-        barmode="group",
+    promedio,
 
-        color_discrete_sequence=[
-            "#f7f6f4",
-            "#C5C3C3",
-            "#999999",
-            "#6e6e6e",
-            "#b1b369",
-        ]
-    )
+    x="Valor",
+    y=referencia,
 
-    fig.update_traces(
-        width=.25,
-        opacity=.65
-    )
+    color=(
+        "Category"
+        if referencia != "Category"
+        and categorias
+        else "Métrica"
+    ),
 
-    fig.update_layout(
+    pattern_shape="Métrica",
 
-        paper_bgcolor="#1a1a1a",
-        plot_bgcolor="#1a1a1a",
+    orientation="h",
 
-        font={
-            "color":"#dcdcdc",
-            "family":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
-            "size":11
-        },
+    barmode="group",
 
-        height=650
-    )
+    color_discrete_sequence=[
+        "#f7f6f4",
+        "#C5C3C3",
+        "#999999",
+        "#6e6e6e",
+        "#b1b369"
+    ]
+)
 
-    return fig
+fig.update_traces(
+    width=0.25,
+    opacity=0.65
+)
+
+fig.update_layout(
+
+    paper_bgcolor="#1a1a1a",
+    plot_bgcolor="#1a1a1a",
+
+    font={
+
+        "color":"#dcdcdc",
+        "family":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
+        "size":11
+    },
+
+    xaxis={
+
+        "showgrid":True,
+        "gridcolor":"#4e4e4e"
+    },
+
+    yaxis={
+
+        "showgrid":False
+    },
+
+    legend={
+
+        "orientation":"h",
+        "y":1.05
+    },
+
+    height=650
+)
+
+return fig
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -59,117 +59,170 @@ referencias = [
     "Period Tags"
 ]
 
-app.layout = html.Div([
+from datetime import datetime
 
-    html.H1(
-        "Danubio Formativas GPS",
-        style={
-            "color":"#ffffff",
-            "textAlign":"center",
-            "marginBottom":"20px"
-        }
-    ),
+ultima_actualizacion = datetime.now().strftime(
+    "%d/%m/%Y - %H:%M"
+)
+
+app.layout = html.Div([
 
     html.Div([
 
-        html.H4(
-            "Categorías",
-            style={"color":"#dcdcdc"}
-        ),
-
-        dcc.Checklist(
-            id="categoria",
-            options=[
-                {"label": c, "value": c}
-                for c in sorted(df["Category"].dropna().unique())
-            ],
-            inline=True,
-
+        html.Img(
+            src="/assets/Banner_titulo.png",
             style={
-                "color":"#dcdcdc"
-            },
-
-            inputStyle={
-                "margin-right":"5px",
-                "margin-left":"10px"
+                "width":"100%",
+                "borderRadius":"0px",
+                "marginBottom":"20px",
+                "maxheight":"300px",
+                "objectFit":"contain"   
             }
         ),
 
-        html.Br(),
-
-        html.H4(
-            "Métricas",
-            style={"color":"#dcdcdc"}
-        ),
-
-        dcc.Checklist(
-            id="metrica",
-            options=[
-                {"label": m, "value": m}
-                for m in metricas
-            ],
-
-            value=["Acceleration Efforts"],
-
-            inline=True,
-
-            inputStyle={
-                "margin-right":"5px",
-                "margin-left":"10px"
-            }
-        ),
-
-        html.Br(),
-
-        html.H4(
-            "Comparar por",
-            style={"color":"#dcdcdc"}
-        ),
-
-        dcc.RadioItems(
-            id="referencia",
-            options=[
-                {"label":r,"value":r}
-                for r in referencias
-            ],
-
-            value="Category",
-
-            inline=True,
-
-            inputStyle={
-                "margin-right":"5px",
-                "margin-left":"10px"
+        html.P(
+            f"Última actualización: {ultima_actualizacion}",
+            style={
+                "color":"#dcdcdc",
+                "textAlign":"right",
+                "padding":"10px"
             }
         )
 
-    ],
+    ]),
 
-    style={
+    html.Div([
 
-        "backgroundColor":"#4e4e4e",
-        "padding":"20px",
-        "borderRadius":"20px",
-        "marginBottom":"20px"
-    }),
+        # IZQUIERDA
+        html.Div([
 
-    dcc.Graph(
-        id="grafico1",
+            dcc.Graph(
+                id="grafico1",
+                style={
+                    "height":"700px"
+                }
+            )
+
+        ],
+
         style={
-            "height":"500px"
-        }
-    )
+
+            "width":"72%",
+            "display":"inline-block",
+            "verticalAlign":"top"
+        }),
+
+        # DERECHA
+        html.Div([
+
+            # Categorías
+            html.Div([
+
+                html.H4(
+                    "Categorías",
+                    style={"color":"white"}
+                ),
+
+                dcc.Checklist(
+                    id="categoria",
+                    options=[
+                        {"label":c,"value":c}
+                        for c in sorted(
+                            df["Category"]
+                            .dropna()
+                            .unique()
+                        )
+                    ],
+                    inline=False
+                )
+
+            ],
+
+            style={
+
+                "background":"#191818",
+                "padding":"15px",
+                "borderRadius":"15px",
+                "marginBottom":"15px"
+            }),
+
+            # Métricas
+            html.Div([
+
+                html.H4(
+                    "Métricas",
+                    style={"color":"white"}
+                ),
+
+                dcc.Checklist(
+                    id="metrica",
+                    options=[
+                        {"label":m,"value":m}
+                        for m in metricas
+                    ],
+                    value=["Distance"],
+                    inline=False
+                )
+
+            ],
+
+            style={
+
+                "background":"#191818",
+                "padding":"15px",
+                "borderRadius":"15px",
+                "marginBottom":"15px"
+            }),
+
+            # Referencia
+            html.Div([
+
+                html.H4(
+                    "Comparar por",
+                    style={"color":"white"}
+                ),
+
+                dcc.RadioItems(
+                    id="referencia",
+                    options=[
+                        {
+                            "label":r,
+                            "value":r
+                        }
+                        for r in referencias
+                    ],
+                    value="Category"
+                )
+
+            ],
+
+            style={
+
+                "background":"#191818",
+                "padding":"15px",
+                "borderRadius":"15px"
+            })
+
+        ],
+
+        style={
+
+            "width":"25%",
+            "display":"inline-block",
+            "paddingLeft":"15px",
+            "verticalAlign":"top"
+        })
+
+    ])
 
 ],
 
 style={
 
     "backgroundColor":"#1a1a1a",
-    "minHeight":"100vh",
     "padding":"20px",
-
     "fontFamily":
-    '"ITC Avant Garde Gothic", Avantgarde, Century Gothic, sans-serif'
+    '"ITC Avant Garde Gothic", Century Gothic, sans-serif'
 })
 
 
@@ -187,54 +240,56 @@ def actualizar(
     referencia
 ):
 
-    dff = df.copy()
+    dff=df.copy()
 
     if categorias:
-        dff = dff[
-            dff["Category"].isin(categorias)
+
+        dff=dff[
+            dff["Category"]
+            .isin(categorias)
         ]
 
-    metrica_actual = metricas_seleccionadas[0]
-
-    promedio = (
-        dff.groupby(referencia)[metrica_actual]
+    promedio=(
+        dff.groupby(
+            referencia
+        )[metricas_seleccionadas]
         .mean()
         .reset_index()
     )
 
-    promedio = promedio.sort_values(
-        by=metrica_actual,
-        ascending=True
+    promedio=pd.melt(
+
+        promedio,
+        id_vars=[referencia],
+        value_vars=metricas_seleccionadas,
+        var_name="Métrica",
+        value_name="Valor"
     )
 
-    fig = px.bar(
+    fig=px.bar(
 
         promedio,
 
-        x=metrica_actual,
+        x="Valor",
         y=referencia,
+
+        color="Métrica",
 
         orientation="h",
 
-        color=referencia,
-
-        text_auto=".1f",
+        barmode="group",
 
         color_discrete_sequence=[
-
-            "#9e8330",
-            "#d1b77e",
+            "#ead69a",
+            "#343434",
             "#999999",
             "#6e6e6e"
         ]
-
     )
 
     fig.update_traces(
-
-        width=0.35,
-        opacity=0.80,
-        textposition="outside"
+        width=.25,
+        opacity=.65
     )
 
     fig.update_layout(
@@ -243,36 +298,12 @@ def actualizar(
         plot_bgcolor="#1a1a1a",
 
         font={
-
-            "family":
-            "ITC Avant Garde Gothic, Century Gothic, sans-serif",
-
             "color":"#dcdcdc",
-            "size":13
+            "family":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
+            "size":11
         },
 
-        title={
-
-            "text":f"Promedio de {metrica_actual}",
-            "x":0.5,
-            "font":{"color":"white"}
-        },
-
-        xaxis={
-
-            "showgrid":True,
-            "gridcolor":"#4e4e4e",
-            "zeroline":False
-        },
-
-        yaxis={
-
-            "showgrid":False
-        },
-
-        showlegend=False,
-
-        height=500
+        height=650
     )
 
     return fig

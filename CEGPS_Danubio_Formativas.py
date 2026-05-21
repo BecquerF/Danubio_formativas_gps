@@ -38,9 +38,15 @@ metricas = [
     "Distance",
     "Player Load",
     "Max Velocity",
+    "Desaceleration Efforts",
     "Acceleration Efforts",
     "Sprint Distance",
-    "High Speed Distance"
+    "High Speed Distance",
+    "Sprint Efforts",
+    "High Speed Efforts",
+    "Impacts",
+    "Sprint Dist per Minute",
+    "High Speed Dist per Minute"
 ]
 
 referencias = [
@@ -53,70 +59,78 @@ referencias = [
 
 app.layout = html.Div([
 
-    html.H1("Danubio Formativas GPS"),
-
-    dcc.Dropdown(
-        id="categoria",
-        options=[
-            {"label": c, "value": c}
-            for c in sorted(df["Category"].dropna().unique())
-        ],
-        multi=True,
-        placeholder="Seleccionar categoría"
+    html.H1(
+        "Danubio Formativas GPS",
+        style={
+            "color":"#ffffff",
+            "textAlign":"center",
+            "marginBottom":"20px"
+        }
     ),
 
-    dcc.Dropdown(
-        id="jugador",
-        options=[
-            {"label": j, "value": j}
-            for j in sorted(df["Player Name"].dropna().unique())
-        ],
-        multi=True,
-        placeholder="Seleccionar jugador"
-    ),
+    html.Div([
 
-    dcc.Dropdown(
-        id="gametag",
-        options=[
-            {"label": g, "value": g}
-            for g in sorted(df["Game Tags"].dropna().unique())
-        ],
-        multi=True,
-        placeholder="Seleccionar dinámica"
-    ),
+        dcc.Checklist(
+            id="categoria",
+            options=[
+                {"label": c, "value": c}
+                for c in sorted(df["Category"].dropna().unique())
+            ],
+            inline=True
+        ),
 
-    dcc.Dropdown(
-        id="athlete",
-        options=[
-            {"label": a, "value": a}
-            for a in sorted(df["Athlete Tags"].dropna().unique())
-        ],
-        multi=True,
-        placeholder="Seleccionar etiqueta"
-    ),
+        html.Br(),
 
-    dcc.Dropdown(
-        id="metrica",
-        options=[
-            {"label": m, "value": m}
-            for m in metricas
-        ],
-        value="Acceleration Efforts"
-    ),
+        dcc.Checklist(
+            id="metrica",
+            options=[
+                {"label": m, "value": m}
+                for m in metricas
+            ],
+            value=["Acceleration Efforts"],
+            inline=True
+        ),
 
-    dcc.Dropdown(
-        id="referencia",
-        options=[
-            {"label": r, "value": r}
-            for r in referencias
-        ],
-        value="Category"
-    ),
+        html.Br(),
 
-    dcc.Graph(id="grafico1")
+        dcc.RadioItems(
+            id="referencia",
+            options=[
+                {"label":r,"value":r}
+                for r in referencias
+            ],
+            value="Category",
+            inline=True
+        )
 
-])
+    ],
 
+    style={
+
+        "backgroundColor":"#4e4e4e",
+        "padding":"15px",
+        "borderRadius":"15px",
+        "marginBottom":"20px"
+    }),
+
+    dcc.Graph(
+        id="grafico1",
+        style={
+            "height":"500px"
+        }
+    )
+
+],
+
+style={
+
+    "backgroundColor":"#1a1a1a",
+    "minHeight":"100vh",
+    "padding":"20px",
+
+    "fontFamily":
+    '"ITC Avant Garde Gothic", Avantgarde, Century Gothic, sans-serif'
+})
 
 @app.callback(
     Output("grafico1", "figure"),
@@ -164,28 +178,61 @@ def actualizar(
     )
 
     fig = px.bar(
-        promedio,
-        x=metrica,
-        y=referencia,
-        orientation="h",
-        color=referencia,
-        text_auto=".1f",
-        title=f"Promedio de {metrica}"
-    )
+    promedio,
+    x=metrica,
+    y=referencia,
+    orientation="h",
+    color=referencia,
+    text_auto=".1f",
 
-    fig.update_layout(
-        height=700,
-        title={"x":0.5},
-        xaxis_title=metrica,
-        yaxis_title="",
-        yaxis={
-            "categoryorder":"total ascending"
-        }
-    )
+    color_discrete_sequence=[
+        "#9e8330",
+        "#d1b77e",
+        "#999999",
+        "#6e6e6e"
+    ]
+)
 
-    fig.update_traces(
-        textposition="outside"
-    )
+fig.update_traces(
+
+    width=0.35,
+    opacity=0.85,
+    textposition="outside"
+)
+
+fig.update_layout(
+
+    paper_bgcolor="#1a1a1a",
+    plot_bgcolor="#1a1a1a",
+
+    font={
+
+        "family":"ITC Avant Garde Gothic",
+        "color":"#dcdcdc",
+        "size":13
+    },
+
+    title={
+
+        "x":0.5,
+        "font":{"color":"white"}
+    },
+
+    xaxis={
+
+        "showgrid":True,
+        "gridcolor":"#4e4e4e",
+        "zeroline":False
+    },
+
+    yaxis={
+
+        "showgrid":False
+    },
+
+    showlegend=False,
+    height=500
+)
 
     return fig
 

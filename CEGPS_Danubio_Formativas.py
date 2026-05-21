@@ -69,47 +69,45 @@ ultima_actualizacion = datetime.now().strftime(
 app.layout = html.Div([
 
     # HEADER
-html.Div([
+    html.Div([
 
-    html.Img(
-        src="/assets/Banner_titulo.png",
-        style={
-            "width":"100%",
-            "borderRadius":"0px",
-            "marginBottom":"20px",
-            "maxHeight":"150px",
-            "objectFit":"contain"
-        }
-    ),
+        html.Img(
+            src="/assets/Banner_titulo.png",
+            style={
+                "width":"100%",
+                "borderRadius":"0px",
+                "marginBottom":"20px",
+                "maxHeight":"150px",
+                "objectFit":"contain"
+            }
+        ),
 
-    html.H1(
-        "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
-        style={
-            "color":"#ffffff",
-            "textAlign":"center",
-            "fontSize":"30px",
-            "fontWeight":"600",
-            "marginTop":"5px",
-            "marginBottom":"15px",
+        html.H1(
+            "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
+            style={
+                "color":"#ffffff",
+                "textAlign":"center",
+                "fontSize":"30px",
+                "fontWeight":"600",
+                "marginTop":"5px",
+                "marginBottom":"15px",
+                "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
+                "borderBottom":"2px solid #9e8330",
+                "paddingBottom":"10px"
+            }
+        ),
 
-            "fontFamily":
-            '"ITC Avant Garde Gothic", Century Gothic, sans-serif',
-            "borderBottom":"2px solid #9e8330",
-"paddingBottom":"10px"
-        }
-    ),
+        html.P(
+            f"Última actualización: {ultima_actualizacion}",
+            style={
+                "color":"#dcdcdc",
+                "textAlign":"right",
+                "padding":"10px",
+                "fontSize":"13px"
+            }
+        )
 
-    html.P(
-        f"Última actualización: {ultima_actualizacion}",
-        style={
-            "color":"#dcdcdc",
-            "textAlign":"right",
-            "padding":"10px",
-            "fontSize":"13px"
-        }
-    )
-
-]),
+    ]),
 
     # CONTENEDOR PRINCIPAL
     html.Div([
@@ -125,9 +123,7 @@ html.Div([
             )
 
         ],
-
         style={
-
             "width":"72%",
             "display":"inline-block",
             "verticalAlign":"top"
@@ -150,7 +146,6 @@ html.Div([
                 ),
 
                 dcc.Checklist(
-
                     id="categoria",
 
                     options=[
@@ -158,7 +153,6 @@ html.Div([
                             "label":c,
                             "value":c
                         }
-
                         for c in sorted(
                             df["Category"]
                             .dropna()
@@ -177,9 +171,7 @@ html.Div([
                 )
 
             ],
-
             style={
-
                 "background":"#2C2C2CE0",
                 "padding":"15px",
                 "borderRadius":"15px",
@@ -200,7 +192,6 @@ html.Div([
                 ),
 
                 dcc.Checklist(
-
                     id="metrica",
 
                     options=[
@@ -208,7 +199,6 @@ html.Div([
                             "label":m,
                             "value":m
                         }
-
                         for m in metricas
                     ],
 
@@ -225,16 +215,14 @@ html.Div([
                 )
 
             ],
-
             style={
-
                 "background":"#2C2C2CE0",
                 "padding":"15px",
                 "borderRadius":"15px",
                 "marginBottom":"15px"
             }),
 
-            # REFERENCIAS
+            # COMPARAR POR
             html.Div([
 
                 html.H4(
@@ -248,16 +236,13 @@ html.Div([
                 ),
 
                 dcc.RadioItems(
-
                     id="referencia",
 
                     options=[
-
                         {
                             "label":r,
                             "value":r
                         }
-
                         for r in referencias
                     ],
 
@@ -272,18 +257,105 @@ html.Div([
                 )
 
             ],
-
             style={
+                "background":"#2C2C2CE0",
+                "padding":"15px",
+                "borderRadius":"15px",
+                "marginBottom":"15px"
+            }),
 
+            # FILTROS COMPARATIVOS
+            html.Div([
+
+                html.H4(
+                    "Filtros comparativos",
+                    style={
+                        "color":"white",
+                        "fontSize":"14px",
+                        "fontWeight":"normal",
+                        "marginBottom":"15px"
+                    }
+                ),
+
+                html.P(
+                    "Jugador",
+                    style={"color":"#dcdcdc","fontSize":"12px"}
+                ),
+
+                dcc.Dropdown(
+                    id="jugador",
+                    options=[
+                        {"label":x,"value":x}
+                        for x in sorted(
+                            df["Player Name"].dropna().unique()
+                        )
+                    ],
+                    multi=True
+                ),
+
+                html.Br(),
+
+                html.P(
+                    "Athlete Tags",
+                    style={"color":"#dcdcdc","fontSize":"12px"}
+                ),
+
+                dcc.Dropdown(
+                    id="athlete",
+                    options=[
+                        {"label":x,"value":x}
+                        for x in sorted(
+                            df["Athlete Tags"].dropna().unique()
+                        )
+                    ],
+                    multi=True
+                ),
+
+                html.Br(),
+
+                html.P(
+                    "Game Tags",
+                    style={"color":"#dcdcdc","fontSize":"12px"}
+                ),
+
+                dcc.Dropdown(
+                    id="gametag",
+                    options=[
+                        {"label":x,"value":x}
+                        for x in sorted(
+                            df["Game Tags"].dropna().unique()
+                        )
+                    ],
+                    multi=True
+                ),
+
+                html.Br(),
+
+                html.P(
+                    "Period Tags",
+                    style={"color":"#dcdcdc","fontSize":"12px"}
+                ),
+
+                dcc.Dropdown(
+                    id="periodtag",
+                    options=[
+                        {"label":x,"value":x}
+                        for x in sorted(
+                            df["Period Tags"].dropna().unique()
+                        )
+                    ],
+                    multi=True
+                )
+
+            ],
+            style={
                 "background":"#2C2C2CE0",
                 "padding":"15px",
                 "borderRadius":"15px"
             })
 
         ],
-
         style={
-
             "width":"25%",
             "display":"inline-block",
             "paddingLeft":"15px",
@@ -293,27 +365,30 @@ html.Div([
     ])
 
 ],
-
 style={
-
     "backgroundColor":"#1a1a1a",
     "padding":"20px",
-
-    "fontFamily":
-    '"ITC Avant Garde Gothic", Century Gothic, sans-serif'
+    "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif'
 })
-
 @app.callback(
     Output("grafico1","figure"),
     Input("categoria","value"),
     Input("metrica","value"),
-    Input("referencia","value")
+    Input("referencia","value"),
+    Input("jugador","value"),
+Input("athlete","value"),
+Input("gametag","value"),
+Input("periodtag","value")
 )
 
 def actualizar(
     categorias,
     metricas_seleccionadas,
-    referencia
+    referencia, 
+    jugador,
+    athlete,
+    gametag,
+    periodtag
 ):
 
     dff = df.copy()

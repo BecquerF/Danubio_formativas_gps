@@ -513,6 +513,7 @@ def actualizar_tab(
             y=referencia,
 
             color="Métrica",
+            backgroundColor="#1a1a1a",
 
             orientation="h",
 
@@ -520,10 +521,11 @@ def actualizar_tab(
 
             color_discrete_sequence=[
 
-                "#9e8330",
-                "#d1b77e",
-                "#999999",
-                "#6e6e6e"
+                "#fafafa",
+                "#b3b1af",
+                "#F5D888",
+                "#5A5A5A",
+                "#1B1B1B"
             ]
         )
 
@@ -563,12 +565,15 @@ def actualizar_tab(
 
             markers=True,
 
+            line={"shape": "spline"},
+
             color_discrete_sequence=[
 
-                "#9e8330",
-                "#d1b77e",
-                "#999999",
-                "#6e6e6e"
+                "#fafafa",
+                "#b3b1af",
+                "#F5D888",
+                "#5A5A5A",
+                "#1B1B1B"
             ]
         )
 
@@ -583,6 +588,8 @@ def actualizar_tab(
                 "color":"#dcdcdc"
             }
         )
+
+        fig.update_xaxes(tickformat="%d/%m/%Y")
 
         return dcc.Graph(
             figure=fig

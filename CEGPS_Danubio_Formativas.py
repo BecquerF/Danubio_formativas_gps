@@ -40,13 +40,15 @@ metricas = [
     "Max Velocity",
     "Desaceleration Efforts",
     "Acceleration Efforts",
+    "Accel + Decel Efforts",
+    "Accel + Decel Efforts Per Minute",
     "Sprint Distance",
     "High Speed Distance",
     "Sprint Efforts",
     "High Speed Efforts",
     "Impacts",
-    "Sprint Dist per Minute",
-    "High Speed Dist per Minute"
+    "Sprint Dist Per Min",
+    "High Speed Distance Per Minute"
 ]
 
 referencias = [
@@ -70,16 +72,35 @@ app.layout = html.Div([
 
     html.Div([
 
+        html.H4(
+            "Categorías",
+            style={"color":"#dcdcdc"}
+        ),
+
         dcc.Checklist(
             id="categoria",
             options=[
                 {"label": c, "value": c}
                 for c in sorted(df["Category"].dropna().unique())
             ],
-            inline=True
+            inline=True,
+
+            style={
+                "color":"#dcdcdc"
+            },
+
+            inputStyle={
+                "margin-right":"5px",
+                "margin-left":"10px"
+            }
         ),
 
         html.Br(),
+
+        html.H4(
+            "Métricas",
+            style={"color":"#dcdcdc"}
+        ),
 
         dcc.Checklist(
             id="metrica",
@@ -87,11 +108,23 @@ app.layout = html.Div([
                 {"label": m, "value": m}
                 for m in metricas
             ],
+
             value=["Acceleration Efforts"],
-            inline=True
+
+            inline=True,
+
+            inputStyle={
+                "margin-right":"5px",
+                "margin-left":"10px"
+            }
         ),
 
         html.Br(),
+
+        html.H4(
+            "Comparar por",
+            style={"color":"#dcdcdc"}
+        ),
 
         dcc.RadioItems(
             id="referencia",
@@ -99,8 +132,15 @@ app.layout = html.Div([
                 {"label":r,"value":r}
                 for r in referencias
             ],
+
             value="Category",
-            inline=True
+
+            inline=True,
+
+            inputStyle={
+                "margin-right":"5px",
+                "margin-left":"10px"
+            }
         )
 
     ],
@@ -108,8 +148,8 @@ app.layout = html.Div([
     style={
 
         "backgroundColor":"#4e4e4e",
-        "padding":"15px",
-        "borderRadius":"15px",
+        "padding":"20px",
+        "borderRadius":"20px",
         "marginBottom":"20px"
     }),
 
@@ -132,110 +172,110 @@ style={
     '"ITC Avant Garde Gothic", Avantgarde, Century Gothic, sans-serif'
 })
 
-@app.callback(
-    Output("grafico1", "figure"),
 
-    Input("categoria", "value"),
-    Input("jugador", "value"),
-    Input("gametag", "value"),
-    Input("athlete", "value"),
-    Input("metrica", "value"),
-    Input("referencia", "value")
+@app.callback(
+    Output("grafico1","figure"),
+
+    Input("categoria","value"),
+    Input("metrica","value"),
+    Input("referencia","value")
 )
 
 def actualizar(
     categorias,
-    jugadores,
-    gametags,
-    athlete,
-    metrica,
+    metricas_seleccionadas,
     referencia
 ):
 
     dff = df.copy()
 
     if categorias:
-        dff = dff[dff["Category"].isin(categorias)]
+        dff = dff[
+            dff["Category"].isin(categorias)
+        ]
 
-    if jugadores:
-        dff = dff[dff["Player Name"].isin(jugadores)]
-
-    if gametags:
-        dff = dff[dff["Game Tags"].isin(gametags)]
-
-    if athlete:
-        dff = dff[dff["Athlete Tags"].isin(athlete)]
+    metrica_actual = metricas_seleccionadas[0]
 
     promedio = (
-        dff.groupby(referencia)[metrica]
+        dff.groupby(referencia)[metrica_actual]
         .mean()
         .reset_index()
     )
 
     promedio = promedio.sort_values(
-        by=metrica,
+        by=metrica_actual,
         ascending=True
     )
 
     fig = px.bar(
-    promedio,
-    x=metrica,
-    y=referencia,
-    orientation="h",
-    color=referencia,
-    text_auto=".1f",
 
-    color_discrete_sequence=[
-        "#9e8330",
-        "#d1b77e",
-        "#999999",
-        "#6e6e6e"
-    ]
-)
+        promedio,
 
-fig.update_traces(
+        x=metrica_actual,
+        y=referencia,
 
-    width=0.35,
-    opacity=0.85,
-    textposition="outside"
-)
+        orientation="h",
 
-fig.update_layout(
+        color=referencia,
 
-    paper_bgcolor="#1a1a1a",
-    plot_bgcolor="#1a1a1a",
+        text_auto=".1f",
 
-    font={
+        color_discrete_sequence=[
 
-        "family":"ITC Avant Garde Gothic",
-        "color":"#dcdcdc",
-        "size":13
-    },
+            "#9e8330",
+            "#d1b77e",
+            "#999999",
+            "#6e6e6e"
+        ]
 
-    title={
+    )
 
-        "x":0.5,
-        "font":{"color":"white"}
-    },
+    fig.update_traces(
 
-    xaxis={
+        width=0.35,
+        opacity=0.80,
+        textposition="outside"
+    )
 
-        "showgrid":True,
-        "gridcolor":"#4e4e4e",
-        "zeroline":False
-    },
+    fig.update_layout(
 
-    yaxis={
+        paper_bgcolor="#1a1a1a",
+        plot_bgcolor="#1a1a1a",
 
-        "showgrid":False
-    },
+        font={
 
-    showlegend=False,
-    height=500
-)
+            "family":
+            "ITC Avant Garde Gothic, Century Gothic, sans-serif",
+
+            "color":"#dcdcdc",
+            "size":13
+        },
+
+        title={
+
+            "text":f"Promedio de {metrica_actual}",
+            "x":0.5,
+            "font":{"color":"white"}
+        },
+
+        xaxis={
+
+            "showgrid":True,
+            "gridcolor":"#4e4e4e",
+            "zeroline":False
+        },
+
+        yaxis={
+
+            "showgrid":False
+        },
+
+        showlegend=False,
+
+        height=500
+    )
 
     return fig
-
 
 if __name__ == "__main__":
     app.run(debug=True)

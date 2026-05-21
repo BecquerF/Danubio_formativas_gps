@@ -5,6 +5,10 @@ from dash import Dash, dcc, html, Input, Output
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
+df["Date"] = pd.to_datetime(
+    df["Date"],
+    errors="coerce"
+)
 
 # Eliminar columnas innecesarias
 columnas_eliminar = [
@@ -121,26 +125,67 @@ app.layout = html.Div([
     # CONTENEDOR PRINCIPAL
     html.Div([
 
-        # IZQUIERDA → GRÁFICO
-        html.Div([
+     # IZQUIERDA → ÁREA GRÁFICOS
+html.Div([
 
-            dcc.Graph(
-                id="grafico1",
+    dcc.Tabs(
+
+        id="tabs",
+        value="comparativas",
+
+        children=[
+
+            dcc.Tab(
+                label="Comparativas",
+                value="comparativas",
+
                 style={
-                    "height":"700px",
+                    "backgroundColor":"#4e4e4e",
+                    "color":"white",
+                    "border":"0px"
+                },
+
+                selected_style={
+                    "backgroundColor":"#9e8330",
+                    "color":"white",
+                    "border":"0px"
+                }
+            ),
+
+            dcc.Tab(
+                label="Cronológico",
+                value="cronologico",
+
+                style={
+                    "backgroundColor":"#4e4e4e",
+                    "color":"white",
+                    "border":"0px"
+                },
+
+                selected_style={
+                    "backgroundColor":"#9e8330",
+                    "color":"white",
+                    "border":"0px"
                 }
             )
+        ]
+    ),
 
-        ],
-        style={
-            "width":"72%",
+    html.Div(
+        id="contenido-tab"
+    )
+
+],
+
+style={
+
+    "width":"72%",
     "display":"inline-block",
     "verticalAlign":"top",
 
     "position":"sticky",
     "top":"20px"
-        }),
-
+}),
         # DERECHA → PANEL FILTROS
         html.Div([
 
@@ -387,19 +432,23 @@ style={
     "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif'
 })
 @app.callback(
-    Output("grafico1","figure"),
+    Output("contenido-tab","children"),
+
+    Input("tabs","value"),
     Input("categoria","value"),
     Input("metrica","value"),
     Input("referencia","value"),
     Input("jugador","value"),
-Input("athlete","value"),
-Input("gametag","value"),
-Input("periodtag","value")
+    Input("athlete","value"),
+    Input("gametag","value"),
+    Input("periodtag","value")
 )
 
-def actualizar(
+def actualizar_tab(
+
+    tab,
     categorias,
-    metricas_seleccionadas,
+    metricas,
     referencia,
     jugadores,
     athlete,
@@ -407,133 +456,136 @@ def actualizar(
     periodtags
 ):
 
-    dff = df.copy()
+    dff=df.copy()
 
-    # FILTROS
     if categorias:
-        dff = dff[
+        dff=dff[
             dff["Category"].isin(categorias)
         ]
 
     if jugadores:
-        dff = dff[
+        dff=dff[
             dff["Player Name"].isin(jugadores)
         ]
 
     if athlete:
-        dff = dff[
+        dff=dff[
             dff["Athlete Tags"].isin(athlete)
         ]
 
     if gametags:
-        dff = dff[
+        dff=dff[
             dff["Game Tags"].isin(gametags)
         ]
 
     if periodtags:
-        dff = dff[
+        dff=dff[
             dff["Period Tags"].isin(periodtags)
         ]
 
-    # agrupación
-    promedio = (
-        dff
-        .groupby(referencia)[metricas_seleccionadas]
-        .mean()
-        .reset_index()
-    )
+    # COMPARATIVAS
+    if tab=="comparativas":
 
-    # convertir a formato largo
-    promedio = pd.melt(
+        promedio=(
 
-        promedio,
+            dff
+            .groupby(referencia)[metricas]
+            .mean()
+            .reset_index()
+        )
 
-        id_vars=[referencia],
+        promedio=pd.melt(
 
-        value_vars=metricas_seleccionadas,
+            promedio,
+            id_vars=[referencia],
 
-        var_name="Métrica",
+            value_vars=metricas,
 
-        value_name="Valor"
-    )
+            var_name="Métrica",
+            value_name="Valor"
+        )
 
-    fig = px.bar(
+        fig=px.bar(
 
-        promedio,
+            promedio,
 
-        x="Valor",
-        y=referencia,
+            x="Valor",
+            y=referencia,
 
-        color="Métrica",
+            color="Métrica",
 
-        orientation="h",
+            orientation="h",
 
-        barmode="group",
+            barmode="group",
 
-        text_auto=".1f",
+            color_discrete_sequence=[
 
-        color_discrete_sequence=[
-            "#f7f6f4",
-            "#999999",
-            "#6e6e6e",
-            "#d1b77e",
-            "#9e8330"
-            
-        ]
-    )
+                "#9e8330",
+                "#d1b77e",
+                "#999999",
+                "#6e6e6e"
+            ]
+        )
 
-    # altura automática
-    altura = max(
-        650,
-        len(promedio[referencia].unique())*70
-    )
+        return dcc.Graph(
+            figure=fig
+        )
 
-    fig.update_layout(
+    # CRONOLÓGICO
+    else:
 
-        title={
+        cronologico=pd.melt(
 
-            "text":
-            f"Comparativa de {' | '.join(metricas_seleccionadas)} según {referencia}",
+            dff,
 
-            "x":0.5,
-            "font":{
-                "size":18,
-                "color":"white"
+            id_vars=[
+                "Date",
+                "Category"
+            ],
+
+            value_vars=metricas,
+
+            var_name="Métrica",
+
+            value_name="Valor"
+        )
+
+        fig=px.line(
+
+            cronologico,
+
+            x="Date",
+            y="Valor",
+
+            color="Category",
+
+            line_dash="Métrica",
+
+            markers=True,
+
+            color_discrete_sequence=[
+
+                "#9e8330",
+                "#d1b77e",
+                "#999999",
+                "#6e6e6e"
+            ]
+        )
+
+        fig.update_layout(
+
+            title="Evolución cronológica",
+
+            paper_bgcolor="#1a1a1a",
+            plot_bgcolor="#1a1a1a",
+
+            font={
+                "color":"#dcdcdc"
             }
-        },
+        )
 
-        xaxis_title=", ".join(metricas_seleccionadas),
-
-        yaxis_title=referencia,
-
-        paper_bgcolor="#1a1a1a",
-        plot_bgcolor="#1a1a1a",
-
-        font={
-            "family":
-            '"ITC Avant Garde Gothic", Century Gothic, sans-serif',
-
-            "color":"#dcdcdc"
-        },
-
-        legend={
-            "orientation":"h",
-            "y":-0.25,
-            "yanchor":"bottom"
-        },
-
-        bargap=0.35,
-        bargroupgap=0.10,
-
-        height=altura
-    )
-
-    fig.update_traces(
-
-        opacity=.8
-    )
-
-    return fig
-
+        return dcc.Graph(
+            figure=fig
+        )
 if __name__ == "__main__":
     app.run(debug=True)

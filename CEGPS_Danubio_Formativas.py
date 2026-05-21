@@ -1,5 +1,6 @@
 import pandas as pd
 import plotly.express as px
+import dash_auth
 from dash import Dash, dcc, html, Input, Output
 
 # Leer datos
@@ -33,6 +34,14 @@ df = df.drop(columns=columnas_eliminar, errors="ignore")
 
 app = Dash(__name__)
 server = app.server
+VALID_USERNAME_PASSWORD_PAIRS = {
+    "Danubioformativas": "danubio2026"
+}
+
+auth = dash_auth.BasicAuth(
+    app,
+    VALID_USERNAME_PASSWORD_PAIRS
+)
 app.title = "CARGA EXTERNA - DANUBIO FORMATIVAS 2026"
 
 metricas = [
@@ -118,15 +127,18 @@ app.layout = html.Div([
             dcc.Graph(
                 id="grafico1",
                 style={
-                    "height":"700px"
+                    "height":"700px",
                 }
             )
 
         ],
         style={
             "width":"72%",
-            "display":"inline-block",
-            "verticalAlign":"top"
+    "display":"inline-block",
+    "verticalAlign":"top",
+
+    "position":"sticky",
+    "top":"20px"
         }),
 
         # DERECHA → PANEL FILTROS
@@ -356,10 +368,14 @@ app.layout = html.Div([
 
         ],
         style={
-            "width":"25%",
-            "display":"inline-block",
-            "paddingLeft":"15px",
-            "verticalAlign":"top"
+             "width":"25%",
+    "display":"inline-block",
+    "paddingLeft":"15px",
+    "verticalAlign":"top",
+
+    "height":"90vh",
+    "overflowY":"auto",
+    "paddingRight":"10px"
         })
 
     ])

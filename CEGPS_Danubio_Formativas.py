@@ -2,10 +2,10 @@ import pandas as pd
 import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
 
-
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
-# Lista de columnas que contienen el archivo excel para eliminar
+
+# Eliminar columnas innecesarias
 columnas_eliminar = [
     "Period Number",
     "Work/Rest Ratio",
@@ -28,6 +28,7 @@ columnas_eliminar = [
     "Running Distance",
     "Athlete Participation Tags"
 ]
+
 df = df.drop(columns=columnas_eliminar, errors="ignore")
 
 app = Dash(__name__)
@@ -52,7 +53,7 @@ referencias = [
 
 app.layout = html.Div([
 
-    html.H2("Danubio Formativas GPS"),
+    html.H1("Danubio Formativas GPS"),
 
     dcc.Dropdown(
         id="categoria",
@@ -62,6 +63,36 @@ app.layout = html.Div([
         ],
         multi=True,
         placeholder="Seleccionar categoría"
+    ),
+
+    dcc.Dropdown(
+        id="jugador",
+        options=[
+            {"label": j, "value": j}
+            for j in sorted(df["Player Name"].dropna().unique())
+        ],
+        multi=True,
+        placeholder="Seleccionar jugador"
+    ),
+
+    dcc.Dropdown(
+        id="gametag",
+        options=[
+            {"label": g, "value": g}
+            for g in sorted(df["Game Tags"].dropna().unique())
+        ],
+        multi=True,
+        placeholder="Seleccionar dinámica"
+    ),
+
+    dcc.Dropdown(
+        id="athlete",
+        options=[
+            {"label": a, "value": a}
+            for a in sorted(df["Athlete Tags"].dropna().unique())
+        ],
+        multi=True,
+        placeholder="Seleccionar etiqueta"
     ),
 
     dcc.Dropdown(
@@ -81,50 +112,21 @@ app.layout = html.Div([
         ],
         value="Category"
     ),
-    
-    dcc.Dropdown(
-    id="jugador",
-    options=[
-        {"label": j, "value": j}
-        for j in sorted(df["Player Name"].dropna().unique())
-    ],
-    multi=True,
-    placeholder="Seleccionar jugador"
-),
-
-dcc.Dropdown(
-    id="gametag",
-    options=[
-        {"label": g, "value": g}
-        for g in sorted(df["Game Tags"].dropna().unique())
-    ],
-    multi=True,
-    placeholder="Seleccionar dinámica"
-),
-
-dcc.Dropdown(
-    id="athlete",
-    options=[
-        {"label": a, "value": a}
-        for a in sorted(df["Athlete Tags"].dropna().unique())
-    ],
-    multi=True,
-    placeholder="Seleccionar etiqueta"
-),
 
     dcc.Graph(id="grafico1")
+
 ])
 
 
 @app.callback(
-     Output("grafico1","figure"),
+    Output("grafico1", "figure"),
 
-    Input("categoria","value"),
-    Input("jugador","value"),
-    Input("gametag","value"),
-    Input("athlete","value"),
-    Input("metrica","value"),
-    Input("referencia","value")
+    Input("categoria", "value"),
+    Input("jugador", "value"),
+    Input("gametag", "value"),
+    Input("athlete", "value"),
+    Input("metrica", "value"),
+    Input("referencia", "value")
 )
 
 def actualizar(
@@ -136,34 +138,57 @@ def actualizar(
     referencia
 ):
 
-    dff=df.copy()
+    dff = df.copy()
 
     if categorias:
-        dff=dff[dff["Category"].isin(categorias)]
+        dff = dff[dff["Category"].isin(categorias)]
 
     if jugadores:
-        dff=dff[dff["Player Name"].isin(jugadores)]
+        dff = dff[dff["Player Name"].isin(jugadores)]
 
     if gametags:
-        dff=dff[dff["Game Tags"].isin(gametags)]
+        dff = dff[dff["Game Tags"].isin(gametags)]
 
     if athlete:
-        dff=dff[dff["Athlete Tags"].isin(athlete)]
+        dff = dff[dff["Athlete Tags"].isin(athlete)]
 
-    promedio=(
+    promedio = (
         dff.groupby(referencia)[metrica]
         .mean()
         .reset_index()
     )
 
-    fig=px.bar(
+    promedio = promedio.sort_values(
+        by=metrica,
+        ascending=True
+    )
+
+    fig = px.bar(
         promedio,
-        x=referencia,
-        y=metrica,
+        x=metrica,
+        y=referencia,
+        orientation="h",
+        color=referencia,
+        text_auto=".1f",
         title=f"Promedio de {metrica}"
+    )
+
+    fig.update_layout(
+        height=700,
+        title={"x":0.5},
+        xaxis_title=metrica,
+        yaxis_title="",
+        yaxis={
+            "categoryorder":"total ascending"
+        }
+    )
+
+    fig.update_traces(
+        textposition="outside"
     )
 
     return fig
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     app.run(debug=True)

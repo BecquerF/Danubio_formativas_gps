@@ -518,8 +518,7 @@ def actualizar(
 
         legend={
             "orientation":"h",
-            "y":0.5,
-            "x":0.5
+            "ubo":"bottom"
         },
 
         bargap=0.35,

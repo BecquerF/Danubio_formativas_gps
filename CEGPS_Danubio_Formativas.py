@@ -241,7 +241,6 @@ style={
 
 @app.callback(
     Output("grafico1","figure"),
-
     Input("categoria","value"),
     Input("metrica","value"),
     Input("referencia","value")
@@ -253,107 +252,76 @@ def actualizar(
     referencia
 ):
 
-    dff=df.copy()
+    dff = df.copy()
 
     if categorias:
-
-        dff=dff[
-            dff["Category"]
-            .isin(categorias)
+        dff = dff[
+            dff["Category"].isin(categorias)
         ]
 
- # Agrupación dinámica
-columnas_agrupacion = [referencia]
+    # Agrupación dinámica
+    columnas_agrupacion = [referencia]
 
-# Mantener categoría como segundo nivel
-if categorias and referencia != "Category":
-    columnas_agrupacion.append("Category")
+    if categorias and referencia != "Category":
+        columnas_agrupacion.append("Category")
 
-promedio = (
-    dff.groupby(columnas_agrupacion)[metricas_seleccionadas]
-    .mean()
-    .reset_index()
-)
+    promedio = (
+        dff.groupby(columnas_agrupacion)[metricas_seleccionadas]
+        .mean()
+        .reset_index()
+    )
 
-# Convertir formato ancho a largo
-promedio = pd.melt(
+    promedio = pd.melt(
+        promedio,
+        id_vars=columnas_agrupacion,
+        value_vars=metricas_seleccionadas,
+        var_name="Métrica",
+        value_name="Valor"
+    )
 
-    promedio,
+    fig = px.bar(
+        promedio,
+        x="Valor",
+        y=referencia,
+        color=(
+            "Category"
+            if referencia != "Category"
+            and categorias
+            else "Métrica"
+        ),
+        pattern_shape="Métrica",
+        orientation="h",
+        barmode="group",
 
-    id_vars=columnas_agrupacion,
-    value_vars=metricas_seleccionadas,
+        color_discrete_sequence=[
+            "#f7f6f4",
+            "#C5C3C3",
+            "#999999",
+            "#6e6e6e",
+            "#b1b369"
+        ]
+    )
 
-    var_name="Métrica",
-    value_name="Valor"
-)
+    fig.update_traces(
+        width=0.25,
+        opacity=0.65
+    )
 
-fig = px.bar(
+    fig.update_layout(
+        paper_bgcolor="#1a1a1a",
+        plot_bgcolor="#1a1a1a",
 
-    promedio,
+        font={
+            "color":"#dcdcdc",
+            "family":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
+            "size":11
+        },
 
-    x="Valor",
-    y=referencia,
+        height=650
+    )
 
-    color=(
-        "Category"
-        if referencia != "Category"
-        and categorias
-        else "Métrica"
-    ),
+    return fig
 
-    pattern_shape="Métrica",
-
-    orientation="h",
-
-    barmode="group",
-
-    color_discrete_sequence=[
-        "#f7f6f4",
-        "#C5C3C3",
-        "#999999",
-        "#6e6e6e",
-        "#b1b369"
-    ]
-)
-
-fig.update_traces(
-    width=0.25,
-    opacity=0.65
-)
-
-fig.update_layout(
-
-    paper_bgcolor="#1a1a1a",
-    plot_bgcolor="#1a1a1a",
-
-    font={
-
-        "color":"#dcdcdc",
-        "family":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
-        "size":11
-    },
-
-    xaxis={
-
-        "showgrid":True,
-        "gridcolor":"#4e4e4e"
-    },
-
-    yaxis={
-
-        "showgrid":False
-    },
-
-    legend={
-
-        "orientation":"h",
-        "y":1.05
-    },
-
-    height=650
-)
-
-return fig
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -75,7 +75,7 @@ app.layout = html.Div([
                 "width":"100%",
                 "borderRadius":"0px",
                 "marginBottom":"20px",
-                "maxheight":"300px",
+                "maxheight":"150px",
                 "objectFit":"contain"   
             }
         ),
@@ -140,7 +140,7 @@ app.layout = html.Div([
 
             style={
 
-                "background":"#191818",
+                "background":"#2C2C2CE0",
                 "padding":"15px",
                 "borderRadius":"15px",
                 "marginBottom":"15px"
@@ -168,7 +168,7 @@ app.layout = html.Div([
 
             style={
 
-                "background":"#191818",
+                "background":"#2C2C2CE0",
                 "padding":"15px",
                 "borderRadius":"15px",
                 "marginBottom":"15px"
@@ -198,7 +198,7 @@ app.layout = html.Div([
 
             style={
 
-                "background":"#191818",
+                "background":"#2C2C2CE0",
                 "padding":"15px",
                 "borderRadius":"15px"
             })
@@ -280,10 +280,11 @@ def actualizar(
         barmode="group",
 
         color_discrete_sequence=[
-            "#ead69a",
-            "#343434",
+            "#f7f6f4",
+            "#C5C3C3",
             "#999999",
-            "#6e6e6e"
+            "#6e6e6e",
+            "#b1b369",
         ]
     )
 

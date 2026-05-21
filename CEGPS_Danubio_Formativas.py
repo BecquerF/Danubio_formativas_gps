@@ -151,9 +151,9 @@ app.layout = html.Div([
                     "Categorías",
                     style={
                         "color":"white",
-                        "fontSize":"14px",
+                        "fontSize":"10px",
                         "fontWeight":"normal",
-                        "marginBottom":"10px"
+                        "marginBottom":"5px"
                     }
                 ),
 
@@ -177,7 +177,7 @@ app.layout = html.Div([
                     labelStyle={
                         "display":"block",
                         "color":"white",
-                        "fontSize":"12px",
+                        "fontSize":"10px",
                         "marginBottom":"5px"
                     }
                 )
@@ -185,9 +185,9 @@ app.layout = html.Div([
             ],
             style={
                 "background":"#2C2C2CE0",
-                "padding":"15px",
-                "borderRadius":"15px",
-                "marginBottom":"15px"
+                "padding":"12px",
+                "borderRadius":"12px",
+                "marginBottom":"5px"
             }),
 
             # MÉTRICAS
@@ -197,9 +197,9 @@ app.layout = html.Div([
                     "Métricas",
                     style={
                         "color":"white",
-                        "fontSize":"14px",
+                        "fontSize":"10px",
                         "fontWeight":"normal",
-                        "marginBottom":"10px"
+                        "marginBottom":"5px"
                     }
                 ),
 
@@ -221,7 +221,7 @@ app.layout = html.Div([
                     labelStyle={
                         "display":"block",
                         "color":"white",
-                        "fontSize":"12px",
+                        "fontSize":"10px",
                         "marginBottom":"5px"
                     }
                 )
@@ -229,9 +229,9 @@ app.layout = html.Div([
             ],
             style={
                 "background":"#2C2C2CE0",
-                "padding":"15px",
-                "borderRadius":"15px",
-                "marginBottom":"15px"
+                "padding":"12px",
+                "borderRadius":"12px",
+                "marginBottom":"5px"
             }),
 
             # COMPARAR POR
@@ -241,9 +241,9 @@ app.layout = html.Div([
                     "Comparar por",
                     style={
                         "color":"white",
-                        "fontSize":"14px",
+                        "fontSize":"10px",
                         "fontWeight":"normal",
-                        "marginBottom":"10px"
+                        "marginBottom":"5px"
                     }
                 ),
 
@@ -263,7 +263,7 @@ app.layout = html.Div([
                     labelStyle={
                         "display":"block",
                         "color":"white",
-                        "fontSize":"12px",
+                        "fontSize":"10px",
                         "marginBottom":"5px"
                     }
                 )
@@ -271,9 +271,9 @@ app.layout = html.Div([
             ],
             style={
                 "background":"#2C2C2CE0",
-                "padding":"15px",
-                "borderRadius":"15px",
-                "marginBottom":"15px"
+                "padding":"12px",
+                "borderRadius":"12px",
+                "marginBottom":"5px"
             }),
 
             # FILTROS COMPARATIVOS
@@ -283,15 +283,15 @@ app.layout = html.Div([
                     "Filtros comparativos",
                     style={
                         "color":"white",
-                        "fontSize":"14px",
+                        "fontSize":"10px",
                         "fontWeight":"normal",
-                        "marginBottom":"15px"
+                        "marginBottom":"12px"
                     }
                 ),
 
                 html.P(
                     "Jugador",
-                    style={"color":"#dcdcdc","fontSize":"12px"}
+                    style={"color":"#dcdcdc","fontSize":"10px"}
                 ),
 
                 dcc.Dropdown(
@@ -309,7 +309,7 @@ app.layout = html.Div([
 
                 html.P(
                     "Athlete Tags",
-                    style={"color":"#dcdcdc","fontSize":"12px"}
+                    style={"color":"#dcdcdc","fontSize":"10px"}
                 ),
 
                 dcc.Dropdown(
@@ -327,7 +327,7 @@ app.layout = html.Div([
 
                 html.P(
                     "Game Tags",
-                    style={"color":"#dcdcdc","fontSize":"12px"}
+                    style={"color":"#dcdcdc","fontSize":"10px"}
                 ),
 
                 dcc.Dropdown(
@@ -345,7 +345,7 @@ app.layout = html.Div([
 
                 html.P(
                     "Period Tags",
-                    style={"color":"#dcdcdc","fontSize":"12px"}
+                    style={"color":"#dcdcdc","fontSize":"10px"}
                 ),
 
                 dcc.Dropdown(
@@ -362,20 +362,20 @@ app.layout = html.Div([
             ],
             style={
                 "background":"#2C2C2CE0",
-                "padding":"15px",
-                "borderRadius":"15px"
+                "padding":"12px",
+                "borderRadius":"12px"
             })
 
         ],
         style={
              "width":"25%",
     "display":"inline-block",
-    "paddingLeft":"15px",
+    "paddingLeft":"12px",
     "verticalAlign":"top",
 
-    "height":"90vh",
+    "height":"80vh",
     "overflowY":"auto",
-    "paddingRight":"10px"
+    "paddingRight":"8px"
         })
 
     ])
@@ -473,12 +473,12 @@ def actualizar(
         text_auto=".1f",
 
         color_discrete_sequence=[
-
-            "#9e8330",
-            "#d1b77e",
+            "#f7f6f4",
             "#999999",
             "#6e6e6e",
-            "#f7f6f4"
+            "#d1b77e",
+            "#9e8330"
+            
         ]
     )
 
@@ -518,7 +518,8 @@ def actualizar(
 
         legend={
             "orientation":"h",
-            "y":1.08
+            "y":0.5,
+            "x":0.5
         },
 
         bargap=0.35,

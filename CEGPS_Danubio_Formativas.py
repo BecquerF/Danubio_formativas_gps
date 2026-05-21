@@ -400,37 +400,60 @@ Input("periodtag","value")
 def actualizar(
     categorias,
     metricas_seleccionadas,
-    referencia, 
-    jugador,
+    referencia,
+    jugadores,
     athlete,
-    gametag,
-    periodtag
+    gametags,
+    periodtags
 ):
 
     dff = df.copy()
 
+    # FILTROS
     if categorias:
         dff = dff[
             dff["Category"].isin(categorias)
         ]
 
-    # Agrupación dinámica
-    columnas_agrupacion = [referencia]
+    if jugadores:
+        dff = dff[
+            dff["Player Name"].isin(jugadores)
+        ]
 
-    if categorias and referencia != "Category":
-        columnas_agrupacion.append("Category")
+    if athlete:
+        dff = dff[
+            dff["Athlete Tags"].isin(athlete)
+        ]
 
+    if gametags:
+        dff = dff[
+            dff["Game Tags"].isin(gametags)
+        ]
+
+    if periodtags:
+        dff = dff[
+            dff["Period Tags"].isin(periodtags)
+        ]
+
+    # agrupación
     promedio = (
-        dff.groupby(columnas_agrupacion)[metricas_seleccionadas]
+        dff
+        .groupby(referencia)[metricas_seleccionadas]
         .mean()
         .reset_index()
     )
 
+    # convertir a formato largo
     promedio = pd.melt(
+
         promedio,
-        id_vars=columnas_agrupacion,
+
+        id_vars=[referencia],
+
         value_vars=metricas_seleccionadas,
+
         var_name="Métrica",
+
         value_name="Valor"
     )
 
@@ -441,77 +464,75 @@ def actualizar(
         x="Valor",
         y=referencia,
 
-        color=(
-            "Category"
-            if referencia != "Category"
-            and categorias
-            else "Métrica"
-        ),
+        color="Métrica",
 
         orientation="h",
 
         barmode="group",
 
+        text_auto=".1f",
+
         color_discrete_sequence=[
-            "#f7f6f4",
-            "#C5C3C3",
+
+            "#9e8330",
+            "#d1b77e",
             "#999999",
             "#6e6e6e",
-            "#b1b369"
+            "#f7f6f4"
         ]
     )
 
-    cantidad_metricas = max(
-        len(metricas_seleccionadas),
-        1
-    )
-
-    altura_categoria = cantidad_metricas * 45
-
-    altura_grafico = max(
+    # altura automática
+    altura = max(
         650,
-        len(promedio[referencia].unique())
-        * altura_categoria
-    )
-
-    fig.update_traces(
-        opacity=0.75
+        len(promedio[referencia].unique())*70
     )
 
     fig.update_layout(
+
+        title={
+
+            "text":
+            f"Comparativa de {' | '.join(metricas_seleccionadas)} según {referencia}",
+
+            "x":0.5,
+            "font":{
+                "size":18,
+                "color":"white"
+            }
+        },
+
+        xaxis_title=", ".join(metricas_seleccionadas),
+
+        yaxis_title=referencia,
 
         paper_bgcolor="#1a1a1a",
         plot_bgcolor="#1a1a1a",
 
         font={
-            "color":"#dcdcdc",
-            "family":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
-            "size":11
-        },
+            "family":
+            '"ITC Avant Garde Gothic", Century Gothic, sans-serif',
 
-        xaxis={
-            "showgrid":True,
-            "gridcolor":"#4e4e4e"
-        },
-
-        yaxis={
-            "showgrid":False,
-            "automargin":True
+            "color":"#dcdcdc"
         },
 
         legend={
             "orientation":"h",
-            "y":1.05
+            "y":1.08
         },
 
         bargap=0.35,
-        bargroupgap=0.15,
+        bargroupgap=0.10,
 
-        height=altura_grafico
+        height=altura
+    )
+
+    fig.update_traces(
+
+        opacity=.8
     )
 
     return fig
-
 
 if __name__ == "__main__":
     app.run(debug=True)

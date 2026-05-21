@@ -69,30 +69,47 @@ ultima_actualizacion = datetime.now().strftime(
 app.layout = html.Div([
 
     # HEADER
-    html.Div([
+html.Div([
 
-        html.Img(
-            src="/assets/Banner_titulo.png",
-            style={
-                "width":"100%",
-                "borderRadius":"0px",
-                "marginBottom":"20px",
-                "maxHeight":"150px",
-                "objectFit":"contain"
-            }
-        ),
+    html.Img(
+        src="/assets/Banner_titulo.png",
+        style={
+            "width":"100%",
+            "borderRadius":"0px",
+            "marginBottom":"20px",
+            "maxHeight":"150px",
+            "objectFit":"contain"
+        }
+    ),
 
-        html.P(
-            f"Última actualización: {ultima_actualizacion}",
-            style={
-                "color":"#dcdcdc",
-                "textAlign":"right",
-                "padding":"10px",
-                "fontSize":"13px"
-            }
-        )
+    html.H1(
+        "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
+        style={
+            "color":"#ffffff",
+            "textAlign":"center",
+            "fontSize":"30px",
+            "fontWeight":"600",
+            "marginTop":"5px",
+            "marginBottom":"15px",
 
-    ]),
+            "fontFamily":
+            '"ITC Avant Garde Gothic", Century Gothic, sans-serif',
+            "borderBottom":"2px solid #9e8330",
+"paddingBottom":"10px"
+        }
+    ),
+
+    html.P(
+        f"Última actualización: {ultima_actualizacion}",
+        style={
+            "color":"#dcdcdc",
+            "textAlign":"right",
+            "padding":"10px",
+            "fontSize":"13px"
+        }
+    )
+
+]),
 
     # CONTENEDOR PRINCIPAL
     html.Div([
@@ -116,21 +133,32 @@ app.layout = html.Div([
             "verticalAlign":"top"
         }),
 
-        # DERECHA → FILTROS
+        # DERECHA → PANEL FILTROS
         html.Div([
 
-            # Categorías
+            # CATEGORÍAS
             html.Div([
 
                 html.H4(
                     "Categorías",
-                    style={"color":"white"}
+                    style={
+                        "color":"white",
+                        "fontSize":"14px",
+                        "fontWeight":"normal",
+                        "marginBottom":"10px"
+                    }
                 ),
 
                 dcc.Checklist(
+
                     id="categoria",
+
                     options=[
-                        {"label":c,"value":c}
+                        {
+                            "label":c,
+                            "value":c
+                        }
+
                         for c in sorted(
                             df["Category"]
                             .dropna()
@@ -138,7 +166,14 @@ app.layout = html.Div([
                         )
                     ],
 
-                    inline=False
+                    inline=False,
+
+                    labelStyle={
+                        "display":"block",
+                        "color":"white",
+                        "fontSize":"12px",
+                        "marginBottom":"5px"
+                    }
                 )
 
             ],
@@ -146,7 +181,6 @@ app.layout = html.Div([
             style={
 
                 "background":"#2C2C2CE0",
-                "color":"white",
                 "padding":"15px",
                 "borderRadius":"15px",
                 "marginBottom":"15px"
@@ -157,20 +191,37 @@ app.layout = html.Div([
 
                 html.H4(
                     "Métricas",
-                    style={"color":"white"}
+                    style={
+                        "color":"white",
+                        "fontSize":"14px",
+                        "fontWeight":"normal",
+                        "marginBottom":"10px"
+                    }
                 ),
 
                 dcc.Checklist(
+
                     id="metrica",
 
                     options=[
-                        {"label":m,"value":m}
+                        {
+                            "label":m,
+                            "value":m
+                        }
+
                         for m in metricas
                     ],
 
                     value=["Distance"],
 
-                    inline=False
+                    inline=False,
+
+                    labelStyle={
+                        "display":"block",
+                        "color":"white",
+                        "fontSize":"12px",
+                        "marginBottom":"5px"
+                    }
                 )
 
             ],
@@ -178,7 +229,6 @@ app.layout = html.Div([
             style={
 
                 "background":"#2C2C2CE0",
-                "color":"white",
                 "padding":"15px",
                 "borderRadius":"15px",
                 "marginBottom":"15px"
@@ -189,21 +239,36 @@ app.layout = html.Div([
 
                 html.H4(
                     "Comparar por",
-                    style={"color":"white"}
+                    style={
+                        "color":"white",
+                        "fontSize":"14px",
+                        "fontWeight":"normal",
+                        "marginBottom":"10px"
+                    }
                 ),
 
                 dcc.RadioItems(
+
                     id="referencia",
 
                     options=[
+
                         {
                             "label":r,
                             "value":r
                         }
+
                         for r in referencias
                     ],
 
-                    value="Category"
+                    value="Category",
+
+                    labelStyle={
+                        "display":"block",
+                        "color":"white",
+                        "fontSize":"12px",
+                        "marginBottom":"5px"
+                    }
                 )
 
             ],
@@ -211,7 +276,6 @@ app.layout = html.Div([
             style={
 
                 "background":"#2C2C2CE0",
-                "color":"white",
                 "padding":"15px",
                 "borderRadius":"15px"
             })
@@ -280,17 +344,23 @@ def actualizar(
     )
 
     fig = px.bar(
+
         promedio,
+
         x="Valor",
         y=referencia,
+
         color=(
             "Category"
             if referencia != "Category"
             and categorias
             else "Métrica"
         ),
+
         pattern_shape="Métrica",
+
         orientation="h",
+
         barmode="group",
 
         color_discrete_sequence=[
@@ -302,12 +372,21 @@ def actualizar(
         ]
     )
 
+    # Ajuste automático del ancho
+    cantidad_metricas = len(metricas_seleccionadas)
+
+    ancho_barra = max(
+        0.10,
+        0.8 / cantidad_metricas
+    )
+
     fig.update_traces(
-        width=0.25,
-        opacity=0.65
+        width=ancho_barra,
+        opacity=0.75
     )
 
     fig.update_layout(
+
         paper_bgcolor="#1a1a1a",
         plot_bgcolor="#1a1a1a",
 
@@ -317,7 +396,24 @@ def actualizar(
             "size":11
         },
 
-        height=650
+        xaxis={
+            "showgrid":True,
+            "gridcolor":"#4e4e4e"
+        },
+
+        yaxis={
+            "showgrid":False
+        },
+
+        legend={
+            "orientation":"h",
+            "y":1.05
+        },
+
+        height=max(
+            650,
+            len(promedio[referencia].unique())*45
+        )
     )
 
     return fig

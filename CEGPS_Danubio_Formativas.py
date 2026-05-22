@@ -138,8 +138,8 @@ app.layout = html.Div([
                 "color": "#ffffff",
                 "backgroundColor": "rgba(0,0,0,0.4)",
                 "padding": "8px 12px",
-                "fontSize": "12px",
-                "fontWeight": "600",
+                "fontSize": "10px",
+                "fontWeight": "400",
                 "letterSpacing": "1px",
                 "zIndex": "9999"
             }
@@ -188,6 +188,30 @@ html.Div([
             dcc.Tab(
                 label="Cronológico",
                 value="cronologico",
+
+                style={
+                    "backgroundColor":"#000000",
+                    "color":"#ffffff",
+                    "border":"1px solid #ffffff",
+                    "borderRadius":"10px",
+                    "padding":"8px 16px",
+                    "marginRight":"10px",
+                    "marginBottom":"8px"
+                },
+
+                selected_style={
+                    "backgroundColor":"#ffffff",
+                    "color":"#000000",
+                    "border":"1px solid #000000",
+                    "borderRadius":"10px",
+                    "padding":"8px 16px",
+                    "marginRight":"10px",
+                    "marginBottom":"8px"
+                }
+            ),
+            dcc.Tab(
+                label="Actividad por Jugador",
+                value="actividad",
 
                 style={
                     "backgroundColor":"#000000",
@@ -333,6 +357,24 @@ style={
                         "color":"white",
                         "fontSize":"10px",
                         "marginBottom":"5px"
+                    }
+                ),
+
+                html.Br(),
+                html.P(
+                    "Fecha",
+                    style={"color":"#dcdcdc","fontSize":"10px"}
+                ),
+                dcc.DatePickerSingle(
+                    id="fecha",
+                    date=fecha_max.date(),
+                    min_date_allowed=df["Date"].min().date(),
+                    max_date_allowed=df["Date"].max().date(),
+                    display_format="DD/MM/YYYY",
+                    style={
+                        "width": "100%",
+                        "backgroundColor": "#1a1a1a",
+                        "color": "#ffffff"
                     }
                 )
 
@@ -506,7 +548,8 @@ style={
     Input("jugador","value"),
     Input("athlete","value"),
     Input("gametag","value"),
-    Input("periodtag","value")
+    Input("periodtag","value"),
+    Input("fecha","date")
 )
 
 def actualizar_tab(
@@ -518,7 +561,8 @@ def actualizar_tab(
     jugadores,
     athlete,
     gametags,
-    periodtags
+    periodtags,
+    fecha
 ):
 
     dff=df.copy()
@@ -604,6 +648,76 @@ def actualizar_tab(
         return dcc.Graph(
             figure=fig
         )
+
+    # ACTIVIDAD POR JUGADOR
+    elif tab=="actividad":
+
+        fecha_dt = pd.to_datetime(fecha).normalize() if fecha else dff["Date"].max().normalize()
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+
+        columnas_requeridas = [
+            "Player Name",
+            "Accel + Decel Efforts",
+            "Accel + Decel Efforts Per Minute",
+            "Distance",
+            "Player Load",
+            "Max Velocity",
+            "Meterage Per Minute",
+            "Player Load Per Minute",
+            "Sprint Distance",
+            "Sprint Efforts",
+            "Sprint Dist Per Min",
+            "High Speed Distance",
+            "High Speed Efforts",
+            "High Speed Distance Per Minute",
+            "Impacts"
+        ]
+
+        columnas_presentes = [
+            c for c in columnas_requeridas
+            if c in dff_fecha.columns
+        ]
+
+        columnas_actividad = [
+            {"name": c, "id": c}
+            for c in columnas_presentes
+        ]
+
+        return html.Div([
+            html.H3(
+                f"Actividad por Jugador - {fecha_dt.strftime('%d/%m/%Y')}",
+                style={
+                    "color": "white",
+                    "textAlign": "center"
+                }
+            ),
+            dcc.Loading(
+                dash_table.DataTable(
+                    data=dff_fecha[columnas_presentes].to_dict("records") if columnas_presentes else [],
+                    columns=columnas_actividad,
+                    filter_action="native",
+                    sort_action="native",
+                    page_size=20,
+                    style_table={
+                        "overflowX": "auto",
+                        "minWidth": "100%"
+                    },
+                    style_header={
+                        "backgroundColor": "#000000",
+                        "color": "white",
+                        "fontWeight": "bold"
+                    },
+                    style_cell={
+                        "backgroundColor": "#1a1a1a",
+                        "color": "white",
+                        "fontSize": "11px",
+                        "textAlign": "center",
+                        "minWidth": "100px",
+                        "whiteSpace": "normal"
+                    }
+                )
+            )
+        ])
 
     # ACWR
     elif tab=="acwr":

@@ -515,6 +515,8 @@ def actualizar_tab(
             color="Métrica",
 
             orientation="h",
+            
+            background="#1a1a1a",
 
             barmode="group",
 
@@ -563,9 +565,7 @@ def actualizar_tab(
             line_dash="Métrica",
 
             markers=True,
-
-            line={"shape": "spline"},
-
+            
             color_discrete_sequence=[
 
                 "#fafafa",

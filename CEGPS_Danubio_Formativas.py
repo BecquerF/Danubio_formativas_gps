@@ -78,9 +78,11 @@ referencias = [
     "Period Tags"
 ]
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
-ultima_actualizacion = datetime.now().strftime(
+ultima_actualizacion = (
+    datetime.now() - timedelta(hours=3)
+).strftime(
     "%d/%m/%Y - %H:%M"
 )
 
@@ -145,15 +147,23 @@ html.Div([
                 value="comparativas",
 
                 style={
-                    "backgroundColor":"#4e4e4e",
-                    "color":"white",
-                    "border":"0px"
+                    "backgroundColor":"#000000",
+                    "color":"#ffffff",
+                    "border":"1px solid #ffffff",
+                    "borderRadius":"20px",
+                    "padding":"8px 16px",
+                    "marginRight":"10px",
+                    "marginBottom":"8px"
                 },
 
                 selected_style={
-                    "backgroundColor":"#9e8330",
-                    "color":"white",
-                    "border":"0px"
+                    "backgroundColor":"#ffffff",
+                    "color":"#000000",
+                    "border":"1px solid #000000",
+                    "borderRadius":"20px",
+                    "padding":"8px 16px",
+                    "marginRight":"10px",
+                    "marginBottom":"8px"
                 }
             ),
 
@@ -162,31 +172,49 @@ html.Div([
                 value="cronologico",
 
                 style={
-                    "backgroundColor":"#4e4e4e",
-                    "color":"white",
-                    "border":"0px"
+                    "backgroundColor":"#000000",
+                    "color":"#ffffff",
+                    "border":"1px solid #ffffff",
+                    "borderRadius":"20px",
+                    "padding":"8px 16px",
+                    "marginRight":"10px",
+                    "marginBottom":"8px"
                 },
 
                 selected_style={
-                    "backgroundColor":"#9e8330",
-                    "color":"white",
-                    "border":"0px"
+                    "backgroundColor":"#ffffff",
+                    "color":"#000000",
+                    "border":"1px solid #000000",
+                    "borderRadius":"20px",
+                    "padding":"8px 16px",
+                    "marginRight":"10px",
+                    "marginBottom":"8px"
                 }
             ),
             dcc.Tab(
-    label="ACWR (Zona Segura)",
-    value="acwr",
+                label="ACWR (Zona Segura)",
+                value="acwr",
 
-    style={
-        "backgroundColor":"#4e4e4e",
-        "color":"white"
-    },
+                style={
+                    "backgroundColor":"#000000",
+                    "color":"#ffffff",
+                    "border":"1px solid #ffffff",
+                    "borderRadius":"20px",
+                    "padding":"8px 16px",
+                    "marginRight":"10px",
+                    "marginBottom":"8px"
+                },
 
-    selected_style={
-        "backgroundColor":"#9e8330",
-        "color":"white"
-    }
-),
+                selected_style={
+                    "backgroundColor":"#ffffff",
+                    "color":"#000000",
+                    "border":"1px solid #000000",
+                    "borderRadius":"20px",
+                    "padding":"8px 16px",
+                    "marginRight":"10px",
+                    "marginBottom":"8px"
+                }
+            ),
         ]
     ),
 

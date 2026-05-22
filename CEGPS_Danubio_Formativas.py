@@ -513,7 +513,6 @@ def actualizar_tab(
             y=referencia,
 
             color="Métrica",
-            backgroundColor="#1a1a1a",
 
             orientation="h",
 

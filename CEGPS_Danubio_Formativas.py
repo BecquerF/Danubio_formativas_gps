@@ -175,28 +175,28 @@ html.Div([
                 value="comparativas",
 
                 style={
-                    "backgroundColor":"#0c0d0f",
-                    "color":"#f5f5f5",
-                    "border":"2px solid #470b4b",
+                    "backgroundColor":"#0B0D12",
+                    "color":"#F5F7FA",
+                    "border":"2px solid #7C3AED",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(88,39,229,0.25)",
+                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(124,58,237,0.18)",
                     "fontWeight":"600",
                     "transition":"all 0.3s ease",
                     "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#5827e5",
-                    "color":"#f5f5f5",
-                    "border":"2px solid #fa10bc",
+                    "backgroundColor":"#7C3AED",
+                    "color":"#F5F7FA",
+                    "border":"2px solid #2563EB",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(95,39,229,0.35)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(124,58,237,0.28)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -207,28 +207,28 @@ html.Div([
                 value="cronologico",
 
                 style={
-                    "backgroundColor":"#0c0d0f",
-                    "color":"#f5f5f5",
-                    "border":"2px solid #470b4b",
+                    "backgroundColor":"#0B0D12",
+                    "color":"#F5F7FA",
+                    "border":"2px solid #7C3AED",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(88,39,229,0.25)",
+                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(124,58,237,0.18)",
                     "fontWeight":"600",
                     "transition":"all 0.3s ease",
                     "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#5827e5",
-                    "color":"#f5f5f5",
-                    "border":"2px solid #fa10bc",
+                    "backgroundColor":"#7C3AED",
+                    "color":"#F5F7FA",
+                    "border":"2px solid #2563EB",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(95,39,229,0.35)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(124,58,237,0.28)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -238,28 +238,28 @@ html.Div([
                 value="actividad",
 
                 style={
-                    "backgroundColor":"#0c0d0f",
-                    "color":"#f5f5f5",
-                    "border":"2px solid #470b4b",
+                    "backgroundColor":"#0B0D12",
+                    "color":"#F5F7FA",
+                    "border":"2px solid #7C3AED",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(88,39,229,0.25)",
+                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(124,58,237,0.18)",
                     "fontWeight":"600",
                     "transition":"all 0.3s ease",
                     "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#5827e5",
-                    "color":"#f5f5f5",
-                    "border":"2px solid #fa10bc",
+                    "backgroundColor":"#7C3AED",
+                    "color":"#F5F7FA",
+                    "border":"2px solid #2563EB",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(95,39,229,0.35)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(124,58,237,0.28)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -269,28 +269,28 @@ html.Div([
                 value="acwr",
 
                 style={
-                    "backgroundColor":"#0c0d0f",
-                    "color":"#f5f5f5",
-                    "border":"2px solid #470b4b",
+                    "backgroundColor":"#0B0D12",
+                    "color":"#F5F7FA",
+                    "border":"2px solid #7C3AED",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(88,39,229,0.25)",
+                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(124,58,237,0.18)",
                     "fontWeight":"600",
                     "transition":"all 0.3s ease",
                     "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#5827e5",
-                    "color":"#f5f5f5",
-                    "border":"2px solid #fa10bc",
+                    "backgroundColor":"#7C3AED",
+                    "color":"#F5F7FA",
+                    "border":"2px solid #2563EB",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(95,39,229,0.35)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(124,58,237,0.28)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -423,7 +423,7 @@ style={
                 html.H4(
                     "Métricas",
                     style={
-                        "color":"#29e51a",
+                        "color":"#39FF14",
                         "fontSize":"13px",
                         "fontWeight":"700",
                         "marginBottom":"12px"
@@ -495,7 +495,7 @@ style={
                 html.H4(
                     "Comparar por",
                     style={
-                        "color":"#fa10bc",
+                        "color":"#2563EB",
                         "fontSize":"13px",
                         "fontWeight":"700",
                         "marginBottom":"12px"
@@ -540,7 +540,7 @@ style={
                 html.H4(
                     "Filtrar por",
                     style={
-                        "color":"#54df4d",
+                        "color":"#39FF14",
                         "fontSize":"13px",
                         "fontWeight":"700",
                         "marginBottom":"12px"
@@ -623,12 +623,11 @@ style={
 
             ],
             style={
-                "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
-                "padding":"16px",
-                "borderRadius":"18px",
-                "marginBottom":"12px",
-                "border":"1px solid rgba(88,39,229,0.25)",
-                "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
+                    "background":"linear-gradient(180deg, rgba(11,13,18,0.95), rgba(11,12,14,0.95))",
+                    "padding":"16px",
+                    "borderRadius":"18px",
+                    "marginBottom":"12px",
+                    "border":"1px solid rgba(124,58,237,0.28)",
             })
 
         ],

@@ -42,6 +42,7 @@ columnas_eliminar = [
 df = df.drop(columns=columnas_eliminar, errors="ignore")
 
 app = Dash(__name__)
+app.config.suppress_callback_exceptions = True
 server = app.server
 VALID_USERNAME_PASSWORD_PAIRS = {
     "Danubioformativas": "danubio2026"
@@ -387,23 +388,28 @@ style={
                         "marginBottom":"5px"
                     }
                 ),
-
                 html.Br(),
-                html.P(
-                    "Fecha",
-                    style={"color":"#dcdcdc","fontSize":"10px"}
-                ),
-                dcc.DatePickerSingle(
-                    id="fecha",
-                    date=fecha_max.date(),
-                    min_date_allowed=df["Date"].min().date(),
-                    max_date_allowed=df["Date"].max().date(),
-                    display_format="DD/MM/YYYY",
-                    style={
-                        "width": "100%",
-                        "backgroundColor": "#1a1a1a",
-                        "color": "#ffffff"
-                    }
+                html.Div(
+                    [
+                        html.P(
+                            "Fecha",
+                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"8px"}
+                        ),
+                        dcc.DatePickerSingle(
+                            id="fecha-actividad",
+                            date=fecha_max.date(),
+                            min_date_allowed=df["Date"].min().date(),
+                            max_date_allowed=df["Date"].max().date(),
+                            display_format="DD/MM/YYYY",
+                            style={
+                                "width": "100%",
+                                "backgroundColor": "#1a1a1a",
+                                "color": "#ffffff"
+                            }
+                        )
+                    ],
+                    id="actividad-fecha-container",
+                    style={"display": "none", "marginTop": "10px"}
                 )
 
             ],
@@ -566,6 +572,16 @@ style={
     "padding":"20px",
     "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif'
 })
+
+@app.callback(
+    Output("actividad-fecha-container","style"),
+    Input("tabs","value")
+)
+def toggle_actividad_fecha(tab):
+    if tab == "actividad":
+        return {"display": "block", "marginTop": "10px"}
+    return {"display": "none"}
+
 @app.callback(
     Output("contenido-tab","children"),
 
@@ -577,7 +593,6 @@ style={
     Input("athlete","value"),
     Input("gametag","value"),
     Input("periodtag","value"),
-    Input("fecha","date"),
     Input("fecha-actividad","date")
 )
 
@@ -591,7 +606,6 @@ def actualizar_tab(
     athlete,
     gametags,
     periodtags,
-    fecha,
     fecha_actividad
 ):
 
@@ -761,15 +775,6 @@ def actualizar_tab(
                     "marginBottom": "20px"
                 }
             ),
-            html.Div([
-                html.Label("Seleccionar fecha:", style={"color": "white", "marginRight": "10px"}),
-                dcc.DatePickerSingle(
-                    id="fecha-actividad",
-                    date=fecha_dt.date(),
-                    display_format="DD/MM/YYYY",
-                    style={"marginRight": "20px"}
-                )
-            ], style={"marginBottom": "20px", "display": "flex", "alignItems": "center"}),
             html.H4(
                 f"{fecha_dt.strftime('%d/%m/%Y')}",
                 style={

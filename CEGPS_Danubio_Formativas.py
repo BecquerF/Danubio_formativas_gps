@@ -1,7 +1,9 @@
+import io
 import pandas as pd
 import plotly.express as px
+import dash
 import dash_auth
-from dash import Dash, dcc, html, dash_table, Input, Output
+from dash import Dash, dcc, html, dash_table, Input, Output, no_update
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
@@ -113,7 +115,7 @@ app.layout = html.Div([
                 "marginTop":"5px",
                 "marginBottom":"15px",
                 "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
-                "borderBottom":"2px solid #9e8330",
+                "borderBottom":"2px solid #5827e5",
                 "paddingBottom":"10px"
             }
         ),
@@ -166,28 +168,28 @@ html.Div([
                 value="comparativas",
 
                 style={
-                    "backgroundColor":"#1a1a1a",
-                    "color":"#ffffff",
-                    "border":"2px solid #444444",
+                    "backgroundColor":"#0c0d0f",
+                    "color":"#f5f5f5",
+                    "border":"2px solid #470b4b",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.4)",
+                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(88,39,229,0.25)",
                     "fontWeight":"600",
                     "transition":"all 0.3s ease",
                     "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#E6E6E6",
-                    "color":"#000000",
-                    "border":"2px solid #FFA500",
+                    "backgroundColor":"#5827e5",
+                    "color":"#f5f5f5",
+                    "border":"2px solid #fa10bc",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 6px 12px rgba(255,215,0,0.4)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(95,39,229,0.35)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -198,28 +200,28 @@ html.Div([
                 value="cronologico",
 
                 style={
-                    "backgroundColor":"#1a1a1a",
-                    "color":"#ffffff",
-                    "border":"2px solid #444444",
+                    "backgroundColor":"#0c0d0f",
+                    "color":"#f5f5f5",
+                    "border":"2px solid #470b4b",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.4)",
+                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(88,39,229,0.25)",
                     "fontWeight":"600",
                     "transition":"all 0.3s ease",
                     "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#E6E6E6",
-                    "color":"#000000",
-                    "border":"2px solid #FFA500",
+                    "backgroundColor":"#5827e5",
+                    "color":"#f5f5f5",
+                    "border":"2px solid #fa10bc",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 6px 12px rgba(255,215,0,0.4)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(95,39,229,0.35)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -229,28 +231,28 @@ html.Div([
                 value="actividad",
 
                 style={
-                    "backgroundColor":"#1a1a1a",
-                    "color":"#ffffff",
-                    "border":"2px solid #444444",
+                    "backgroundColor":"#0c0d0f",
+                    "color":"#f5f5f5",
+                    "border":"2px solid #470b4b",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.4)",
+                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(88,39,229,0.25)",
                     "fontWeight":"600",
                     "transition":"all 0.3s ease",
                     "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#E6E6E6",
-                    "color":"#000000",
-                    "border":"2px solid #FFA500",
+                    "backgroundColor":"#5827e5",
+                    "color":"#f5f5f5",
+                    "border":"2px solid #fa10bc",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 6px 12px rgba(255,215,0,0.4)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(95,39,229,0.35)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -260,34 +262,106 @@ html.Div([
                 value="acwr",
 
                 style={
-                    "backgroundColor":"#1a1a1a",
-                    "color":"#ffffff",
-                    "border":"2px solid #444444",
+                    "backgroundColor":"#0c0d0f",
+                    "color":"#f5f5f5",
+                    "border":"2px solid #470b4b",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.4)",
+                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(88,39,229,0.25)",
                     "fontWeight":"600",
                     "transition":"all 0.3s ease",
                     "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#E6E6E6",
-                    "color":"#000000",
-                    "border":"2px solid #FFA500",
+                    "backgroundColor":"#5827e5",
+                    "color":"#f5f5f5",
+                    "border":"2px solid #fa10bc",
                     "borderRadius":"12px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 6px 12px rgba(255,215,0,0.4)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(95,39,229,0.35)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
             ),
         ]
     ),
+
+    html.Div([
+        html.Button(
+            "Descargar gráfico .PNG",
+            id="download-graph-png",
+            n_clicks=0,
+            style={
+                "backgroundColor":"#fa10bc",
+                "color":"#0b0c0e",
+                "border":"none",
+                "borderRadius":"12px",
+                "padding":"10px 18px",
+                "fontWeight":"700",
+                "cursor":"pointer",
+                "boxShadow":"0 0 20px rgba(250,16,188,0.35)"
+            }
+        ),
+        html.Button(
+            "Descargar gráfico .PDF",
+            id="download-graph-pdf",
+            n_clicks=0,
+            style={
+                "backgroundColor":"#54df4d",
+                "color":"#0b0c0e",
+                "border":"none",
+                "borderRadius":"12px",
+                "padding":"10px 18px",
+                "fontWeight":"700",
+                "cursor":"pointer",
+                "boxShadow":"0 0 20px rgba(84,223,77,0.35)"
+            }
+        ),
+        html.Button(
+            "Descargar tabla .CSV",
+            id="download-table-csv",
+            n_clicks=0,
+            style={
+                "backgroundColor":"#5827e5",
+                "color":"#f5f5f5",
+                "border":"none",
+                "borderRadius":"12px",
+                "padding":"10px 18px",
+                "fontWeight":"700",
+                "cursor":"pointer",
+                "boxShadow":"0 0 20px rgba(88,39,229,0.35)"
+            }
+        ),
+        html.Button(
+            "Descargar tabla .XLSX",
+            id="download-table-xlsx",
+            n_clicks=0,
+            style={
+                "backgroundColor":"#29e51a",
+                "color":"#0b0c0e",
+                "border":"none",
+                "borderRadius":"12px",
+                "padding":"10px 18px",
+                "fontWeight":"700",
+                "cursor":"pointer",
+                "boxShadow":"0 0 20px rgba(41,229,26,0.35)"
+            }
+        )
+    ],
+    style={
+        "display":"flex",
+        "flexWrap":"wrap",
+        "gap":"12px",
+        "marginBottom":"16px"
+    }),
+
+    dcc.Download(id="download-graph"),
+    dcc.Download(id="download-table"),
 
     html.Div(
         id="contenido-tab"
@@ -313,7 +387,7 @@ style={
                 html.H4(
                     "Categorías",
                     style={
-                        "color":"#FFD700",
+                        "color":"#5827e5",
                         "fontSize":"13px",
                         "fontWeight":"700",
                         "marginBottom":"12px"
@@ -348,12 +422,12 @@ style={
 
             ],
             style={
-                "background":"linear-gradient(180deg, rgba(46,46,46,0.95), rgba(20,20,20,0.95))",
+                "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
                 "padding":"16px",
                 "borderRadius":"18px",
                 "marginBottom":"12px",
-                "border":"1px solid rgba(255,255,255,0.08)",
-                "boxShadow":"0 15px 35px rgba(0,0,0,0.35)"
+                "border":"1px solid rgba(88,39,229,0.25)",
+                "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             }),
 
             # MÉTRICAS
@@ -362,7 +436,7 @@ style={
                 html.H4(
                     "Métricas",
                     style={
-                        "color":"#FFD700",
+                        "color":"#29e51a",
                         "fontSize":"13px",
                         "fontWeight":"700",
                         "marginBottom":"12px"
@@ -396,7 +470,7 @@ style={
                     [
                         html.P(
                             "Fecha de actividad",
-                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"8px"}
+                            style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"8px"}
                         ),
                         dcc.DatePickerSingle(
                             id="fecha-actividad",
@@ -406,9 +480,9 @@ style={
                             display_format="DD/MM/YYYY",
                             style={
                                 "width": "100%",
-                                "backgroundColor": "#1a1a1a",
-                                "color": "#ffffff",
-                                "border": "1px solid #444444",
+                                "backgroundColor": "#0c0d0f",
+                                "color": "#f5f5f5",
+                                "border": "1px solid #8c8c8c",
                                 "borderRadius": "8px",
                                 "padding": "8px"
                             }
@@ -420,12 +494,12 @@ style={
 
             ],
             style={
-                "background":"linear-gradient(180deg, rgba(46,46,46,0.95), rgba(20,20,20,0.95))",
+                "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
                 "padding":"16px",
                 "borderRadius":"18px",
                 "marginBottom":"12px",
-                "border":"1px solid rgba(255,255,255,0.08)",
-                "boxShadow":"0 15px 35px rgba(0,0,0,0.35)"
+                "border":"1px solid rgba(88,39,229,0.25)",
+                "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             }),
 
             # COMPARAR POR
@@ -434,7 +508,7 @@ style={
                 html.H4(
                     "Comparar por",
                     style={
-                        "color":"#FFD700",
+                        "color":"#fa10bc",
                         "fontSize":"13px",
                         "fontWeight":"700",
                         "marginBottom":"12px"
@@ -465,12 +539,12 @@ style={
 
             ],
             style={
-                "background":"linear-gradient(180deg, rgba(46,46,46,0.95), rgba(20,20,20,0.95))",
+                "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
                 "padding":"16px",
                 "borderRadius":"18px",
                 "marginBottom":"12px",
-                "border":"1px solid rgba(255,255,255,0.08)",
-                "boxShadow":"0 15px 35px rgba(0,0,0,0.35)"
+                "border":"1px solid rgba(88,39,229,0.25)",
+                "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             }),
 
             # FILTROS COMPARATIVOS
@@ -479,7 +553,7 @@ style={
                 html.H4(
                     "Filtrar por",
                     style={
-                        "color":"#FFD700",
+                        "color":"#54df4d",
                         "fontSize":"13px",
                         "fontWeight":"700",
                         "marginBottom":"12px"
@@ -490,7 +564,7 @@ style={
                     html.Div([
                         html.P(
                             "Jugador",
-                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"6px"}
+                            style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"6px"}
                         ),
                         dcc.Dropdown(
                             id="jugador",
@@ -508,7 +582,7 @@ style={
                     html.Div([
                         html.P(
                             "Athlete Tags",
-                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"6px"}
+                            style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"6px"}
                         ),
                         dcc.Dropdown(
                             id="athlete",
@@ -526,7 +600,7 @@ style={
                     html.Div([
                         html.P(
                             "Game Tags",
-                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"6px"}
+                            style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"6px"}
                         ),
                         dcc.Dropdown(
                             id="gametag",
@@ -544,7 +618,7 @@ style={
                     html.Div([
                         html.P(
                             "Period Tags",
-                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"6px"}
+                            style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"6px"}
                         ),
                         dcc.Dropdown(
                             id="periodtag",
@@ -562,12 +636,12 @@ style={
 
             ],
             style={
-                "background":"linear-gradient(180deg, rgba(46,46,46,0.95), rgba(20,20,20,0.95))",
+                "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
                 "padding":"16px",
                 "borderRadius":"18px",
                 "marginBottom":"12px",
-                "border":"1px solid rgba(255,255,255,0.08)",
-                "boxShadow":"0 15px 35px rgba(0,0,0,0.35)"
+                "border":"1px solid rgba(88,39,229,0.25)",
+                "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             })
 
         ],
@@ -586,7 +660,7 @@ style={
 
 ],
 style={
-    "backgroundColor":"#1a1a1a",
+    "backgroundColor":"#0b0c0e",
     "padding":"20px",
     "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif'
 })
@@ -691,20 +765,56 @@ def actualizar_tab(
 
             color_discrete_sequence=[
 
-                "#fafafa",
-                "#b3b1af",
-                "#F5D888",
-                "#5A5A5A",
-                "#1B1B1B"
-            ]
+                "#fa10bc",
+                "#54df4d",
+                "#29e51a",
+                "#5827e5",
+                "#f5f5f5"
+            ],
+            template="plotly_dark"
+        )
+
+        fig.update_traces(
+            marker=dict(
+                line=dict(width=1, color="#ffffff")
+            ),
+            opacity=0.95,
+            hoverlabel=dict(
+                bgcolor="#0c0d0f",
+                font_size=12,
+                font_color="#f5f5f5"
+            )
         )
 
         fig.update_layout(
-            paper_bgcolor="#1a1a1a",
-            plot_bgcolor="#1a1a1a",
+            paper_bgcolor="#0b0c0e",
+            plot_bgcolor="#0b0c0e",
             font={
-                "color":"#ffffff"
-            }
+                "color":"#f5f5f5"
+            },
+            legend=dict(
+                bgcolor="rgba(11,12,14,0.75)",
+                bordercolor="#fa10bc",
+                borderwidth=1
+            )
+        )
+
+        fig.update_xaxes(
+            showgrid=True,
+            gridcolor="rgba(88,39,229,0.2)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#fa10bc",
+            tickfont_color="#f5f5f5",
+            title_font_color="#54df4d"
+        )
+
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor="rgba(88,39,229,0.2)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#fa10bc",
+            tickfont_color="#f5f5f5",
+            title_font_color="#54df4d"
         )
 
         return dcc.Graph(
@@ -796,7 +906,7 @@ def actualizar_tab(
             html.H4(
                 f"{fecha_dt.strftime('%d/%m/%Y')}",
                 style={
-                    "color": "#FFD700",
+                    "color": "#54df4d",
                     "textAlign": "center",
                     "marginBottom": "15px"
                 }
@@ -958,7 +1068,7 @@ def actualizar_tab(
                                 "filter_query": "{Distance_ACWR} > 1.3",
                                 "column_id": "Distance_ACWR"
                             },
-                            "backgroundColor": "#FFD700",
+                            "backgroundColor": "#fa10bc",
                             "color": "black"
                         },
                         {
@@ -982,7 +1092,7 @@ def actualizar_tab(
                                 "filter_query": "{Player Load_ACWR} > 1.3",
                                 "column_id": "Player Load_ACWR"
                             },
-                            "backgroundColor": "#FFD700",
+                            "backgroundColor": "#fa10bc",
                             "color": "black"
                         },
                         {
@@ -1006,7 +1116,7 @@ def actualizar_tab(
                                 "filter_query": "{Acceleration Efforts_ACWR} > 1.3",
                                 "column_id": "Acceleration Efforts_ACWR"
                             },
-                            "backgroundColor": "#FFD700",
+                            "backgroundColor": "#fa10bc",
                             "color": "black"
                         },
                         {
@@ -1030,7 +1140,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Distance_ACWR} > 1.3",
                                 "column_id": "Sprint Distance_ACWR"
                             },
-                            "backgroundColor": "#FFD700",
+                            "backgroundColor": "#fa10bc",
                             "color": "black"
                         },
                         {
@@ -1054,7 +1164,7 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Distance_ACWR} > 1.3",
                                 "column_id": "High Speed Distance_ACWR"
                             },
-                            "backgroundColor": "#FFD700",
+                            "backgroundColor": "#fa10bc",
                             "color": "black"
                         },
                         {
@@ -1078,7 +1188,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Efforts_ACWR} > 1.3",
                                 "column_id": "Sprint Efforts_ACWR"
                             },
-                            "backgroundColor": "#FFD700",
+                            "backgroundColor": "#fa10bc",
                             "color": "black"
                         },
                         {
@@ -1102,7 +1212,7 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Efforts_ACWR} > 1.3",
                                 "column_id": "High Speed Efforts_ACWR"
                             },
-                            "backgroundColor": "#FFD700",
+                            "backgroundColor": "#fa10bc",
                             "color": "black"
                         },
                         {
@@ -1126,7 +1236,7 @@ def actualizar_tab(
                                 "filter_query": "{Impacts_ACWR} > 1.3",
                                 "column_id": "Impacts_ACWR"
                             },
-                            "backgroundColor": "#FFD700",
+                            "backgroundColor": "#fa10bc",
                             "color": "black"
                         }
                     ],
@@ -1159,25 +1269,362 @@ def actualizar_tab(
             x="Date",
             y="Valor",
             color="Category",
-            symbol="Métrica"
+            symbol="Métrica",
+            color_discrete_sequence=["#fa10bc", "#54df4d", "#29e51a", "#5827e5", "#f5f5f5"],
+            template="plotly_dark"
+        )
+
+        fig.update_traces(
+            marker=dict(
+                size=10,
+                line=dict(width=1, color="#ffffff")
+            ),
+            selector=dict(mode="markers"),
+            hoverlabel=dict(
+                bgcolor="#0c0d0f",
+                font_size=12,
+                font_color="#f5f5f5"
+            )
         )
 
         fig.update_layout(
-
             title="Evolución cronológica",
-
-            paper_bgcolor="#1a1a1a",
-            plot_bgcolor="#1a1a1a",
-
+            paper_bgcolor="#0b0c0e",
+            plot_bgcolor="#0b0c0e",
             font={
-                "color":"#ffffff"
-            }
+                "color":"#f5f5f5"
+            },
+            legend=dict(
+                bgcolor="rgba(11,12,14,0.75)",
+                bordercolor="#fa10bc",
+                borderwidth=1
+            )
         )
 
-        fig.update_xaxes(tickformat="%d/%m/%Y")
+        fig.update_xaxes(
+            tickformat="%d/%m/%Y",
+            showgrid=True,
+            gridcolor="rgba(88,39,229,0.2)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#fa10bc",
+            tickfont_color="#f5f5f5",
+            title_font_color="#54df4d"
+        )
+
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor="rgba(88,39,229,0.2)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#fa10bc",
+            tickfont_color="#f5f5f5",
+            title_font_color="#54df4d"
+        )
 
         return dcc.Graph(
             figure=fig
         )
+
+
+@app.callback(
+    Output("download-graph","data"),
+    Input("download-graph-png","n_clicks"),
+    Input("download-graph-pdf","n_clicks"),
+    Input("tabs","value"),
+    Input("categoria","value"),
+    Input("metrica","value"),
+    Input("referencia","value"),
+    Input("jugador","value"),
+    Input("athlete","value"),
+    Input("gametag","value"),
+    Input("periodtag","value"),
+    Input("fecha-actividad","date")
+)
+def descargar_grafico(
+    n_png,
+    n_pdf,
+    tab,
+    categorias,
+    metricas,
+    referencia,
+    jugadores,
+    athlete,
+    gametags,
+    periodtags,
+    fecha_actividad
+):
+    triggered = dash.callback_context.triggered
+    if not triggered:
+        return no_update
+
+    trigger_id = triggered[0]["prop_id"].split(".")[0]
+    if trigger_id not in ["download-graph-png", "download-graph-pdf"]:
+        return no_update
+
+    dff = df.copy()
+    if categorias:
+        dff = dff[dff["Category"].isin(categorias)]
+    if jugadores:
+        dff = dff[dff["Player Name"].isin(jugadores)]
+    if athlete:
+        dff = dff[dff["Athlete Tags"].isin(athlete)]
+    if gametags:
+        dff = dff[dff["Game Tags"].isin(gametags)]
+    if periodtags:
+        dff = dff[dff["Period Tags"].isin(periodtags)]
+
+    if tab == "comparativas":
+        promedio = (
+            dff.groupby(referencia)[metricas].mean().reset_index()
+        )
+        promedio = pd.melt(
+            promedio,
+            id_vars=[referencia],
+            value_vars=metricas,
+            var_name="Métrica",
+            value_name="Valor"
+        )
+        fig = px.bar(
+            promedio,
+            x="Valor",
+            y=referencia,
+            color="Métrica",
+            orientation="h",
+            barmode="group",
+            color_discrete_sequence=["#fa10bc", "#54df4d", "#29e51a", "#5827e5", "#f5f5f5"],
+            template="plotly_dark"
+        )
+        fig.update_traces(
+            marker=dict(line=dict(width=1, color="#ffffff")),
+            opacity=0.95
+        )
+        fig.update_layout(
+            paper_bgcolor="#0b0c0e",
+            plot_bgcolor="#0b0c0e",
+            font={"color": "#f5f5f5"},
+            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#fa10bc", borderwidth=1)
+        )
+        fig.update_layout(
+            annotations=[
+                dict(
+                    text="Desarrollado por: Bécquer Fernández 🌐 https://www.linkedin.com/in/b%C3%A9cquer-fernandez-2108ab152/",
+                    x=1,
+                    y=-0.08,
+                    xref="paper",
+                    yref="paper",
+                    showarrow=False,
+                    font=dict(color="#f5f5f5", size=10),
+                    xanchor="right",
+                    align="right"
+                )
+            ],
+            margin=dict(b=80)
+        )
+        fig.update_xaxes(
+            showgrid=True,
+            gridcolor="rgba(88,39,229,0.2)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#fa10bc",
+            tickfont_color="#f5f5f5"
+        )
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor="rgba(88,39,229,0.2)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#fa10bc",
+            tickfont_color="#f5f5f5"
+        )
+    elif tab == "cronologico":
+        cronologico = pd.melt(
+            dff,
+            id_vars=["Date", "Category"],
+            value_vars=metricas,
+            var_name="Métrica",
+            value_name="Valor"
+        )
+        fig = px.scatter(
+            cronologico,
+            x="Date",
+            y="Valor",
+            color="Category",
+            symbol="Métrica",
+            color_discrete_sequence=["#fa10bc", "#54df4d", "#29e51a", "#5827e5", "#f5f5f5"],
+            template="plotly_dark"
+        )
+        fig.update_traces(
+            marker=dict(size=10, line=dict(width=1, color="#ffffff")),
+            selector=dict(mode="markers")
+        )
+        fig.update_layout(
+            title="Evolución cronológica",
+            paper_bgcolor="#0b0c0e",
+            plot_bgcolor="#0b0c0e",
+            font={"color": "#f5f5f5"},
+            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#fa10bc", borderwidth=1)
+        )
+        fig.update_layout(
+            annotations=[
+                dict(
+                    text="Desarrollado por: Bécquer Fernández 🌐 https://www.linkedin.com/in/b%C3%A9cquer-fernandez-2108ab152/",
+                    x=1,
+                    y=-0.08,
+                    xref="paper",
+                    yref="paper",
+                    showarrow=False,
+                    font=dict(color="#f5f5f5", size=10),
+                    xanchor="right",
+                    align="right"
+                )
+            ],
+            margin=dict(b=80)
+        )
+        fig.update_xaxes(
+            tickformat="%d/%m/%Y",
+            showgrid=True,
+            gridcolor="rgba(88,39,229,0.2)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#fa10bc",
+            tickfont_color="#f5f5f5"
+        )
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor="rgba(88,39,229,0.2)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#fa10bc",
+            tickfont_color="#f5f5f5"
+        )
+    else:
+        return no_update
+
+    fmt = "png" if trigger_id == "download-graph-png" else "pdf"
+    filename = f"grafico_{tab}.{fmt}"
+    image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
+    return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
+
+
+@app.callback(
+    Output("download-table","data"),
+    Input("download-table-csv","n_clicks"),
+    Input("download-table-xlsx","n_clicks"),
+    Input("tabs","value"),
+    Input("categoria","value"),
+    Input("metrica","value"),
+    Input("referencia","value"),
+    Input("jugador","value"),
+    Input("athlete","value"),
+    Input("gametag","value"),
+    Input("periodtag","value"),
+    Input("fecha-actividad","date")
+)
+def descargar_tabla(
+    n_csv,
+    n_xlsx,
+    tab,
+    categorias,
+    metricas,
+    referencia,
+    jugadores,
+    athlete,
+    gametags,
+    periodtags,
+    fecha_actividad
+):
+    triggered = dash.callback_context.triggered
+    if not triggered:
+        return no_update
+
+    trigger_id = triggered[0]["prop_id"].split(".")[0]
+    if trigger_id not in ["download-table-csv", "download-table-xlsx"]:
+        return no_update
+
+    dff = df.copy()
+    if categorias:
+        dff = dff[dff["Category"].isin(categorias)]
+    if jugadores:
+        dff = dff[dff["Player Name"].isin(jugadores)]
+    if athlete:
+        dff = dff[dff["Athlete Tags"].isin(athlete)]
+    if gametags:
+        dff = dff[dff["Game Tags"].isin(gametags)]
+    if periodtags:
+        dff = dff[dff["Period Tags"].isin(periodtags)]
+
+    if tab == "comparativas":
+        df_export = dff.groupby(referencia)[metricas].mean().reset_index()
+    elif tab == "actividad":
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        columnas_requeridas = [
+            "Player Name",
+            "Accel + Decel Efforts",
+            "Accel + Decel Efforts Per Minute",
+            "Distance",
+            "Player Load",
+            "Max Velocity",
+            "Meterage Per Minute",
+            "Player Load Per Minute",
+            "Sprint Distance",
+            "Sprint Efforts",
+            "Sprint Dist Per Min",
+            "High Speed Distance",
+            "High Speed Efforts",
+            "High Speed Distance Per Minute",
+            "Impacts"
+        ]
+        columnas_presentes = [c for c in columnas_requeridas if c in dff_fecha.columns]
+        df_export = dff_fecha[columnas_presentes]
+    elif tab == "acwr":
+        metricas_acwr = list(dict.fromkeys([
+            "Distance",
+            "Player Load",
+            "Acceleration Efforts",
+            "Sprint Distance",
+            "High Speed Distance",
+            "Sprint Efforts",
+            "High Speed Efforts",
+            "Impacts"
+        ]))
+        dff["Player Name"] = dff["Player Name"].astype(str).str.strip()
+        ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
+        ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
+        df21 = dff[dff["Date"] >= ultimos21]
+        df7 = dff[dff["Date"] >= ultimos7]
+        cronica = df21.groupby("Player Name")[metricas_acwr].mean().reset_index()
+        aguda = df7.groupby("Player Name")[metricas_acwr].mean().reset_index()
+        tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7"))
+        tabla = tabla.loc[:, ~tabla.columns.duplicated()]
+        for m in metricas_acwr:
+            tabla[m + "_ACWR"] = (tabla[f"{m}_7"] / tabla[f"{m}_21"]).round(2)
+        df_export = tabla[["Player Name"] + [f"{m}_ACWR" for m in metricas_acwr]].fillna(0)
+    else:
+        df_export = pd.melt(
+            dff,
+            id_vars=["Date", "Category"],
+            value_vars=metricas,
+            var_name="Métrica",
+            value_name="Valor"
+        )
+
+    if trigger_id == "download-table-csv":
+        metadata = (
+            "Desarrollado por: Bécquer Fernández 🌐 https://www.linkedin.com/in/b%C3%A9cquer-fernandez-2108ab152/\n\n"
+        )
+        buffer = io.BytesIO()
+        buffer.write(metadata.encode("utf-8"))
+        df_export.to_csv(buffer, index=False, line_terminator="\n")
+        buffer.seek(0)
+        return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab}.csv")
+
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        worksheet_name = "Datos"
+        df_export.to_excel(writer, sheet_name=worksheet_name, index=False, startrow=4)
+        workbook = writer.book
+        worksheet = writer.sheets[worksheet_name]
+        worksheet.cell(row=1, column=1, value="Desarrollado por: Bécquer Fernández")
+        worksheet.cell(row=2, column=1, value="🌐 https://www.linkedin.com/in/b%C3%A9cquer-fernandez-2108ab152/")
+        worksheet.cell(row=3, column=1, value=f"Tabla: {tab}")
+    buffer.seek(0)
+    return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab}.xlsx")
+
 if __name__ == "__main__":
     app.run(debug=True)

@@ -180,9 +180,9 @@ html.Div([
                 value="comparativas",
 
                 style={
-                    "backgroundColor":"#0B0D12",
+                    "backgroundColor":"#011c24",
                     "color":"#F5F7FA",
-                    "border":"2px solid #7C3AED",
+                    "border":"2px solid #3c4d52",
                     "borderRadius":"8px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
@@ -194,7 +194,7 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#7C3AED",
+                    "backgroundColor":"#f29eff",
                     "color":"#F5F7FA",
                     "border":"2px solid #2563EB",
                     "borderRadius":"8px",
@@ -212,9 +212,9 @@ html.Div([
                 value="cronologico",
 
                 style={
-                    "backgroundColor":"#0B0D12",
+                    "backgroundColor":"#011c24",
                     "color":"#F5F7FA",
-                    "border":"2px solid #7C3AED",
+                    "border":"2px solid #3c4d52",
                     "borderRadius":"8px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
@@ -226,7 +226,7 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#7C3AED",
+                    "backgroundColor":"#f29eff",
                     "color":"#F5F7FA",
                     "border":"2px solid #2563EB",
                     "borderRadius":"8px",
@@ -243,9 +243,9 @@ html.Div([
                 value="actividad",
 
                 style={
-                    "backgroundColor":"#0B0D12",
+                    "backgroundColor":"#011c24",
                     "color":"#F5F7FA",
-                    "border":"2px solid #7C3AED",
+                    "border":"2px solid #3c4d52",
                     "borderRadius":"8px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
@@ -257,7 +257,7 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#7C3AED",
+                    "backgroundColor":"#f29eff",
                     "color":"#F5F7FA",
                     "border":"2px solid #2563EB",
                     "borderRadius":"8px",
@@ -274,9 +274,9 @@ html.Div([
                 value="acwr",
 
                 style={
-                    "backgroundColor":"#0B0D12",
+                    "backgroundColor":"#011c24",
                     "color":"#F5F7FA",
-                    "border":"2px solid #7C3AED",
+                    "border":"2px solid #3c4d52",
                     "borderRadius":"8px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
@@ -288,7 +288,7 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#7C3AED",
+                    "backgroundColor":"#f29eff",
                     "color":"#F5F7FA",
                     "border":"2px solid #2563EB",
                     "borderRadius":"8px",

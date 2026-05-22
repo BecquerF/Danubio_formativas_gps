@@ -516,8 +516,6 @@ def actualizar_tab(
 
             orientation="h",
             
-            background="#1a1a1a",
-
             barmode="group",
 
             color_discrete_sequence=[
@@ -528,6 +526,11 @@ def actualizar_tab(
                 "#5A5A5A",
                 "#1B1B1B"
             ]
+        )
+
+        fig.update_layout(
+            paper_bgcolor="#1a1a1a",
+            plot_bgcolor="#1a1a1a"
         )
 
         return dcc.Graph(
@@ -565,6 +568,8 @@ def actualizar_tab(
             line_dash="Métrica",
 
             markers=True,
+
+            line={"shape": "spline"},
             
             color_discrete_sequence=[
 

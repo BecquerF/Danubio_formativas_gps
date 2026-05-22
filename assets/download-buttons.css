@@ -60,6 +60,15 @@ h1, h2, h3, h4, .tab-item, .section-title {
     gap: 12px;
     align-items: flex-start;
     margin-bottom: 16px;
+    position: relative;
+    transform: translateX(-24px);
+    opacity: 0.92;
+    transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease;
+}
+
+.tab-menu:hover {
+    transform: translateX(0);
+    opacity: 1;
 }
 
 .sidebar-panel {
@@ -67,11 +76,14 @@ h1, h2, h3, h4, .tab-item, .section-title {
     border-radius: 24px;
     border: 1px solid rgba(137, 188, 239, 0.16);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    position: relative;
+    transform: translateX(24px);
+    opacity: 0.94;
+    transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
 }
 
 .sidebar-panel:hover {
-    transform: translateX(4px);
+    transform: translateX(0);
     box-shadow: 0 24px 72px rgba(0, 0, 0, 0.55);
     border-color: rgba(137, 188, 239, 0.28);
 }

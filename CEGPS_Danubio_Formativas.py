@@ -98,6 +98,28 @@ ultima_actualizacion = (
 
 app.layout = html.Div([
 
+    html.Div(
+        html.H1(
+            "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
+            style={
+                "color":"#ffffff",
+                "textAlign":"center",
+                "fontSize":"34px",
+                "fontWeight":"600",
+                "marginTop":"0",
+                "marginBottom":"18px",
+                "fontFamily":"'Clash Display', 'Helvetica Neue'",
+                "lineHeight":"1.05",
+                "letterSpacing":"0.02em"
+            }
+        ),
+        style={
+            "width":"100%",
+            "textAlign":"center",
+            "paddingBottom":"8px"
+        }
+    ),
+
     # HEADER
     html.Div([
 
@@ -113,21 +135,6 @@ app.layout = html.Div([
                 "backgroundColor":"rgba(13, 24, 34, 0.95)",
                 "boxShadow":"0 18px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(137, 188, 239, 0.16)",
                 "border":"1px solid rgba(137, 188, 239, 0.45)"
-            }
-        ),
-
-        html.H1(
-            "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
-            style={
-                "color":"#ffffff",
-                "textAlign":"center",
-                "fontSize":"30px",
-                "fontWeight":"600",
-                "marginTop":"5px",
-                "marginBottom":"15px",
-                "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
-                "borderBottom":"2px solid #89bcef",
-                "paddingBottom":"10px"
             }
         ),
 
@@ -396,7 +403,7 @@ style={
                         "color":"#a3e3d0",
                         "fontSize":"13px",
                         "fontWeight":"600",
-                        "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
+                        "fontFamily":"'Clash Display', 'Helvetica Neue'",
                         "marginBottom":"12px",
                         "columnCount":"2"
                     }
@@ -447,7 +454,7 @@ style={
                         "color":"#a3e3d0",
                         "fontSize":"13px",
                         "fontWeight":"600",
-                        "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
+                        "fontFamily":"'Clash Display', 'Helvetica Neue'",
                         "marginBottom":"12px",
                         "columnCount":"2"
                     }
@@ -521,7 +528,7 @@ style={
                         "color":"#a3e3d0",
                         "fontSize":"13px",
                         "fontWeight":"600",
-                        "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
+                        "fontFamily":"'Clash Display', 'Helvetica Neue'",
                         "marginBottom":"12px",
                         "columnCount":"2"
                     }
@@ -568,7 +575,7 @@ style={
                         "color":"#a3e3d0",
                         "fontSize":"13px",
                         "fontWeight":"600",
-                        "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
+                        "fontFamily":"'Clash Display', 'Helvetica Neue'",
                         "marginBottom":"12px",
                         "columnCount":"2"
                     }
@@ -676,7 +683,7 @@ style={
 style={
     "backgroundColor":"#000c0f",
     "padding":"20px",
-    "fontFamily":"'Manrope', 'Segoe UI', sans-serif",
+    "fontFamily":"'Manrope', 'Segoe UI'",
     "display":"flex",
     "alignItems":"flex-start",
     "gap":"24px",
@@ -920,7 +927,7 @@ def actualizar_tab(
                     "color": "white",
                     "textAlign": "center",
                     "marginBottom": "20px",
-                    "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
+                    "fontFamily":"'Clash Display', 'Helvetica Neue'",
                     "fontWeight":"600"
                 }
             ),
@@ -930,7 +937,7 @@ def actualizar_tab(
                     "color": "#a3e3d0",
                     "textAlign": "center",
                     "marginBottom": "15px",
-                    "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
+                    "fontFamily":"'Clash Display', 'Helvetica Neue'",
                     "fontWeight":"600"
                 }
             ),

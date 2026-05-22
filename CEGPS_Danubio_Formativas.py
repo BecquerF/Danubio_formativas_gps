@@ -165,23 +165,30 @@ html.Div([
                 value="comparativas",
 
                 style={
-                    "backgroundColor":"#000000",
+                    "backgroundColor":"#1a1a1a",
                     "color":"#ffffff",
-                    "border":"1px solid #ffffff",
-                    "borderRadius":"10px",
-                    "padding":"8px 16px",
+                    "border":"2px solid #444444",
+                    "borderRadius":"12px",
+                    "padding":"10px 20px",
                     "marginRight":"10px",
-                    "marginBottom":"8px"
+                    "marginBottom":"8px",
+                    "boxShadow":"inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.4)",
+                    "fontWeight":"600",
+                    "transition":"all 0.3s ease",
+                    "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#ffffff",
+                    "backgroundColor":"#FFD700",
                     "color":"#000000",
-                    "border":"1px solid #000000",
-                    "borderRadius":"10px",
-                    "padding":"8px 16px",
+                    "border":"2px solid #FFA500",
+                    "borderRadius":"12px",
+                    "padding":"10px 20px",
                     "marginRight":"10px",
-                    "marginBottom":"8px"
+                    "marginBottom":"8px",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 6px 12px rgba(255,215,0,0.4)",
+                    "fontWeight":"700",
+                    "transition":"all 0.3s ease"
                 }
             ),
 
@@ -190,23 +197,30 @@ html.Div([
                 value="cronologico",
 
                 style={
-                    "backgroundColor":"#000000",
+                    "backgroundColor":"#1a1a1a",
                     "color":"#ffffff",
-                    "border":"1px solid #ffffff",
-                    "borderRadius":"10px",
-                    "padding":"8px 16px",
+                    "border":"2px solid #444444",
+                    "borderRadius":"12px",
+                    "padding":"10px 20px",
                     "marginRight":"10px",
-                    "marginBottom":"8px"
+                    "marginBottom":"8px",
+                    "boxShadow":"inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.4)",
+                    "fontWeight":"600",
+                    "transition":"all 0.3s ease",
+                    "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#ffffff",
+                    "backgroundColor":"#FFD700",
                     "color":"#000000",
-                    "border":"1px solid #000000",
-                    "borderRadius":"10px",
-                    "padding":"8px 16px",
+                    "border":"2px solid #FFA500",
+                    "borderRadius":"12px",
+                    "padding":"10px 20px",
                     "marginRight":"10px",
-                    "marginBottom":"8px"
+                    "marginBottom":"8px",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 6px 12px rgba(255,215,0,0.4)",
+                    "fontWeight":"700",
+                    "transition":"all 0.3s ease"
                 }
             ),
             dcc.Tab(
@@ -214,23 +228,30 @@ html.Div([
                 value="actividad",
 
                 style={
-                    "backgroundColor":"#000000",
+                    "backgroundColor":"#1a1a1a",
                     "color":"#ffffff",
-                    "border":"1px solid #ffffff",
-                    "borderRadius":"10px",
-                    "padding":"8px 16px",
+                    "border":"2px solid #444444",
+                    "borderRadius":"12px",
+                    "padding":"10px 20px",
                     "marginRight":"10px",
-                    "marginBottom":"8px"
+                    "marginBottom":"8px",
+                    "boxShadow":"inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.4)",
+                    "fontWeight":"600",
+                    "transition":"all 0.3s ease",
+                    "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#ffffff",
+                    "backgroundColor":"#FFD700",
                     "color":"#000000",
-                    "border":"1px solid #000000",
-                    "borderRadius":"10px",
-                    "padding":"8px 16px",
+                    "border":"2px solid #FFA500",
+                    "borderRadius":"12px",
+                    "padding":"10px 20px",
                     "marginRight":"10px",
-                    "marginBottom":"8px"
+                    "marginBottom":"8px",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 6px 12px rgba(255,215,0,0.4)",
+                    "fontWeight":"700",
+                    "transition":"all 0.3s ease"
                 }
             ),
             dcc.Tab(
@@ -238,23 +259,30 @@ html.Div([
                 value="acwr",
 
                 style={
-                    "backgroundColor":"#000000",
+                    "backgroundColor":"#1a1a1a",
                     "color":"#ffffff",
-                    "border":"1px solid #ffffff",
-                    "borderRadius":"10px",
-                    "padding":"8px 16px",
+                    "border":"2px solid #444444",
+                    "borderRadius":"12px",
+                    "padding":"10px 20px",
                     "marginRight":"10px",
-                    "marginBottom":"8px"
+                    "marginBottom":"8px",
+                    "boxShadow":"inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.4)",
+                    "fontWeight":"600",
+                    "transition":"all 0.3s ease",
+                    "cursor":"pointer"
                 },
 
                 selected_style={
-                    "backgroundColor":"#ffffff",
+                    "backgroundColor":"#FFD700",
                     "color":"#000000",
-                    "border":"1px solid #000000",
-                    "borderRadius":"10px",
-                    "padding":"8px 16px",
+                    "border":"2px solid #FFA500",
+                    "borderRadius":"12px",
+                    "padding":"10px 20px",
                     "marginRight":"10px",
-                    "marginBottom":"8px"
+                    "marginBottom":"8px",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 6px 12px rgba(255,215,0,0.4)",
+                    "fontWeight":"700",
+                    "transition":"all 0.3s ease"
                 }
             ),
         ]
@@ -683,12 +711,69 @@ def actualizar_tab(
             for c in columnas_presentes
         ]
 
+        # Calcular min/max para colores semáforo
+        estilos_condicionales = []
+        
+        for col in columnas_presentes:
+            if col != "Player Name" and dff_fecha[col].dtype in ['float64', 'int64']:
+                max_val = dff_fecha[col].max()
+                min_val = dff_fecha[col].min()
+                rango = max_val - min_val if max_val != min_val else 1
+                
+                # Verde para máximos
+                estilos_condicionales.append({
+                    "if": {
+                        "filter_query": f"{{{col}}} >= {max_val * 0.8}",
+                        "column_id": col
+                    },
+                    "backgroundColor": "#4CAF50",
+                    "color": "white"
+                })
+                
+                # Amarillo para intermedios-altos
+                estilos_condicionales.append({
+                    "if": {
+                        "filter_query": f"{{{col}}} >= {min_val + rango * 0.5} && {{{col}}} < {max_val * 0.8}",
+                        "column_id": col
+                    },
+                    "backgroundColor": "#FFC107",
+                    "color": "black"
+                })
+                
+                # Rojo para mínimos
+                estilos_condicionales.append({
+                    "if": {
+                        "filter_query": f"{{{col}}} < {min_val + rango * 0.5}",
+                        "column_id": col
+                    },
+                    "backgroundColor": "#F44336",
+                    "color": "white"
+                })
+
         return html.Div([
             html.H3(
-                f"Actividad por Jugador - {fecha_dt.strftime('%d/%m/%Y')}",
+                "Actividad por Jugador",
                 style={
                     "color": "white",
-                    "textAlign": "center"
+                    "textAlign": "center",
+                    "marginBottom": "20px"
+                }
+            ),
+            html.Div([
+                html.Label("Seleccionar fecha:", style={"color": "white", "marginRight": "10px"}),
+                dcc.DatePickerSingle(
+                    id="fecha",
+                    date=fecha_dt.date(),
+                    display_format="DD/MM/YYYY",
+                    style={"marginRight": "20px"}
+                )
+            ], style={"marginBottom": "20px", "display": "flex", "alignItems": "center"}),
+            html.H4(
+                f"{fecha_dt.strftime('%d/%m/%Y')}",
+                style={
+                    "color": "#FFD700",
+                    "textAlign": "center",
+                    "marginBottom": "15px"
                 }
             ),
             dcc.Loading(
@@ -697,6 +782,7 @@ def actualizar_tab(
                     columns=columnas_actividad,
                     filter_action="native",
                     sort_action="native",
+                    fixed_columns={"headers": True, "data": 1},
                     page_size=20,
                     style_table={
                         "overflowX": "auto",
@@ -705,7 +791,9 @@ def actualizar_tab(
                     style_header={
                         "backgroundColor": "#000000",
                         "color": "white",
-                        "fontWeight": "bold"
+                        "fontWeight": "bold",
+                        "position": "sticky",
+                        "top": 0
                     },
                     style_cell={
                         "backgroundColor": "#1a1a1a",
@@ -714,10 +802,12 @@ def actualizar_tab(
                         "textAlign": "center",
                         "minWidth": "100px",
                         "whiteSpace": "normal"
-                    }
+                    },
+                    style_data_conditional=estilos_condicionales
                 )
             )
         ])
+
 
     # ACWR
     elif tab=="acwr":

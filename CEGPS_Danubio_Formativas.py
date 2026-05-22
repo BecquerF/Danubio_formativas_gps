@@ -180,7 +180,7 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#FFD700",
+                    "backgroundColor":"#E6E6E6",
                     "color":"#000000",
                     "border":"2px solid #FFA500",
                     "borderRadius":"12px",
@@ -212,7 +212,7 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#FFD700",
+                    "backgroundColor":"#E6E6E6",
                     "color":"#000000",
                     "border":"2px solid #FFA500",
                     "borderRadius":"12px",
@@ -243,7 +243,7 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#FFD700",
+                    "backgroundColor":"#E6E6E6",
                     "color":"#000000",
                     "border":"2px solid #FFA500",
                     "borderRadius":"12px",
@@ -274,7 +274,7 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#FFD700",
+                    "backgroundColor":"#E6E6E6",
                     "color":"#000000",
                     "border":"2px solid #FFA500",
                     "borderRadius":"12px",
@@ -313,10 +313,10 @@ style={
                 html.H4(
                     "Categorías",
                     style={
-                        "color":"white",
-                        "fontSize":"10px",
-                        "fontWeight":"normal",
-                        "marginBottom":"5px"
+                        "color":"#FFD700",
+                        "fontSize":"13px",
+                        "fontWeight":"700",
+                        "marginBottom":"12px"
                     }
                 ),
 
@@ -338,19 +338,22 @@ style={
                     inline=False,
 
                     labelStyle={
-                        "display":"block",
+                        "display":"inline-block",
+                        "width":"48%",
                         "color":"white",
                         "fontSize":"10px",
-                        "marginBottom":"5px"
+                        "marginBottom":"8px"
                     }
                 )
 
             ],
             style={
-                "background":"#2C2C2CE0",
-                "padding":"12px",
-                "borderRadius":"12px",
-                "marginBottom":"5px"
+                "background":"linear-gradient(180deg, rgba(46,46,46,0.95), rgba(20,20,20,0.95))",
+                "padding":"16px",
+                "borderRadius":"18px",
+                "marginBottom":"12px",
+                "border":"1px solid rgba(255,255,255,0.08)",
+                "boxShadow":"0 15px 35px rgba(0,0,0,0.35)"
             }),
 
             # MÉTRICAS
@@ -359,10 +362,10 @@ style={
                 html.H4(
                     "Métricas",
                     style={
-                        "color":"white",
-                        "fontSize":"10px",
-                        "fontWeight":"normal",
-                        "marginBottom":"5px"
+                        "color":"#FFD700",
+                        "fontSize":"13px",
+                        "fontWeight":"700",
+                        "marginBottom":"12px"
                     }
                 ),
 
@@ -382,17 +385,17 @@ style={
                     inline=False,
 
                     labelStyle={
-                        "display":"block",
+                        "display":"inline-block",
+                        "width":"48%",
                         "color":"white",
                         "fontSize":"10px",
-                        "marginBottom":"5px"
+                        "marginBottom":"8px"
                     }
                 ),
-                html.Br(),
                 html.Div(
                     [
                         html.P(
-                            "Fecha",
+                            "Fecha de actividad",
                             style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"8px"}
                         ),
                         dcc.DatePickerSingle(
@@ -404,20 +407,25 @@ style={
                             style={
                                 "width": "100%",
                                 "backgroundColor": "#1a1a1a",
-                                "color": "#ffffff"
+                                "color": "#ffffff",
+                                "border": "1px solid #444444",
+                                "borderRadius": "8px",
+                                "padding": "8px"
                             }
                         )
                     ],
                     id="actividad-fecha-container",
-                    style={"display": "none", "marginTop": "10px"}
+                    style={"display": "none", "marginTop": "16px"}
                 )
 
             ],
             style={
-                "background":"#2C2C2CE0",
-                "padding":"12px",
-                "borderRadius":"12px",
-                "marginBottom":"5px"
+                "background":"linear-gradient(180deg, rgba(46,46,46,0.95), rgba(20,20,20,0.95))",
+                "padding":"16px",
+                "borderRadius":"18px",
+                "marginBottom":"12px",
+                "border":"1px solid rgba(255,255,255,0.08)",
+                "boxShadow":"0 15px 35px rgba(0,0,0,0.35)"
             }),
 
             # COMPARAR POR
@@ -426,10 +434,10 @@ style={
                 html.H4(
                     "Comparar por",
                     style={
-                        "color":"white",
-                        "fontSize":"10px",
-                        "fontWeight":"normal",
-                        "marginBottom":"5px"
+                        "color":"#FFD700",
+                        "fontSize":"13px",
+                        "fontWeight":"700",
+                        "marginBottom":"12px"
                     }
                 ),
 
@@ -447,121 +455,131 @@ style={
                     value="Category",
 
                     labelStyle={
-                        "display":"block",
+                        "display":"inline-block",
+                        "width":"48%",
                         "color":"white",
                         "fontSize":"10px",
-                        "marginBottom":"5px"
+                        "marginBottom":"8px"
                     }
                 )
 
             ],
             style={
-                "background":"#2C2C2CE0",
-                "padding":"12px",
-                "borderRadius":"12px",
-                "marginBottom":"5px"
+                "background":"linear-gradient(180deg, rgba(46,46,46,0.95), rgba(20,20,20,0.95))",
+                "padding":"16px",
+                "borderRadius":"18px",
+                "marginBottom":"12px",
+                "border":"1px solid rgba(255,255,255,0.08)",
+                "boxShadow":"0 15px 35px rgba(0,0,0,0.35)"
             }),
 
             # FILTROS COMPARATIVOS
             html.Div([
 
                 html.H4(
-                    "Filtros comparativos",
+                    "Filtrar por",
                     style={
-                        "color":"white",
-                        "fontSize":"10px",
-                        "fontWeight":"normal",
+                        "color":"#FFD700",
+                        "fontSize":"13px",
+                        "fontWeight":"700",
                         "marginBottom":"12px"
                     }
                 ),
 
-                html.P(
-                    "Jugador",
-                    style={"color":"#dcdcdc","fontSize":"10px"}
-                ),
-
-                dcc.Dropdown(
-                    id="jugador",
-                    options=[
-                        {"label":x,"value":x}
-                        for x in sorted(
-                            df["Player Name"].dropna().unique()
+                html.Div([
+                    html.Div([
+                        html.P(
+                            "Jugador",
+                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"6px"}
+                        ),
+                        dcc.Dropdown(
+                            id="jugador",
+                            options=[
+                                {"label":x,"value":x}
+                                for x in sorted(
+                                    df["Player Name"].dropna().unique()
+                                )
+                            ],
+                            multi=True,
+                            style={"marginBottom": "12px"}
                         )
-                    ],
-                    multi=True
-                ),
+                    ], style={"width": "100%"}),
 
-                html.Br(),
-
-                html.P(
-                    "Athlete Tags",
-                    style={"color":"#dcdcdc","fontSize":"10px"}
-                ),
-
-                dcc.Dropdown(
-                    id="athlete",
-                    options=[
-                        {"label":x,"value":x}
-                        for x in sorted(
-                            df["Athlete Tags"].dropna().unique()
+                    html.Div([
+                        html.P(
+                            "Athlete Tags",
+                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"6px"}
+                        ),
+                        dcc.Dropdown(
+                            id="athlete",
+                            options=[
+                                {"label":x,"value":x}
+                                for x in sorted(
+                                    df["Athlete Tags"].dropna().unique()
+                                )
+                            ],
+                            multi=True,
+                            style={"marginBottom": "12px"}
                         )
-                    ],
-                    multi=True
-                ),
+                    ], style={"width": "100%"}),
 
-                html.Br(),
-
-                html.P(
-                    "Game Tags",
-                    style={"color":"#dcdcdc","fontSize":"10px"}
-                ),
-
-                dcc.Dropdown(
-                    id="gametag",
-                    options=[
-                        {"label":x,"value":x}
-                        for x in sorted(
-                            df["Game Tags"].dropna().unique()
+                    html.Div([
+                        html.P(
+                            "Game Tags",
+                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"6px"}
+                        ),
+                        dcc.Dropdown(
+                            id="gametag",
+                            options=[
+                                {"label":x,"value":x}
+                                for x in sorted(
+                                    df["Game Tags"].dropna().unique()
+                                )
+                            ],
+                            multi=True,
+                            style={"marginBottom": "12px"}
                         )
-                    ],
-                    multi=True
-                ),
+                    ], style={"width": "100%"}),
 
-                html.Br(),
-
-                html.P(
-                    "Period Tags",
-                    style={"color":"#dcdcdc","fontSize":"10px"}
-                ),
-
-                dcc.Dropdown(
-                    id="periodtag",
-                    options=[
-                        {"label":x,"value":x}
-                        for x in sorted(
-                            df["Period Tags"].dropna().unique()
+                    html.Div([
+                        html.P(
+                            "Period Tags",
+                            style={"color":"#dcdcdc","fontSize":"10px","marginBottom":"6px"}
+                        ),
+                        dcc.Dropdown(
+                            id="periodtag",
+                            options=[
+                                {"label":x,"value":x}
+                                for x in sorted(
+                                    df["Period Tags"].dropna().unique()
+                                )
+                            ],
+                            multi=True
                         )
-                    ],
-                    multi=True
-                )
+                    ], style={"width": "100%"})
+
+                ], style={"display": "grid", "gridTemplateColumns": "1fr", "gap": "12px"})
 
             ],
             style={
-                "background":"#2C2C2CE0",
-                "padding":"12px",
-                "borderRadius":"12px"
+                "background":"linear-gradient(180deg, rgba(46,46,46,0.95), rgba(20,20,20,0.95))",
+                "padding":"16px",
+                "borderRadius":"18px",
+                "marginBottom":"12px",
+                "border":"1px solid rgba(255,255,255,0.08)",
+                "boxShadow":"0 15px 35px rgba(0,0,0,0.35)"
             })
 
         ],
         style={
-             "width":"25%",
+             "width":"26%",
     "display":"inline-block",
-    "paddingLeft":"12px",
+    "paddingLeft":"16px",
     "verticalAlign":"top",
 
-    "height":"80vh",
+    "height":"88vh",
     "overflowY":"auto",
-    "paddingRight":"8px"
+    "paddingRight":"12px"
         })
 
     ])

@@ -571,6 +571,8 @@ def actualizar_tab(
             line_dash="Métrica",
 
             markers=True,
+
+            line={"shape": "spline"},
                         
             color_discrete_sequence=[
 

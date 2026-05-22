@@ -559,29 +559,12 @@ def actualizar_tab(
             value_name="Valor"
         )
 
-        fig=px.line(
-
+        fig=px.scatter(
             cronologico,
-
             x="Date",
             y="Valor",
-
             color="Category",
-
-            line_dash="Métrica",
-
-            markers=True,
-
-            line={"shape": "spline"},
-                        
-            color_discrete_sequence=[
-
-                "#fafafa",
-                "#b3b1af",
-                "#F5D888",
-                "#5A5A5A",
-                "#1B1B1B"
-            ]
+            symbol="Métrica"
         )
 
         fig.update_layout(

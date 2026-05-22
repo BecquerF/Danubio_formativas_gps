@@ -621,9 +621,19 @@ def actualizar_tab(
                 dash_table.DataTable(
                     data=tabla.to_dict("records"),
                     columns=[
-                        {"name": i, "id": i}
+                        {
+                            "name": i,
+                            "id": i,
+                            "type": "numeric",
+                            "format": {"specifier": ".2f"}
+                        } if i.endswith("_ACWR") else {"name": i, "id": i}
                         for i in tabla.columns
                     ],
+                    fixed_columns={"headers": True, "data": 1},
+                    style_table={
+                        "overflowX": "auto",
+                        "minWidth": "100%"
+                    },
                     style_header={
                         "backgroundColor": "#9e8330",
                         "color": "white",
@@ -634,19 +644,203 @@ def actualizar_tab(
                         "color": "white",
                         "fontSize": "11px",
                         "textAlign": "center"
+                        ,"minWidth": "100px",
+                        "width": "100px",
+                        "maxWidth": "100px",
+                        "whiteSpace": "normal"
                     },
                     style_data_conditional=[
                         {
                             "if": {
-                                "filter_query": "{Distance_ACWR} > 1.3"
+                                "filter_query": "{Distance_ACWR} < 0.8",
+                                "column_id": "Distance_ACWR"
                             },
-                            "backgroundColor": "#8B0000"
+                            "backgroundColor": "#8B0000",
+                            "color": "white"
                         },
                         {
                             "if": {
-                                "filter_query": "{Distance_ACWR} >= 0.8 && {Distance_ACWR} <= 1.3"
+                                "filter_query": "{Distance_ACWR} >= 0.8 && {Distance_ACWR} <= 1.3",
+                                "column_id": "Distance_ACWR"
                             },
-                            "backgroundColor": "#4f7942"
+                            "backgroundColor": "#4f7942",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Distance_ACWR} > 1.3",
+                                "column_id": "Distance_ACWR"
+                            },
+                            "backgroundColor": "#FFD700",
+                            "color": "black"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Player Load_ACWR} < 0.8",
+                                "column_id": "Player Load_ACWR"
+                            },
+                            "backgroundColor": "#8B0000",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Player Load_ACWR} >= 0.8 && {Player Load_ACWR} <= 1.3",
+                                "column_id": "Player Load_ACWR"
+                            },
+                            "backgroundColor": "#4f7942",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Player Load_ACWR} > 1.3",
+                                "column_id": "Player Load_ACWR"
+                            },
+                            "backgroundColor": "#FFD700",
+                            "color": "black"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Acceleration Efforts_ACWR} < 0.8",
+                                "column_id": "Acceleration Efforts_ACWR"
+                            },
+                            "backgroundColor": "#8B0000",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Acceleration Efforts_ACWR} >= 0.8 && {Acceleration Efforts_ACWR} <= 1.3",
+                                "column_id": "Acceleration Efforts_ACWR"
+                            },
+                            "backgroundColor": "#4f7942",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Acceleration Efforts_ACWR} > 1.3",
+                                "column_id": "Acceleration Efforts_ACWR"
+                            },
+                            "backgroundColor": "#FFD700",
+                            "color": "black"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Sprint Distance_ACWR} < 0.8",
+                                "column_id": "Sprint Distance_ACWR"
+                            },
+                            "backgroundColor": "#8B0000",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Sprint Distance_ACWR} >= 0.8 && {Sprint Distance_ACWR} <= 1.3",
+                                "column_id": "Sprint Distance_ACWR"
+                            },
+                            "backgroundColor": "#4f7942",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Sprint Distance_ACWR} > 1.3",
+                                "column_id": "Sprint Distance_ACWR"
+                            },
+                            "backgroundColor": "#FFD700",
+                            "color": "black"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{High Speed Distance_ACWR} < 0.8",
+                                "column_id": "High Speed Distance_ACWR"
+                            },
+                            "backgroundColor": "#8B0000",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{High Speed Distance_ACWR} >= 0.8 && {High Speed Distance_ACWR} <= 1.3",
+                                "column_id": "High Speed Distance_ACWR"
+                            },
+                            "backgroundColor": "#4f7942",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{High Speed Distance_ACWR} > 1.3",
+                                "column_id": "High Speed Distance_ACWR"
+                            },
+                            "backgroundColor": "#FFD700",
+                            "color": "black"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Sprint Efforts_ACWR} < 0.8",
+                                "column_id": "Sprint Efforts_ACWR"
+                            },
+                            "backgroundColor": "#8B0000",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Sprint Efforts_ACWR} >= 0.8 && {Sprint Efforts_ACWR} <= 1.3",
+                                "column_id": "Sprint Efforts_ACWR"
+                            },
+                            "backgroundColor": "#4f7942",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Sprint Efforts_ACWR} > 1.3",
+                                "column_id": "Sprint Efforts_ACWR"
+                            },
+                            "backgroundColor": "#FFD700",
+                            "color": "black"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{High Speed Efforts_ACWR} < 0.8",
+                                "column_id": "High Speed Efforts_ACWR"
+                            },
+                            "backgroundColor": "#8B0000",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{High Speed Efforts_ACWR} >= 0.8 && {High Speed Efforts_ACWR} <= 1.3",
+                                "column_id": "High Speed Efforts_ACWR"
+                            },
+                            "backgroundColor": "#4f7942",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{High Speed Efforts_ACWR} > 1.3",
+                                "column_id": "High Speed Efforts_ACWR"
+                            },
+                            "backgroundColor": "#FFD700",
+                            "color": "black"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Impacts_ACWR} < 0.8",
+                                "column_id": "Impacts_ACWR"
+                            },
+                            "backgroundColor": "#8B0000",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Impacts_ACWR} >= 0.8 && {Impacts_ACWR} <= 1.3",
+                                "column_id": "Impacts_ACWR"
+                            },
+                            "backgroundColor": "#4f7942",
+                            "color": "white"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Impacts_ACWR} > 1.3",
+                                "column_id": "Impacts_ACWR"
+                            },
+                            "backgroundColor": "#FFD700",
+                            "color": "black"
                         }
                     ],
                     page_size=20

@@ -530,7 +530,10 @@ def actualizar_tab(
 
         fig.update_layout(
             paper_bgcolor="#1a1a1a",
-            plot_bgcolor="#1a1a1a"
+            plot_bgcolor="#1a1a1a",
+            font={
+                "color":"#ffffff"
+            }
         )
 
         return dcc.Graph(
@@ -568,9 +571,7 @@ def actualizar_tab(
             line_dash="Métrica",
 
             markers=True,
-
-            line={"shape": "spline"},
-            
+                        
             color_discrete_sequence=[
 
                 "#fafafa",
@@ -589,7 +590,7 @@ def actualizar_tab(
             plot_bgcolor="#1a1a1a",
 
             font={
-                "color":"#dcdcdc"
+                "color":"#ffffff"
             }
         )
 

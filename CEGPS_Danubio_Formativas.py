@@ -577,7 +577,8 @@ style={
     Input("athlete","value"),
     Input("gametag","value"),
     Input("periodtag","value"),
-    Input("fecha","date")
+    Input("fecha","date"),
+    Input("fecha-actividad","date")
 )
 
 def actualizar_tab(
@@ -590,7 +591,8 @@ def actualizar_tab(
     athlete,
     gametags,
     periodtags,
-    fecha
+    fecha,
+    fecha_actividad
 ):
 
     dff=df.copy()
@@ -680,7 +682,7 @@ def actualizar_tab(
     # ACTIVIDAD POR JUGADOR
     elif tab=="actividad":
 
-        fecha_dt = pd.to_datetime(fecha).normalize() if fecha else dff["Date"].max().normalize()
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
         columnas_requeridas = [
@@ -762,7 +764,7 @@ def actualizar_tab(
             html.Div([
                 html.Label("Seleccionar fecha:", style={"color": "white", "marginRight": "10px"}),
                 dcc.DatePickerSingle(
-                    id="fecha",
+                    id="fecha-actividad",
                     date=fecha_dt.date(),
                     display_format="DD/MM/YYYY",
                     style={"marginRight": "20px"}

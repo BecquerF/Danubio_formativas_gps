@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import dash_auth
-from dash import Dash, dcc, html, Input, Output
+from dash import Dash, dcc, html, dash_table, Input, Output
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
@@ -9,6 +9,11 @@ df["Date"] = pd.to_datetime(
     df["Date"],
     errors="coerce"
 )
+
+fecha_max = df["Date"].max()
+
+ultimos21 = fecha_max - pd.Timedelta(days=21)
+ultimos7 = fecha_max - pd.Timedelta(days=7)
 
 # Eliminar columnas innecesarias
 columnas_eliminar = [
@@ -167,7 +172,21 @@ html.Div([
                     "color":"white",
                     "border":"0px"
                 }
-            )
+            ),
+            dcc.Tab(
+    label="ACWR (Zona Segura)",
+    value="acwr",
+
+    style={
+        "backgroundColor":"#4e4e4e",
+        "color":"white"
+    },
+
+    selected_style={
+        "backgroundColor":"#9e8330",
+        "color":"white"
+    }
+),
         ]
     ),
 
@@ -539,6 +558,101 @@ def actualizar_tab(
         return dcc.Graph(
             figure=fig
         )
+
+    # ACWR
+    elif tab=="acwr":
+
+        metricas_acwr = [
+
+            "Distance",
+            "Player Load",
+            "Acceleration Efforts",
+            "Sprint Distance",
+            "High Speed Distance",
+            "Sprint Efforts",
+            "High Speed Efforts",
+            "Impacts"
+        ]
+
+        ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
+        ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
+
+        df21 = dff[
+            dff["Date"] >= ultimos21
+        ]
+
+        df7 = dff[
+            dff["Date"] >= ultimos7
+        ]
+
+        cronica = (
+            df21
+            .groupby("Player Name")[metricas_acwr]
+            .mean()
+            .reset_index()
+        )
+
+        aguda = (
+            df7
+            .groupby("Player Name")[metricas_acwr]
+            .mean()
+            .reset_index()
+        )
+
+        tabla = cronica.copy()
+
+        for m in metricas_acwr:
+            tabla[m+"_ACWR"] = (
+                aguda[m] /
+                cronica[m]
+            ).round(2)
+
+        tabla = tabla.fillna(0)
+
+        return html.Div([
+            html.H3(
+                "ACWR - Últimos 21 días",
+                style={
+                    "color":"white",
+                    "textAlign":"center"
+                }
+            ),
+            dcc.Loading(
+                dash_table.DataTable(
+                    data=tabla.to_dict("records"),
+                    columns=[
+                        {"name": i, "id": i}
+                        for i in tabla.columns
+                    ],
+                    style_header={
+                        "backgroundColor": "#9e8330",
+                        "color": "white",
+                        "fontWeight": "bold"
+                    },
+                    style_cell={
+                        "backgroundColor": "#1a1a1a",
+                        "color": "white",
+                        "fontSize": "11px",
+                        "textAlign": "center"
+                    },
+                    style_data_conditional=[
+                        {
+                            "if": {
+                                "filter_query": "{Distance_ACWR} > 1.3"
+                            },
+                            "backgroundColor": "#8B0000"
+                        },
+                        {
+                            "if": {
+                                "filter_query": "{Distance_ACWR} >= 0.8 && {Distance_ACWR} <= 1.3"
+                            },
+                            "backgroundColor": "#4f7942"
+                        }
+                    ],
+                    page_size=20
+                )
+            )
+        ])
 
     # CRONOLÓGICO
     else:

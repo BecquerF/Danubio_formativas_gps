@@ -599,36 +599,45 @@ def actualizar_tab(
             .reset_index()
         )
 
-        tabla = cronica.copy()
+        tabla = cronica.merge(
+            aguda,
+            on="Player Name",
+            how="outer",
+            suffixes=("_21", "_7")
+        )
 
         for m in metricas_acwr:
-            tabla[m+"_ACWR"] = (
-                aguda[m] /
-                cronica[m]
+            tabla[m + "_ACWR"] = (
+                tabla[f"{m}_7"] / tabla[f"{m}_21"]
             ).round(2)
 
-        tabla = tabla.fillna(0)
+        ratio_columns = [f"{m}_ACWR" for m in metricas_acwr]
+        tabla = tabla[["Player Name"] + ratio_columns].fillna(0)
 
         return html.Div([
             html.H3(
-                "ACWR - Últimos 21 días",
+                "ACWR - Últimos 7 días vs 21 días",
                 style={
-                    "color":"white",
-                    "textAlign":"center"
+                    "color": "white",
+                    "textAlign": "center"
                 }
             ),
             dcc.Loading(
                 dash_table.DataTable(
                     data=tabla.to_dict("records"),
                     columns=[
+                        {"name": "Player Name", "id": "Player Name"}
+                    ] + [
                         {
-                            "name": i,
-                            "id": i,
+                            "name": col,
+                            "id": col,
                             "type": "numeric",
                             "format": {"specifier": ".2f"}
-                        } if i.endswith("_ACWR") else {"name": i, "id": i}
-                        for i in tabla.columns
+                        }
+                        for col in ratio_columns
                     ],
+                    filter_action="native",
+                    sort_action="native",
                     fixed_columns={"headers": True, "data": 1},
                     style_table={
                         "overflowX": "auto",
@@ -643,8 +652,8 @@ def actualizar_tab(
                         "backgroundColor": "#1a1a1a",
                         "color": "white",
                         "fontSize": "11px",
-                        "textAlign": "center"
-                        ,"minWidth": "100px",
+                        "textAlign": "center",
+                        "minWidth": "100px",
                         "width": "100px",
                         "maxWidth": "100px",
                         "whiteSpace": "normal"

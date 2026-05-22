@@ -125,6 +125,24 @@ app.layout = html.Div([
                 "padding":"10px",
                 "fontSize":"13px"
             }
+        ),
+
+        html.Div(
+            "Creador y Desarrollador: Bécquer Fernández",
+            style={
+                "position": "fixed",
+                "right": "0",
+                "top": "50%",
+                "transform": "translateY(-50%) rotate(90deg)",
+                "transformOrigin": "top right",
+                "color": "#ffffff",
+                "backgroundColor": "rgba(0,0,0,0.4)",
+                "padding": "8px 12px",
+                "fontSize": "12px",
+                "fontWeight": "600",
+                "letterSpacing": "1px",
+                "zIndex": "9999"
+            }
         )
 
     ]),
@@ -150,7 +168,7 @@ html.Div([
                     "backgroundColor":"#000000",
                     "color":"#ffffff",
                     "border":"1px solid #ffffff",
-                    "borderRadius":"20px",
+                    "borderRadius":"10px",
                     "padding":"8px 16px",
                     "marginRight":"10px",
                     "marginBottom":"8px"
@@ -160,7 +178,7 @@ html.Div([
                     "backgroundColor":"#ffffff",
                     "color":"#000000",
                     "border":"1px solid #000000",
-                    "borderRadius":"20px",
+                    "borderRadius":"10px",
                     "padding":"8px 16px",
                     "marginRight":"10px",
                     "marginBottom":"8px"
@@ -175,7 +193,7 @@ html.Div([
                     "backgroundColor":"#000000",
                     "color":"#ffffff",
                     "border":"1px solid #ffffff",
-                    "borderRadius":"20px",
+                    "borderRadius":"10px",
                     "padding":"8px 16px",
                     "marginRight":"10px",
                     "marginBottom":"8px"
@@ -185,7 +203,7 @@ html.Div([
                     "backgroundColor":"#ffffff",
                     "color":"#000000",
                     "border":"1px solid #000000",
-                    "borderRadius":"20px",
+                    "borderRadius":"10px",
                     "padding":"8px 16px",
                     "marginRight":"10px",
                     "marginBottom":"8px"
@@ -199,7 +217,7 @@ html.Div([
                     "backgroundColor":"#000000",
                     "color":"#ffffff",
                     "border":"1px solid #ffffff",
-                    "borderRadius":"20px",
+                    "borderRadius":"10px",
                     "padding":"8px 16px",
                     "marginRight":"10px",
                     "marginBottom":"8px"
@@ -209,7 +227,7 @@ html.Div([
                     "backgroundColor":"#ffffff",
                     "color":"#000000",
                     "border":"1px solid #000000",
-                    "borderRadius":"20px",
+                    "borderRadius":"10px",
                     "padding":"8px 16px",
                     "marginRight":"10px",
                     "marginBottom":"8px"

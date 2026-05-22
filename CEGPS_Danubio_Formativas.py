@@ -81,6 +81,13 @@ referencias = [
     "Period Tags"
 ]
 
+tab_titles = {
+    "comparativas": "Comparativas",
+    "cronologico": "Cronologico",
+    "actividad": "Actividad_por_Jugador",
+    "acwr": "ACWR_Zona_Segura"
+}
+
 from datetime import datetime, timedelta
 
 ultima_actualizacion = (
@@ -93,6 +100,29 @@ app.layout = html.Div([
 
     # HEADER
     html.Div([
+
+        html.Style(
+            """
+            .download-btn {
+                background-color: #333545;
+                border: 2px solid rgba(245,245,245,0.12);
+                border-radius: 14px;
+                width: 46px;
+                height: 46px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 0 12px rgba(255,255,255,0.08);
+                transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            }
+            .download-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0 18px rgba(255,255,255,0.16);
+                border-color: rgba(245,245,245,0.25);
+            }
+            """
+        ),
 
         html.Img(
             src="/assets/Banner_titulo.png",
@@ -293,64 +323,44 @@ html.Div([
 
     html.Div([
         html.Button(
-            "Descargar gráfico .PNG",
+            html.Img(
+                src="/assets/icon-download-png.svg",
+                style={"width":"26px","height":"26px"}
+            ),
             id="download-graph-png",
             n_clicks=0,
-            style={
-                "backgroundColor":"#fa10bc",
-                "color":"#0b0c0e",
-                "border":"none",
-                "borderRadius":"12px",
-                "padding":"10px 18px",
-                "fontWeight":"700",
-                "cursor":"pointer",
-                "boxShadow":"0 0 20px rgba(250,16,188,0.35)"
-            }
+            title="Descargar gráfico PNG",
+            className="download-btn"
         ),
         html.Button(
-            "Descargar gráfico .PDF",
+            html.Img(
+                src="/assets/icon-download-pdf.svg",
+                style={"width":"26px","height":"26px"}
+            ),
             id="download-graph-pdf",
             n_clicks=0,
-            style={
-                "backgroundColor":"#54df4d",
-                "color":"#0b0c0e",
-                "border":"none",
-                "borderRadius":"12px",
-                "padding":"10px 18px",
-                "fontWeight":"700",
-                "cursor":"pointer",
-                "boxShadow":"0 0 20px rgba(84,223,77,0.35)"
-            }
+            title="Descargar gráfico PDF",
+            className="download-btn"
         ),
         html.Button(
-            "Descargar tabla .CSV",
+            html.Img(
+                src="/assets/icon-download-csv.svg",
+                style={"width":"26px","height":"26px"}
+            ),
             id="download-table-csv",
             n_clicks=0,
-            style={
-                "backgroundColor":"#5827e5",
-                "color":"#f5f5f5",
-                "border":"none",
-                "borderRadius":"12px",
-                "padding":"10px 18px",
-                "fontWeight":"700",
-                "cursor":"pointer",
-                "boxShadow":"0 0 20px rgba(88,39,229,0.35)"
-            }
+            title="Descargar tabla CSV",
+            className="download-btn"
         ),
         html.Button(
-            "Descargar tabla .XLSX",
+            html.Img(
+                src="/assets/icon-download-xlsx.svg",
+                style={"width":"26px","height":"26px"}
+            ),
             id="download-table-xlsx",
             n_clicks=0,
-            style={
-                "backgroundColor":"#29e51a",
-                "color":"#0b0c0e",
-                "border":"none",
-                "borderRadius":"12px",
-                "padding":"10px 18px",
-                "fontWeight":"700",
-                "cursor":"pointer",
-                "boxShadow":"0 0 20px rgba(41,229,26,0.35)"
-            }
+            title="Descargar tabla XLSX",
+            className="download-btn"
         )
     ],
     style={
@@ -1390,18 +1400,18 @@ def descargar_grafico(
             color="Métrica",
             orientation="h",
             barmode="group",
-            color_discrete_sequence=["#fa10bc", "#54df4d", "#29e51a", "#5827e5", "#f5f5f5"],
+            color_discrete_sequence=["#f5f5f5", "#b7b9c8", "#8c91a8", "#7a84b9", "#c3add9"],
             template="plotly_dark"
         )
         fig.update_traces(
-            marker=dict(line=dict(width=1, color="#ffffff")),
-            opacity=0.95
+            marker=dict(line=dict(width=1, color="#c6cad8")),
+            opacity=0.85
         )
         fig.update_layout(
             paper_bgcolor="#0b0c0e",
             plot_bgcolor="#0b0c0e",
             font={"color": "#f5f5f5"},
-            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#fa10bc", borderwidth=1)
+            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#b7b9c8", borderwidth=1)
         )
         fig.update_layout(
             annotations=[
@@ -1421,17 +1431,19 @@ def descargar_grafico(
         )
         fig.update_xaxes(
             showgrid=True,
-            gridcolor="rgba(88,39,229,0.2)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#fa10bc",
-            tickfont_color="#f5f5f5"
+            gridcolor="rgba(183,186,204,0.2)",
+            zerolinecolor="rgba(255,255,255,0.06)",
+            linecolor="#8c91a8",
+            tickfont_color="#f5f5f5",
+            title_font_color="#c3c6d5"
         )
         fig.update_yaxes(
             showgrid=True,
-            gridcolor="rgba(88,39,229,0.2)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#fa10bc",
-            tickfont_color="#f5f5f5"
+            gridcolor="rgba(183,186,204,0.2)",
+            zerolinecolor="rgba(255,255,255,0.06)",
+            linecolor="#8c91a8",
+            tickfont_color="#f5f5f5",
+            title_font_color="#c3c6d5"
         )
     elif tab == "cronologico":
         cronologico = pd.melt(
@@ -1447,11 +1459,11 @@ def descargar_grafico(
             y="Valor",
             color="Category",
             symbol="Métrica",
-            color_discrete_sequence=["#fa10bc", "#54df4d", "#29e51a", "#5827e5", "#f5f5f5"],
+            color_discrete_sequence=["#f5f5f5", "#b7b9c8", "#8c91a8", "#7a84b9", "#c3add9"],
             template="plotly_dark"
         )
         fig.update_traces(
-            marker=dict(size=10, line=dict(width=1, color="#ffffff")),
+            marker=dict(size=8, line=dict(width=1, color="#c6cad8")),
             selector=dict(mode="markers")
         )
         fig.update_layout(
@@ -1459,7 +1471,7 @@ def descargar_grafico(
             paper_bgcolor="#0b0c0e",
             plot_bgcolor="#0b0c0e",
             font={"color": "#f5f5f5"},
-            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#fa10bc", borderwidth=1)
+            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#b7b9c8", borderwidth=1)
         )
         fig.update_layout(
             annotations=[
@@ -1480,23 +1492,26 @@ def descargar_grafico(
         fig.update_xaxes(
             tickformat="%d/%m/%Y",
             showgrid=True,
-            gridcolor="rgba(88,39,229,0.2)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#fa10bc",
-            tickfont_color="#f5f5f5"
+            gridcolor="rgba(183,186,204,0.2)",
+            zerolinecolor="rgba(255,255,255,0.06)",
+            linecolor="#8c91a8",
+            tickfont_color="#f5f5f5",
+            title_font_color="#c3c6d5"
         )
         fig.update_yaxes(
             showgrid=True,
-            gridcolor="rgba(88,39,229,0.2)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#fa10bc",
-            tickfont_color="#f5f5f5"
+            gridcolor="rgba(183,186,204,0.2)",
+            zerolinecolor="rgba(255,255,255,0.06)",
+            linecolor="#8c91a8",
+            tickfont_color="#f5f5f5",
+            title_font_color="#c3c6d5"
         )
     else:
         return no_update
 
     fmt = "png" if trigger_id == "download-graph-png" else "pdf"
-    filename = f"grafico_{tab}.{fmt}"
+    tab_name = tab_titles.get(tab, tab)
+    filename = f"grafico_{tab_name}.{fmt}"
     image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
     return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
 
@@ -1604,6 +1619,7 @@ def descargar_tabla(
             value_name="Valor"
         )
 
+    tab_name = tab_titles.get(tab, tab)
     if trigger_id == "download-table-csv":
         metadata = (
             "Desarrollado por: Bécquer Fernández 🌐 https://www.linkedin.com/in/b%C3%A9cquer-fernandez-2108ab152/\n\n"
@@ -1612,7 +1628,7 @@ def descargar_tabla(
         buffer.write(metadata.encode("utf-8"))
         df_export.to_csv(buffer, index=False, line_terminator="\n")
         buffer.seek(0)
-        return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab}.csv")
+        return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.csv")
 
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
@@ -1622,9 +1638,9 @@ def descargar_tabla(
         worksheet = writer.sheets[worksheet_name]
         worksheet.cell(row=1, column=1, value="Desarrollado por: Bécquer Fernández")
         worksheet.cell(row=2, column=1, value="🌐 https://www.linkedin.com/in/b%C3%A9cquer-fernandez-2108ab152/")
-        worksheet.cell(row=3, column=1, value=f"Tabla: {tab}")
+        worksheet.cell(row=3, column=1, value=f"Tabla: {tab_name}")
     buffer.seek(0)
-    return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab}.xlsx")
+    return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.xlsx")
 
 if __name__ == "__main__":
     app.run(debug=True)

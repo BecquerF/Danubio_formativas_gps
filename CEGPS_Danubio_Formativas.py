@@ -104,15 +104,15 @@ app.layout = html.Div([
         html.Img(
             src="/assets/logo_dataload.png",
             style={
-                "width":"100%",
-                "borderRadius":"0px",
+                "width":"160px",
+                "display":"block",
+                "borderRadius":"18px",
                 "marginBottom":"20px",
                 "maxHeight":"150px",
                 "objectFit":"contain",
-                "position":"relative",
-                "boxShadow":"0 4px 12px rgba(88,39,229,0.3)",
-                "border":"2px solid #7C3AED",
-                "shadow":"0 8px 16px rgba(124,58,237,0.25)"
+                "backgroundColor":"rgba(13, 24, 34, 0.95)",
+                "boxShadow":"0 18px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(137, 188, 239, 0.16)",
+                "border":"1px solid rgba(137, 188, 239, 0.45)"
             }
         ),
 
@@ -126,7 +126,7 @@ app.layout = html.Div([
                 "marginTop":"5px",
                 "marginBottom":"15px",
                 "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
-                "borderBottom":"2px solid #5827e5",
+                "borderBottom":"2px solid #89bcef",
                 "paddingBottom":"10px"
             }
         ),
@@ -160,7 +160,14 @@ app.layout = html.Div([
             }
         )
 
-    ]),
+    ],
+    style={
+        "display": "flex",
+        "alignItems": "center",
+        "gap": "22px",
+        "flexWrap": "wrap",
+        "paddingBottom": "14px"
+    }),
 
     # CONTENEDOR PRINCIPAL
     html.Div([
@@ -172,12 +179,15 @@ html.Div([
 
         id="tabs",
         value="comparativas",
+        className="tab-menu",
 
         children=[
 
             dcc.Tab(
                 label="Comparativas",
                 value="comparativas",
+                className="tab-item",
+                selected_className="tab-item-selected",
 
                 style={
                     "backgroundColor":"#011c24",
@@ -194,14 +204,14 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#f29eff",
-                    "color":"#F5F7FA",
-                    "border":"2px solid #2563EB",
+                    "backgroundColor":"#89bcef",
+                    "color":"#000c0f",
+                    "border":"2px solid #48f788",
                     "borderRadius":"8px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(124,58,237,0.28)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(137,188,239,0.25)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -210,6 +220,8 @@ html.Div([
             dcc.Tab(
                 label="Cronológico",
                 value="cronologico",
+                className="tab-item",
+                selected_className="tab-item-selected",
 
                 style={
                     "backgroundColor":"#011c24",
@@ -226,14 +238,14 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#f29eff",
-                    "color":"#F5F7FA",
-                    "border":"2px solid #2563EB",
+                    "backgroundColor":"#89bcef",
+                    "color":"#000c0f",
+                    "border":"2px solid #48f788",
                     "borderRadius":"8px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(124,58,237,0.28)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(137,188,239,0.25)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -241,6 +253,8 @@ html.Div([
             dcc.Tab(
                 label="Actividad por Jugador",
                 value="actividad",
+                className="tab-item",
+                selected_className="tab-item-selected",
 
                 style={
                     "backgroundColor":"#011c24",
@@ -257,14 +271,14 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#f29eff",
-                    "color":"#F5F7FA",
-                    "border":"2px solid #2563EB",
+                    "backgroundColor":"#89bcef",
+                    "color":"#000c0f",
+                    "border":"2px solid #48f788",
                     "borderRadius":"8px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(124,58,237,0.28)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(137,188,239,0.25)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -272,6 +286,8 @@ html.Div([
             dcc.Tab(
                 label="ACWR (Zona Segura)",
                 value="acwr",
+                className="tab-item",
+                selected_className="tab-item-selected",
 
                 style={
                     "backgroundColor":"#011c24",
@@ -288,14 +304,14 @@ html.Div([
                 },
 
                 selected_style={
-                    "backgroundColor":"#f29eff",
-                    "color":"#F5F7FA",
-                    "border":"2px solid #2563EB",
+                    "backgroundColor":"#89bcef",
+                    "color":"#000c0f",
+                    "border":"2px solid #48f788",
                     "borderRadius":"8px",
                     "padding":"10px 20px",
                     "marginRight":"10px",
                     "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(124,58,237,0.28)",
+                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(137,188,239,0.25)",
                     "fontWeight":"700",
                     "transition":"all 0.3s ease"
                 }
@@ -362,13 +378,11 @@ html.Div([
 ],
 
 style={
-
-    "width":"72%",
+    "flex":"1 1 0",
+    "minWidth":"0",
     "display":"inline-block",
     "verticalAlign":"top",
-
-    "position":"sticky",
-    "top":"20px"
+    "paddingRight":"12px"
 }),
         # DERECHA → PANEL FILTROS
         html.Div([
@@ -419,7 +433,7 @@ style={
                 "padding":"16px",
                 "borderRadius":"18px",
                 "marginBottom":"12px",
-                "border":"1px solid rgba(88,39,229,0.25)",
+                "border":"1px solid rgba(137,188,239,0.18)",
                 "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             }),
 
@@ -476,7 +490,7 @@ style={
                                 "width": "100%",
                                 "backgroundColor": "#011c24",
                                 "color": "#f5f5f5",
-                                "border": "1px solid #8c8c8c",
+                                "border": "1px solid rgba(137,188,239,0.22)",
                                 "borderRadius": "8px",
                                 "padding": "8px"
                             }
@@ -492,7 +506,7 @@ style={
                 "padding":"16px",
                 "borderRadius":"18px",
                 "marginBottom":"12px",
-                "border":"1px solid rgba(88,39,229,0.25)",
+                "border":"1px solid rgba(137,188,239,0.18)",
                 "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             }),
 
@@ -538,7 +552,7 @@ style={
                 "padding":"16px",
                 "borderRadius":"18px",
                 "marginBottom":"12px",
-                "border":"1px solid rgba(88,39,229,0.25)",
+                "border":"1px solid rgba(137,188,239,0.18)",
                 "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             }),
 
@@ -640,13 +654,14 @@ style={
             })
 
         ],
+        className="sidebar-panel",
         style={
-             "width":"26%",
+             "width":"360px",
     "display":"inline-block",
     "paddingLeft":"16px",
     "verticalAlign":"top",
 
-    "height":"88vh",
+    "height":"calc(100vh - 160px)",
     "overflowY":"auto",
     "paddingRight":"12px"
         })
@@ -655,9 +670,13 @@ style={
 
 ],
 style={
-    "backgroundColor":"#0b0c0e",
+    "backgroundColor":"#000c0f",
     "padding":"20px",
-    "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif'
+    "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
+    "display":"flex",
+    "alignItems":"flex-start",
+    "gap":"24px",
+    "width":"100%"
 })
 
 @app.callback(
@@ -759,13 +778,12 @@ def actualizar_tab(
             barmode="group",
 
             color_discrete_sequence=[
-
-                "#f29eff",
+                "#edf1f2",
+                "#3c4d52",
                 "#a3e3d0",
                 "#89bcef",
-                "#f57a7a",
-                "#f5f5f5",
-                "#48f788"
+                "#48f788",
+                "#72d2e4"
             ],
             template="plotly_dark"
         )
@@ -790,31 +808,32 @@ def actualizar_tab(
             },
             legend=dict(
                 bgcolor="rgba(11,12,14,0.75)",
-                bordercolor="#f29eff",
+                bordercolor="#89bcef",
                 borderwidth=1
             )
         )
 
         fig.update_xaxes(
             showgrid=True,
-            gridcolor="rgba(88,39,229,0.2)",
+            gridcolor="rgba(137,188,239,0.18)",
             zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#f29eff",
+            linecolor="#89bcef",
             tickfont_color="#f5f5f5",
             title_font_color="#a3e3d0"
         )
 
         fig.update_yaxes(
             showgrid=True,
-            gridcolor="rgba(88,39,229,0.2)",
+            gridcolor="rgba(137,188,239,0.18)",
             zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#f29eff",
+            linecolor="#89bcef",
             tickfont_color="#f5f5f5",
             title_font_color="#a3e3d0"
         )
 
         return dcc.Graph(
-            figure=fig
+            figure=fig,
+            style={"width":"100%","height":"100%"}
         )
 
     # ACTIVIDAD POR JUGADOR
@@ -1028,9 +1047,10 @@ def actualizar_tab(
                         "minWidth": "100%"
                     },
                     style_header={
-                        "backgroundColor": "#9e8330",
-                        "color": "white",
-                        "fontWeight": "bold"
+                        "backgroundColor": "#0d1620",
+                        "color": "#edf1f2",
+                        "fontWeight": "bold",
+                        "borderBottom": "1px solid rgba(137,188,239,0.2)"
                     },
                     style_cell={
                         "backgroundColor": "#1a1a1a",
@@ -1064,7 +1084,7 @@ def actualizar_tab(
                                 "filter_query": "{Distance_ACWR} > 1.3",
                                 "column_id": "Distance_ACWR"
                             },
-                            "backgroundColor": "#f29eff",
+                            "backgroundColor": "#89bcef",
                             "color": "black"
                         },
                         {
@@ -1088,7 +1108,7 @@ def actualizar_tab(
                                 "filter_query": "{Player Load_ACWR} > 1.3",
                                 "column_id": "Player Load_ACWR"
                             },
-                            "backgroundColor": "#f29eff",
+                            "backgroundColor": "#89bcef",
                             "color": "black"
                         },
                         {
@@ -1112,7 +1132,7 @@ def actualizar_tab(
                                 "filter_query": "{Acceleration Efforts_ACWR} > 1.3",
                                 "column_id": "Acceleration Efforts_ACWR"
                             },
-                            "backgroundColor": "#f29eff",
+                            "backgroundColor": "#89bcef",
                             "color": "black"
                         },
                         {
@@ -1136,7 +1156,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Distance_ACWR} > 1.3",
                                 "column_id": "Sprint Distance_ACWR"
                             },
-                            "backgroundColor": "#f29eff",
+                            "backgroundColor": "#89bcef",
                             "color": "black"
                         },
                         {
@@ -1160,7 +1180,7 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Distance_ACWR} > 1.3",
                                 "column_id": "High Speed Distance_ACWR"
                             },
-                            "backgroundColor": "#f29eff",
+                            "backgroundColor": "#89bcef",
                             "color": "black"
                         },
                         {
@@ -1184,7 +1204,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Efforts_ACWR} > 1.3",
                                 "column_id": "Sprint Efforts_ACWR"
                             },
-                            "backgroundColor": "#f29eff",
+                            "backgroundColor": "#89bcef",
                             "color": "black"
                         },
                         {
@@ -1208,7 +1228,7 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Efforts_ACWR} > 1.3",
                                 "column_id": "High Speed Efforts_ACWR"
                             },
-                            "backgroundColor": "#f29eff",
+                            "backgroundColor": "#89bcef",
                             "color": "black"
                         },
                         {
@@ -1232,7 +1252,7 @@ def actualizar_tab(
                                 "filter_query": "{Impacts_ACWR} > 1.3",
                                 "column_id": "Impacts_ACWR"
                             },
-                            "backgroundColor": "#f29eff",
+                            "backgroundColor": "#89bcef",
                             "color": "black"
                         }
                     ],
@@ -1266,7 +1286,7 @@ def actualizar_tab(
             y="Valor",
             color="Category",
             symbol="Métrica",
-            color_discrete_sequence=["#edf1f2", "#3c4d52", "#a3e3d0", "#f29eff", "#f57a7a", "#89bcef"],
+            color_discrete_sequence=["#edf1f2", "#3c4d52", "#a3e3d0", "#89bcef", "#48f788", "#72d2e4"],
             template="plotly_dark"
         )
 
@@ -1292,7 +1312,7 @@ def actualizar_tab(
             },
             legend=dict(
                 bgcolor="rgba(11,12,14,0.75)",
-                bordercolor="#f29eff",
+                bordercolor="#89bcef",
                 borderwidth=1
             )
         )
@@ -1300,24 +1320,25 @@ def actualizar_tab(
         fig.update_xaxes(
             tickformat="%d/%m/%Y",
             showgrid=True,
-            gridcolor="rgba(88,39,229,0.2)",
+            gridcolor="rgba(137,188,239,0.18)",
             zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#f29eff",
+            linecolor="#89bcef",
             tickfont_color="#f5f5f5",
-            title_font_color="#f57a7a"
+            title_font_color="#a3e3d0"
         )
 
         fig.update_yaxes(
             showgrid=True,
-            gridcolor="rgba(88,39,229,0.2)",
+            gridcolor="rgba(137,188,239,0.18)",
             zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#f29eff",
+            linecolor="#89bcef",
             tickfont_color="#f5f5f5",
-            title_font_color="#f57a7a"
+            title_font_color="#a3e3d0"
         )
 
         return dcc.Graph(
-            figure=fig
+            figure=fig,
+            style={"width":"100%","height":"100%"}
         )
 
 

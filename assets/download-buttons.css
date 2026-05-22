@@ -1,6 +1,6 @@
 .download-btn {
-    background-color: #333545;
-    border: 2px solid rgba(245, 245, 245, 0.12);
+    background-color: #011c24;
+    border: 2px solid rgba(137, 188, 239, 0.18);
     border-radius: 14px;
     width: 46px;
     height: 46px;
@@ -8,12 +8,59 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 16px rgba(137, 188, 239, 0.14);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .download-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 18px rgba(255, 255, 255, 0.16);
-    border-color: rgba(245, 245, 245, 0.25);
+    box-shadow: 0 0 22px rgba(137, 188, 239, 0.24);
+    border-color: rgba(137, 188, 239, 0.28);
+}
+
+.tab-item {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.tab-item:hover {
+    transform: translateX(6px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+}
+
+.tab-item-selected {
+    background-color: #89bcef !important;
+    color: #000c0f !important;
+    border-color: #48f788 !important;
+}
+
+.sidebar-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.sidebar-card:hover {
+    transform: translateX(8px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+    border-color: rgba(137, 188, 239, 0.25);
+}
+
+.tab-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.sidebar-panel {
+    background-color: #011c24;
+    border-radius: 24px;
+    border: 1px solid rgba(137, 188, 239, 0.16);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.sidebar-panel:hover {
+    transform: translateX(4px);
+    box-shadow: 0 24px 72px rgba(0, 0, 0, 0.55);
+    border-color: rgba(137, 188, 239, 0.28);
 }

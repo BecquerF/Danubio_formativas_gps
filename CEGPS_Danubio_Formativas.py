@@ -125,7 +125,7 @@ app.layout = html.Div([
                 "fontWeight":"600",
                 "marginTop":"5px",
                 "marginBottom":"15px",
-                "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
+                "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
                 "borderBottom":"2px solid #89bcef",
                 "paddingBottom":"10px"
             }
@@ -395,7 +395,8 @@ style={
                     style={
                         "color":"#a3e3d0",
                         "fontSize":"13px",
-                        "fontWeight":"700",
+                        "fontWeight":"600",
+                        "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
                         "marginBottom":"12px",
                         "columnCount":"2"
                     }
@@ -445,7 +446,8 @@ style={
                     style={
                         "color":"#a3e3d0",
                         "fontSize":"13px",
-                        "fontWeight":"700",
+                        "fontWeight":"600",
+                        "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
                         "marginBottom":"12px",
                         "columnCount":"2"
                     }
@@ -518,7 +520,8 @@ style={
                     style={
                         "color":"#a3e3d0",
                         "fontSize":"13px",
-                        "fontWeight":"700",
+                        "fontWeight":"600",
+                        "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
                         "marginBottom":"12px",
                         "columnCount":"2"
                     }
@@ -564,7 +567,8 @@ style={
                     style={
                         "color":"#a3e3d0",
                         "fontSize":"13px",
-                        "fontWeight":"700",
+                        "fontWeight":"600",
+                        "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
                         "marginBottom":"12px",
                         "columnCount":"2"
                     }
@@ -672,7 +676,7 @@ style={
 style={
     "backgroundColor":"#000c0f",
     "padding":"20px",
-    "fontFamily":'"ITC Avant Garde Gothic", Century Gothic, sans-serif',
+    "fontFamily":"'Manrope', 'Segoe UI', sans-serif",
     "display":"flex",
     "alignItems":"flex-start",
     "gap":"24px",
@@ -915,7 +919,9 @@ def actualizar_tab(
                 style={
                     "color": "white",
                     "textAlign": "center",
-                    "marginBottom": "20px"
+                    "marginBottom": "20px",
+                    "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
+                    "fontWeight":"600"
                 }
             ),
             html.H4(
@@ -923,7 +929,9 @@ def actualizar_tab(
                 style={
                     "color": "#a3e3d0",
                     "textAlign": "center",
-                    "marginBottom": "15px"
+                    "marginBottom": "15px",
+                    "fontFamily":"'Clash Display', 'Helvetica Neue', sans-serif",
+                    "fontWeight":"600"
                 }
             ),
             dcc.Loading(
@@ -1629,7 +1637,7 @@ def descargar_tabla(
     tab_name = tab_titles.get(tab, tab)
     if trigger_id == "download-table-csv":
         metadata = (
-            "Desarrollado por: Bécquer Fernández 🌐 https://www.linkedin.com/in/b%C3%A9cquer-fernandez-2108ab152/\n\n"
+            "Desarrollado por: Bécquer Fernández 🌐 https://www.linkedin.com/in/bécquer-fernandez-2108ab152/\n\n"
         )
         buffer = io.BytesIO()
         buffer.write(metadata.encode("utf-8"))
@@ -1644,7 +1652,7 @@ def descargar_tabla(
         workbook = writer.book
         worksheet = writer.sheets[worksheet_name]
         worksheet.cell(row=1, column=1, value="Desarrollado por: Bécquer Fernández")
-        worksheet.cell(row=2, column=1, value="🌐 https://www.linkedin.com/in/b%C3%A9cquer-fernandez-2108ab152/")
+        worksheet.cell(row=2, column=1, value="🌐 https://www.linkedin.com/in/bécquer-fernandez-2108ab152/")
         worksheet.cell(row=3, column=1, value=f"Tabla: {tab_name}")
     buffer.seek(0)
     return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.xlsx")

@@ -562,8 +562,7 @@ def actualizar_tab(
     # ACWR
     elif tab=="acwr":
 
-        metricas_acwr = [
-
+        metricas_acwr = list(dict.fromkeys([
             "Distance",
             "Player Load",
             "Acceleration Efforts",
@@ -572,7 +571,9 @@ def actualizar_tab(
             "Sprint Efforts",
             "High Speed Efforts",
             "Impacts"
-        ]
+        ]))
+
+        dff["Player Name"] = dff["Player Name"].astype(str).str.strip()
 
         ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
         ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
@@ -606,12 +607,14 @@ def actualizar_tab(
             suffixes=("_21", "_7")
         )
 
+        tabla = tabla.loc[:, ~tabla.columns.duplicated()]
+
         for m in metricas_acwr:
             tabla[m + "_ACWR"] = (
                 tabla[f"{m}_7"] / tabla[f"{m}_21"]
             ).round(2)
 
-        ratio_columns = [f"{m}_ACWR" for m in metricas_acwr]
+        ratio_columns = list(dict.fromkeys([f"{m}_ACWR" for m in metricas_acwr]))
         tabla = tabla[["Player Name"] + ratio_columns].fillna(0)
 
         return html.Div([

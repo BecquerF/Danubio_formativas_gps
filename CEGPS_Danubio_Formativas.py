@@ -133,11 +133,10 @@ app.layout = html.Div([
         "display":"block",
         "borderRadius":"18px",
         "marginBottom":"12px",
-        "maxHeight":"150px",
+        "maxHeight":"220px",
         "objectFit":"contain",
         "backgroundColor":"rgba(13, 24, 34, 0.95)",
         "boxShadow":"0 18px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(137, 188, 239, 0.16)",
-        "border":"1px solid rgba(137, 188, 239, 0.45)"
     }
 )
                         ],

@@ -116,9 +116,9 @@ h4,
     position: relative;
     padding-bottom: 8px;
     overflow-x: auto;
-    transform: translateX(-24px);
+    transform: none;
     opacity: 0.92;
-    transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease;
+    transition: opacity 0.35s ease, box-shadow 0.35s ease;
 }
 
 .horizontal-tabs {

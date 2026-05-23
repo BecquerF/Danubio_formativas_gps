@@ -284,8 +284,8 @@ app.layout = html.Div([
             className="sidebar-panel sidebar-menu-panel",
             style={
                 "padding":"24px",
-                "minWidth":"220px",
-                "maxWidth":"260px",
+                "width":"100%",
+                "maxWidth":"520px",
                 "backgroundColor":"#011c24",
                 "borderRadius":"24px",
                 "border":"1px solid rgba(137, 188, 239, 0.16)",
@@ -411,12 +411,9 @@ app.layout = html.Div([
                     }
                 )
             ],
+            className="filter-card",
             style={
-                "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
-                "padding":"16px",
-                "borderRadius":"18px",
-                "border":"1px solid rgba(137,188,239,0.18)",
-                "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
+                "padding":"16px"
             }),
             html.Div([
                 html.H4(
@@ -469,12 +466,9 @@ app.layout = html.Div([
                 id="actividad-fecha-container",
                 style={"display": "none", "marginTop": "16px"})
             ],
+            className="filter-card",
             style={
-                "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
-                "padding":"16px",
-                "borderRadius":"18px",
-                "border":"1px solid rgba(137,188,239,0.18)",
-                "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
+                "padding":"16px"
             }),
             html.Div([
                 html.H4(

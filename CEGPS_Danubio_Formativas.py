@@ -106,7 +106,7 @@ app.layout = html.Div([
                 "textAlign":"top",
                 "fontSize":"38px",
                 "fontWeight":"700",
-                "marginTop":"1",
+                "marginTop":"0px",
                 "margincolor":"#a3e3d0",
                 "marginBottom":"10px",
                 "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
@@ -384,7 +384,7 @@ app.layout = html.Div([
                         "color":"#a3e3d0",
                         "fontSize":"13px",
                         "fontWeight":"600",
-                        "fontFamily":"'Clash Display', 'Helvetica Neue'",
+                        "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                         "marginBottom":"12px"
                     }
                 ),
@@ -418,7 +418,7 @@ app.layout = html.Div([
                         "color":"#a3e3d0",
                         "fontSize":"13px",
                         "fontWeight":"600",
-                        "fontFamily":"'Clash Display', 'Helvetica Neue'",
+                        "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                         "marginBottom":"12px"
                     }
                 ),
@@ -476,7 +476,7 @@ app.layout = html.Div([
                         "color":"#a3e3d0",
                         "fontSize":"13px",
                         "fontWeight":"600",
-                        "fontFamily":"'Clash Display', 'Helvetica Neue'",
+                        "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                         "marginBottom":"12px"
                     }
                 ),
@@ -510,7 +510,7 @@ app.layout = html.Div([
                         "color":"#a3e3d0",
                         "fontSize":"13px",
                         "fontWeight":"600",
-                        "fontFamily":"'Clash Display', 'Helvetica Neue'",
+                        "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                         "marginBottom":"12px"
                     }
                 ),
@@ -859,7 +859,7 @@ def actualizar_tab(
                     "color": "white",
                     "textAlign": "center",
                     "marginBottom": "20px",
-                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                    "fontFamily":"'Clash Display Semibold Semibold', 'Helvetica Neue'",
                     "fontWeight":"600"
                 }
             ),
@@ -869,7 +869,7 @@ def actualizar_tab(
                     "color": "#a3e3d0",
                     "textAlign": "center",
                     "marginBottom": "15px",
-                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                    "fontFamily":"'Clash Display Semibold Semibold', 'Helvetica Neue'",
                     "fontWeight":"600"
                 }
             ),

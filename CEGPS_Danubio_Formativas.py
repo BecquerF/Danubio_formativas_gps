@@ -128,16 +128,16 @@ app.layout = html.Div([
                     html.Div(
                         [
                             html.Img(
-            src="/assets/logo_dataload_2.png",
-            style={
-                "width":"100%",
-                "boxSizing":"border-box",
-                "height":"auto",
-                "display":"block",
-                "objectFit":"contain",
-                "position":"relative",
-                "top":"-10xp",
-            }
+           src="/assets/logo_dataload_2.png",
+style={
+    "width":"100%",
+    "boxSizing":"border-box",
+    "height":"auto",
+    "display":"block",
+    "objectFit":"contain",
+    "position":"relative",
+    "top":"-10px"
+}
         )
     ],
 

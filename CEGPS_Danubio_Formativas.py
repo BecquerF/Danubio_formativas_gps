@@ -148,150 +148,140 @@ app.layout = html.Div([
         "paddingRight":"15px"
     }
 ),
-    html.Div([
+   html.Div([
 
-        html.Div([
-            html.Div([
-                html.H2("Menú", className="sidebar-title"),
-                dcc.Tabs(
-                    id="tabs",
+    html.Div([
+        html.H2(
+            "MENÚ",
+            style={
+                "color":"#edf1f2",
+                "fontSize":"22px",
+                "fontWeight":"700",
+                "marginBottom":"25px",
+                "textAlign":"center",
+                "fontFamily":"'ITC Avant Garde Gothic'"
+            }
+        ),
+
+        dcc.Tabs(
+            id="tabs",
+            value="comparativas",
+            children=[
+                dcc.Tab(
+                    label="COMPARATIVAS",
                     value="comparativas",
-                    className="tab-menu horizontal-tabs",
-                    children=[
-                        dcc.Tab(
-                            label="COMPARATIVOS",
-                            value="comparativas",
-                            className="tab-item",
-                            selected_className="tab-item-selected",
-                            style={
-                                "backgroundColor":"#011c24",
-                                "color":"#F5F7FA",
-                                "border":"2px solid #3c4d52",
-                                "borderRadius":"16px",
-                                "padding":"14px 16px",
-                                "marginRight":"12px",
-                                "marginBottom":"12px",
-                                "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
-                                "fontWeight":"700",
-                                "textAlign":"center",
-                                "whiteSpace":"nowrap",
-                                "cursor":"pointer",
-                                "minWidth":"120px"
-                            },
-                            selected_style={
-                                "backgroundColor":"#89bcef",
-                                "color":"#000c0f",
-                                "border":"2px solid #48f788",
-                                "borderRadius":"16px",
-                                "padding":"14px 16px",
-                                "marginRight":"12px",
-                                "marginBottom":"12px"
-                            }
-                        ),
-                        dcc.Tab(
-                            label="CRONOLÓGICO",
-                            value="cronologico",
-                            className="tab-item",
-                            selected_className="tab-item-selected",
-                            style={
-                                "backgroundColor":"#011c24",
-                                "color":"#F5F7FA",
-                                "border":"2px solid #3c4d52",
-                                "borderRadius":"16px",
-                                "padding":"14px 16px",
-                                "marginRight":"12px",
-                                "marginBottom":"12px",
-                                "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
-                                "fontWeight":"700",
-                                "textAlign":"center",
-                                "whiteSpace":"nowrap",
-                                "cursor":"pointer",
-                                "minWidth":"120px"
-                            },
-                            selected_style={
-                                "backgroundColor":"#89bcef",
-                                "color":"#000c0f",
-                                "border":"2px solid #48f788",
-                                "borderRadius":"16px",
-                                "padding":"14px 16px",
-                                "marginRight":"12px",
-                                "marginBottom":"12px"
-                            }
-                        ),
-                        dcc.Tab(
-                            label="ACTIVIDAD",
-                            value="actividad",
-                            className="tab-item",
-                            selected_className="tab-item-selected",
-                            style={
-                                "backgroundColor":"#011c24",
-                                "color":"#F5F7FA",
-                                "border":"2px solid #3c4d52",
-                                "borderRadius":"16px",
-                                "padding":"14px 16px",
-                                "marginRight":"12px",
-                                "marginBottom":"12px",
-                                "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
-                                "fontWeight":"700",
-                                "textAlign":"center",
-                                "whiteSpace":"nowrap",
-                                "cursor":"pointer",
-                                "minWidth":"120px"
-                            },
-                            selected_style={
-                                "backgroundColor":"#89bcef",
-                                "color":"#000c0f",
-                                "border":"2px solid #48f788",
-                                "borderRadius":"16px",
-                                "padding":"14px 16px",
-                                "marginRight":"12px",
-                                "marginBottom":"12px"
-                            }
-                        ),
-                        dcc.Tab(
-                            label="ACWR",
-                            value="acwr",
-                            className="tab-item",
-                            selected_className="tab-item-selected",
-                            style={
-                                "backgroundColor":"#011c24",
-                                "color":"#F5F7FA",
-                                "border":"2px solid #3c4d52",
-                                "borderRadius":"16px",
-                                "padding":"14px 16px",
-                                "marginRight":"12px",
-                                "marginBottom":"12px",
-                                "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
-                                "fontWeight":"700",
-                                "textAlign":"center",
-                                "whiteSpace":"nowrap",
-                                "cursor":"pointer",
-                                "minWidth":"120px"
-                            },
-                            selected_style={
-                                "backgroundColor":"#89bcef",
-                                "color":"#000c0f",
-                                "border":"2px solid #48f788",
-                                "borderRadius":"16px",
-                                "padding":"14px 16px",
-                                "marginRight":"12px",
-                                "marginBottom":"12px"
-                            }
-                        )
-                    ]
+                    style={
+                        "backgroundColor":"#011c24",
+                        "color":"#edf1f2",
+                        "border":"1px solid #3c4d52",
+                        "borderRadius":"12px",
+                        "padding":"16px",
+                        "marginBottom":"12px",
+                        "fontWeight":"600"
+                    },
+                    selected_style={
+                        "backgroundColor":"#48f788",
+                        "color":"#000c0f",
+                        "border":"1px solid #48f788",
+                        "borderRadius":"12px",
+                        "padding":"16px",
+                        "marginBottom":"12px",
+                        "fontWeight":"700"
+                    }
+                ),
+                dcc.Tab(
+                    label="CRONOLÓGICO",
+                    value="cronologico",
+                    style={
+                        "backgroundColor":"#011c24",
+                        "color":"#edf1f2",
+                        "border":"1px solid #3c4d52",
+                        "borderRadius":"12px",
+                        "padding":"16px",
+                        "marginBottom":"12px",
+                        "fontWeight":"600"
+                    },
+                    selected_style={
+                        "backgroundColor":"#48f788",
+                        "color":"#000c0f",
+                        "border":"1px solid #48f788",
+                        "borderRadius":"12px",
+                        "padding":"16px",
+                        "marginBottom":"12px",
+                        "fontWeight":"700"
+                    }
+                ),
+                dcc.Tab(
+                    label="ACTIVIDAD",
+                    value="actividad",
+                    style={
+                        "backgroundColor":"#011c24",
+                        "color":"#edf1f2",
+                        "border":"1px solid #3c4d52",
+                        "borderRadius":"12px",
+                        "padding":"16px",
+                        "marginBottom":"12px",
+                        "fontWeight":"600"
+                    },
+                    selected_style={
+                        "backgroundColor":"#48f788",
+                        "color":"#000c0f",
+                        "border":"1px solid #48f788",
+                        "borderRadius":"12px",
+                        "padding":"16px",
+                        "marginBottom":"12px",
+                        "fontWeight":"700"
+                    }
+                ),
+                dcc.Tab(
+                    label="ACWR",
+                    value="acwr",
+                    style={
+                        "backgroundColor":"#011c24",
+                        "color":"#edf1f2",
+                        "border":"1px solid #3c4d52",
+                        "borderRadius":"12px",
+                        "padding":"16px",
+                        "marginBottom":"12px",
+                        "fontWeight":"600"
+                    },
+                    selected_style={
+                        "backgroundColor":"#48f788",
+                        "color":"#000c0f",
+                        "border":"1px solid #48f788",
+                        "borderRadius":"12px",
+                        "padding":"16px",
+                        "marginBottom":"12px",
+                        "fontWeight":"700"
+                    }
                 )
             ],
-            className="sidebar-panel sidebar-menu-panel",
-            style={
-                "padding":"24px",
-                "width":"100%",
-                "maxWidth":"520px",
-                "backgroundColor":"#011c24",
-                "borderRadius":"24px",
-                "border":"1px solid rgba(137, 188, 239, 0.16)",
-                "boxShadow":"0 20px 60px rgba(0, 0, 0, 0.35)"
-            }
+            vertical=True
         )
+    ],
+    className="sidebar-panel sidebar-menu-panel",
+    style={
+        "padding":"24px",
+        "width":"100%",
+        "maxWidth":"520px",
+        "backgroundColor":"#011c24",
+        "borderRadius":"24px",
+        "border":"1px solid rgba(137, 188, 239, 0.16)",
+        "boxShadow":"0 20px 60px rgba(0, 0, 0, 0.35)"
+    })
+],
+style={
+    "position":"fixed",
+    "left":"0",
+    "top":"0",
+    "width":"260px",
+    "height":"100vh",
+    "backgroundColor":"#000c0f",
+    "padding":"30px 20px",
+    "borderRight":"1px solid #3c4d52",
+    "overflowY":"auto",
+    "zIndex":"999"
+}),
     ],
     style={
         "display": "flex",
@@ -608,19 +598,13 @@ style={
     "alignItems": "flex-start",
     "gap": "18px",
     "width": "100%",
-    "minHeight": "calc(100vh - 180px)"
-})
-
-],
-style={
-    "backgroundColor": "#061b27",
+    "minHeight": "calc(100vh - 180px)",
+    "backgroundColor": "#000c0f",
     "color":"#ffffff",
     "padding":"28px 24px 36px 24px",
     "fontFamily":"'Manrope Light', 'Segoe UI', sans-serif",
-    "minHeight":"100vh"
-}
-)
-])
+    "margin":"0"
+})
 
 @app.callback(
     Output("actividad-fecha-container","style"),

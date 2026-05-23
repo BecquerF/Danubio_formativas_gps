@@ -200,6 +200,7 @@ h4,
     transform: translateX(250px);
     transition: 0.35s ease;
     overflow: visible;
+    opacity: 0.72;
 }
 
 .sidebar-right-panel:hover {

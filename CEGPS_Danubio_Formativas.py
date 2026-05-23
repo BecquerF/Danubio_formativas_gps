@@ -82,10 +82,10 @@ referencias = [
 ]
 
 tab_titles = {
-    "comparativas": "Comparativas",
-    "cronologico": "Cronologico",
     "actividad": "Actividad_por_Jugador",
-    "acwr": "ACWR_Zona_Segura"
+    "acwr": "ACWR_Zona_Segura",
+    "comparativas": "Comparativas",
+    "cronologico": "Cronologico"   
 }
 
 from datetime import datetime, timedelta
@@ -110,7 +110,9 @@ app.layout = html.Div([
                 "marginLeft":"-10px",
                 "fontFamily":"'Clash Display Semibold'",
                 "lineHeight":"1.05",
-                "letterSpacing":"0.02em"
+                "letterSpacing":"0.02em",
+                "borderBottom":"2px solid #48f788",
+                "paddingBottom":"12px",
             }
         ),
         style={

@@ -143,6 +143,7 @@ app.layout = html.Div([
         "borderRadius":"20px",
         "boxShadow":"0 18px 40px rgba(0,0,0,0.45)",
         "border":"1px solid rgba(137,188,239,0.20)",
+        "marginTop":"5px",
         "marginBottom":"20px",
         "overflow":"hidden"
     }

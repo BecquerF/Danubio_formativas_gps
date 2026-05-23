@@ -81,42 +81,62 @@ h4,
     border-color: #48f788 !important;
 }
 
-.sidebar-card {
+.sidebar-card,
+.filter-card {
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.sidebar-card:hover {
-    transform: translateX(8px);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+.sidebar-card:hover,
+.filter-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.28);
     border-color: rgba(137, 188, 239, 0.25);
+}
+
+.filter-card {
+    background: linear-gradient(180deg, rgba(12, 15, 20, 0.98), rgba(7, 10, 14, 0.98));
+    border: 1px solid rgba(137, 188, 239, 0.22);
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+#contenido-tab {
+    position: sticky;
+    top: 140px;
+    min-height: calc(100vh - 180px);
 }
 
 .tab-menu {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 12px;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: flex-start;
     margin-bottom: 16px;
     position: relative;
+    padding-bottom: 8px;
+    overflow-x: auto;
     transform: translateX(-24px);
     opacity: 0.92;
     transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease;
 }
 
-.vertical-tabs {
-    flex-direction: column;
-    align-items: stretch;
+.horizontal-tabs {
+    flex-direction: row;
 }
 
-.vertical-tabs .tab-item {
-    min-width: 94px;
+.horizontal-tabs .tab-item {
+    min-width: 110px;
+    flex: 1 0 auto;
 }
 
-.vertical-tab {
-    writing-mode: vertical-rl;
-    text-orientation: upright;
-    white-space: nowrap;
-    text-align: center;
+.tab-item {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.tab-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
 }
 
 .tab-menu:hover {
@@ -134,6 +154,13 @@ h4,
     transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
 }
 
+.sidebar-menu-panel,
+.sidebar-right-panel {
+    position: sticky;
+    top: 28px;
+    max-height: calc(100vh - 56px);
+}
+
 .sidebar-menu-panel {
     transform: translateX(-24px);
 }
@@ -144,6 +171,7 @@ h4,
 
 .sidebar-right-panel {
     transform: translateX(24px);
+    overflow: visible;
 }
 
 .sidebar-right-panel:hover {

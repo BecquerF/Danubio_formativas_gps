@@ -98,27 +98,29 @@ ultima_actualizacion = (
 
 app.layout = html.Div([
 
-    html.Div(
-        html.H1(
-            "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
-            style={
-                "color":"#ffffff",
-                "textAlign":"top",
-                "fontSize":"38px",
-                "fontWeight":"700",
-                "marginTop":"20px",
-                "marginBottom":"10px",
-                "fontFamily":"'Clash Display Semibold'",
-                "lineHeight":"1.05",
-                "letterSpacing":"0.02em"
-            }
-        ),
+   html.Div(
+    html.H1(
+        "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
         style={
-            "width":"100%",
+            "color":"#ffffff",
             "textAlign":"center",
-            "paddingBottom":"8px"
+            "fontSize":"38px",
+            "fontWeight":"700",
+            "marginTop":"0px",
+            "marginBottom":"10px",
+            "fontFamily":"'Clash Display Semibold'",
+            "lineHeight":"1.05",
+            "letterSpacing":"0.02em"
         }
     ),
+
+    style={
+        "width":"100%",
+        "textAlign":"center",
+        "paddingTop":"35px",
+        "paddingBottom":"8px"
+    }
+),
 
     html.Div([
         html.Img(
@@ -154,122 +156,126 @@ app.layout = html.Div([
                 dcc.Tabs(
                     id="tabs",
                     value="comparativas",
-                    className="tab-menu vertical-tabs",
+                    className="tab-menu horizontal-tabs",
                     children=[
                         dcc.Tab(
-                            label="Comparativas",
+                            label="COMPARATIVOS",
                             value="comparativas",
-                            className="tab-item vertical-tab",
+                            className="tab-item",
                             selected_className="tab-item-selected",
                             style={
                                 "backgroundColor":"#011c24",
                                 "color":"#F5F7FA",
                                 "border":"2px solid #3c4d52",
                                 "borderRadius":"16px",
-                                "padding":"18px 18px",
-                                "marginBottom":"14px",
+                                "padding":"14px 16px",
+                                "marginRight":"12px",
+                                "marginBottom":"12px",
                                 "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
                                 "fontWeight":"700",
-                                "writingMode":"vertical-rl",
-                                "textOrientation":"upright",
                                 "textAlign":"center",
                                 "whiteSpace":"nowrap",
-                                "cursor":"pointer"
+                                "cursor":"pointer",
+                                "minWidth":"120px"
                             },
                             selected_style={
                                 "backgroundColor":"#89bcef",
                                 "color":"#000c0f",
                                 "border":"2px solid #48f788",
                                 "borderRadius":"16px",
-                                "padding":"18px 18px",
-                                "marginBottom":"14px"
+                                "padding":"14px 16px",
+                                "marginRight":"12px",
+                                "marginBottom":"12px"
                             }
                         ),
                         dcc.Tab(
-                            label="Cronológico",
+                            label="CRONOLÓGICO",
                             value="cronologico",
-                            className="tab-item vertical-tab",
+                            className="tab-item",
                             selected_className="tab-item-selected",
                             style={
                                 "backgroundColor":"#011c24",
                                 "color":"#F5F7FA",
                                 "border":"2px solid #3c4d52",
                                 "borderRadius":"16px",
-                                "padding":"18px 18px",
-                                "marginBottom":"14px",
+                                "padding":"14px 16px",
+                                "marginRight":"12px",
+                                "marginBottom":"12px",
                                 "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
                                 "fontWeight":"700",
-                                "writingMode":"vertical-rl",
-                                "textOrientation":"upright",
                                 "textAlign":"center",
                                 "whiteSpace":"nowrap",
-                                "cursor":"pointer"
+                                "cursor":"pointer",
+                                "minWidth":"120px"
                             },
                             selected_style={
                                 "backgroundColor":"#89bcef",
                                 "color":"#000c0f",
                                 "border":"2px solid #48f788",
                                 "borderRadius":"16px",
-                                "padding":"18px 18px",
-                                "marginBottom":"14px"
+                                "padding":"14px 16px",
+                                "marginRight":"12px",
+                                "marginBottom":"12px"
                             }
                         ),
                         dcc.Tab(
-                            label="Actividad",
+                            label="ACTIVIDAD",
                             value="actividad",
-                            className="tab-item vertical-tab",
+                            className="tab-item",
                             selected_className="tab-item-selected",
                             style={
                                 "backgroundColor":"#011c24",
                                 "color":"#F5F7FA",
                                 "border":"2px solid #3c4d52",
                                 "borderRadius":"16px",
-                                "padding":"18px 18px",
-                                "marginBottom":"14px",
+                                "padding":"14px 16px",
+                                "marginRight":"12px",
+                                "marginBottom":"12px",
                                 "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
                                 "fontWeight":"700",
-                                "writingMode":"vertical-rl",
-                                "textOrientation":"upright",
                                 "textAlign":"center",
                                 "whiteSpace":"nowrap",
-                                "cursor":"pointer"
+                                "cursor":"pointer",
+                                "minWidth":"120px"
                             },
                             selected_style={
                                 "backgroundColor":"#89bcef",
                                 "color":"#000c0f",
                                 "border":"2px solid #48f788",
                                 "borderRadius":"16px",
-                                "padding":"18px 18px",
-                                "marginBottom":"14px"
+                                "padding":"14px 16px",
+                                "marginRight":"12px",
+                                "marginBottom":"12px"
                             }
                         ),
                         dcc.Tab(
                             label="ACWR",
                             value="acwr",
-                            className="tab-item vertical-tab",
+                            className="tab-item",
                             selected_className="tab-item-selected",
                             style={
                                 "backgroundColor":"#011c24",
                                 "color":"#F5F7FA",
                                 "border":"2px solid #3c4d52",
                                 "borderRadius":"16px",
-                                "padding":"18px 18px",
-                                "marginBottom":"14px",
+                                "padding":"14px 16px",
+                                "marginRight":"12px",
+                                "marginBottom":"12px",
                                 "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
                                 "fontWeight":"700",
-                                "writingMode":"vertical-rl",
-                                "textOrientation":"upright",
                                 "textAlign":"center",
                                 "whiteSpace":"nowrap",
-                                "cursor":"pointer"
+                                "cursor":"pointer",
+                                "minWidth":"120px"
                             },
                             selected_style={
                                 "backgroundColor":"#89bcef",
                                 "color":"#000c0f",
                                 "border":"2px solid #48f788",
                                 "borderRadius":"16px",
-                                "padding":"18px 18px",
-                                "marginBottom":"14px"
+                                "padding":"14px 16px",
+                                "marginRight":"12px",
+                                "marginBottom":"12px"
                             }
                         )
                     ]
@@ -291,8 +297,8 @@ app.layout = html.Div([
         "display": "flex",
         "flexDirection": "column",
         "gap": "18px",
-        "width": "260px",
-        "minWidth": "260px",
+        "width": "500px",
+        "minWidth": "500px",
         "position": "sticky",
         "top": "28px",
         "alignSelf": "flex-start"
@@ -354,8 +360,10 @@ app.layout = html.Div([
                 id="contenido-tab",
                 style={
                     "flex":"1 1 0",
-                    "minHeight":"700px",
-                    "width":"100%"
+                    "minHeight":"calc(100vh - 220px)",
+                    "width":"100%",
+                    "position":"sticky",
+                    "top":"140px"
                 }
             )
         ],
@@ -576,12 +584,9 @@ app.layout = html.Div([
                 ],
                 style={"display": "grid", "gridTemplateColumns": "1fr", "gap": "12px"})
             ],
+            className="filter-card",
             style={
-                "background":"linear-gradient(180deg, rgba(11,13,18,0.95), rgba(11,12,14,0.95))",
-                "padding":"16px",
-                "borderRadius":"18px",
-                "border":"1px solid rgba(124,58,237,0.28)",
-                "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
+                "padding":"16px"
             })
         ],
         style={
@@ -592,13 +597,15 @@ app.layout = html.Div([
     ],
     className="sidebar-panel sidebar-right-panel",
     style={
-        "width": "300px",
-        "minWidth": "280px",
+        "width": "320px",
+        "minWidth": "320px",
         "padding":"22px",
         "backgroundColor":"#011c24",
         "borderRadius":"24px",
         "border":"1px solid rgba(137, 188, 239, 0.16)",
-        "boxShadow":"0 18px 48px rgba(0, 0, 0, 0.35)"
+        "boxShadow":"0 18px 48px rgba(0, 0, 0, 0.35)",
+        "position":"sticky",
+        "top":"28px"
     })
 
 ],

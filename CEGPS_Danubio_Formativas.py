@@ -828,7 +828,7 @@ def actualizar_tab(
                         "filter_query": f"{{{col}}} >= {max_val * 0.8}",
                         "column_id": col
                     },
-                    "backgroundColor": "#4CAF50",
+                    "backgroundColor": "#48f788",
                     "color": "white"
                 })
                 
@@ -838,7 +838,7 @@ def actualizar_tab(
                         "filter_query": f"{{{col}}} >= {min_val + rango * 0.5} && {{{col}}} < {max_val * 0.8}",
                         "column_id": col
                     },
-                    "backgroundColor": "#FFC107",
+                    "backgroundColor": "#F4C95D",
                     "color": "black"
                 })
                 
@@ -848,7 +848,7 @@ def actualizar_tab(
                         "filter_query": f"{{{col}}} < {min_val + rango * 0.5}",
                         "column_id": col
                     },
-                    "backgroundColor": "#F44336",
+                    "backgroundColor": "#F84874",
                     "color": "white"
                 })
 
@@ -859,7 +859,7 @@ def actualizar_tab(
                     "color": "white",
                     "textAlign": "center",
                     "marginBottom": "20px",
-                    "fontFamily":"'Clash Display', 'Helvetica Neue'",
+                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                     "fontWeight":"600"
                 }
             ),
@@ -869,7 +869,7 @@ def actualizar_tab(
                     "color": "#a3e3d0",
                     "textAlign": "center",
                     "marginBottom": "15px",
-                    "fontFamily":"'Clash Display', 'Helvetica Neue'",
+                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                     "fontWeight":"600"
                 }
             ),

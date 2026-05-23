@@ -170,76 +170,6 @@ app.layout = html.Div([
                                     "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'"
                                 }
                                 ),
-                                     dcc.Tab(
-                                        label="ACTIVIDAD",
-                                        value="actividad",
-                                        className="tab-item",
-                                        selected_className="tab-item-selected",
-                                        style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#edf1f2",
-                                            "border":"none",
-                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
-                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "textAlign":"center",
-                                            "fontSize":"10px",
-                                            "fontWeight":"600",
-                                            "width":"100%",
-"boxSizing":"border-box",
-                                        },
-                                        selected_style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#48f788",
-                                            "border":"none",
-                                            "borderTop":"1px solid #48f788",
-                                            "borderBottom":"1px solid #48f788",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "fontWeight":"700"
-                                        }
-                                    ),
-                                    dcc.Tab(
-                                        label="ACWR",
-                                        value="acwr",
-                                        className="tab-item",
-                                        selected_className="tab-item-selected",
-                                        style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#edf1f2",
-                                            "border":"none",
-                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
-                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "textAlign":"center",
-                                            "fontSize":"10px",
-                                            "fontWeight":"600",
-                                            "width":"100%",
-                                            "boxSizing":"border-box"
-                                        },
-                                        selected_style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#48f788",
-                                            "border":"none",
-                                            "borderTop":"1px solid #48f788",
-                                            "borderBottom":"1px solid #48f788",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "fontWeight":"700",
-                                            "width":"100%",
-                                            "boxSizing":"border-box"
-                                        }
-                                    ),
                             dcc.Tabs(
                                 id="tabs",
                                 value="comparativas",
@@ -314,6 +244,76 @@ app.layout = html.Div([
                                             "fontWeight":"700"
                                         }
                                     ),
+                                    dcc.Tab(
+                                        label="ACTIVIDAD",
+                                        value="actividad",
+                                        className="tab-item",
+                                        selected_className="tab-item-selected",
+                                        style={
+                                            "backgroundColor":"transparent",
+                                            "color":"#edf1f2",
+                                            "border":"none",
+                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
+                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
+                                            "borderRadius":"0",
+                                            "padding":"8px 10px",
+                                            "marginBottom":"2px",
+                                            "marginRight":"-10px",
+                                            "textAlign":"center",
+                                            "fontSize":"10px",
+                                            "fontWeight":"600",
+                                            "width":"100%",
+"boxSizing":"border-box",
+                                        },
+                                        selected_style={
+                                            "backgroundColor":"transparent",
+                                            "color":"#48f788",
+                                            "border":"none",
+                                            "borderTop":"1px solid #48f788",
+                                            "borderBottom":"1px solid #48f788",
+                                            "borderRadius":"0",
+                                            "padding":"8px 10px",
+                                            "marginBottom":"2px",
+                                            "marginRight":"-10px",
+                                            "fontWeight":"700"
+                                        }
+                                    ),
+                                    dcc.Tab(
+                                        label="ACWR",
+                                        value="acwr",
+                                        className="tab-item",
+                                        selected_className="tab-item-selected",
+                                        style={
+                                            "backgroundColor":"transparent",
+                                            "color":"#edf1f2",
+                                            "border":"none",
+                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
+                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
+                                            "borderRadius":"0",
+                                            "padding":"8px 10px",
+                                            "marginBottom":"2px",
+                                            "marginRight":"-10px",
+                                            "textAlign":"center",
+                                            "fontSize":"10px",
+                                            "fontWeight":"600",
+                                            "width":"100%",
+                                            "boxSizing":"border-box"
+                                        },
+                                        selected_style={
+                                            "backgroundColor":"transparent",
+                                            "color":"#48f788",
+                                            "border":"none",
+                                            "borderTop":"1px solid #48f788",
+                                            "borderBottom":"1px solid #48f788",
+                                            "borderRadius":"0",
+                                            "padding":"8px 10px",
+                                            "marginBottom":"2px",
+                                            "marginRight":"-10px",
+                                            "fontWeight":"700",
+                                            "width":"100%",
+                                            "boxSizing":"border-box"
+                                        }
+                                    )
                                 ],
                                 vertical=True
                             ),

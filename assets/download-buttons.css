@@ -1,11 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap');
+@font-face {
+    font-family: 'Clash Display Semibold';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/assets/fonts/ClashDisplay-Semibold.eot');
+    src: url('/assets/fonts/ClashDisplay-Semibold.eot?#iefix') format('embedded-opentype');
+}
 
 :root, body, .tab-menu, .tab-item, .download-btn, .sidebar-panel, .dash-table {
     font-family: 'Manrope', 'Segoe UI', sans-serif;
 }
 
 h1, h2, h3, h4, .tab-item, .section-title {
-    font-family: 'Clash Display', 'Helvetica Neue', sans-serif;
+    font-family: 'Clash Display Semibold', 'Helvetica Neue', sans-serif;
     font-weight: 600;
 }
 

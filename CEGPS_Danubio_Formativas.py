@@ -54,7 +54,7 @@ auth = dash_auth.BasicAuth(
     app,
     VALID_USERNAME_PASSWORD_PAIRS
 )
-app.title = "CARGA EXTERNA - DANUBIO FORMATIVAS 2026"
+app.title = "DATA LOAD - Sports Performance Platform"
 
 metricas = [
     "Distance",
@@ -103,12 +103,13 @@ app.layout = html.Div([
             "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
             style={
                 "color":"#ffffff",
-                "textAlign":"center",
+                "textAlign":"top",
                 "fontSize":"38px",
                 "fontWeight":"700",
-                "marginTop":"0",
+                "marginTop":"1",
+                "margincolor":"#a3e3d0",
                 "marginBottom":"10px",
-                "fontFamily":"'Clash Display', 'Helvetica Neue'",
+                "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                 "lineHeight":"1.05",
                 "letterSpacing":"0.02em"
             }
@@ -138,22 +139,14 @@ app.layout = html.Div([
         html.Div(
             f"Última actualización: {ultima_actualizacion}",
             style={
-                "color":"#dcdcdc",
-                "fontSize":"13px",
-                "textAlign":"right",
-                "padding":"10px"
-            }
-        )
-    ],
-    style={
-        "display": "flex",
-        "justifyContent": "space-between",
-        "alignItems": "center",
-        "gap": "18px",
-        "flexWrap": "wrap",
-        "paddingBottom": "20px"
-    }),
-
+        "color":"#dcdcdc",
+        "fontSize":"13px",
+        "textAlign":"right",
+        "marginTop":"30px",
+        "width":"100%",
+        "paddingRight":"15px"
+    }
+),
     html.Div([
 
         html.Div([
@@ -627,6 +620,7 @@ style={
     "minHeight":"100vh"
 }
 )
+])
 
 @app.callback(
     Output("actividad-fecha-container","style"),

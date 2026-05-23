@@ -20,7 +20,8 @@ html, body {
     margin: 0;
     padding: 0;
     min-height: 100%;
-    background-color: #000c0f;
+    background: linear-gradient(135deg, #011c24 0%, #000c0f 55%, #3c4d52 100%);
+    background-attachment: fixed;
 }
 
 :root, body, .tab-menu, .download-btn, .sidebar-panel, .dash-table {
@@ -161,6 +162,15 @@ h4,
     transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
 }
 
+.sidebar-panel.sidebar-menu-panel {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 220px;
+    max-width: 220px;
+    min-width: 220px;
+}
+
 .sidebar-menu-panel,
 .sidebar-right-panel {
     position: sticky;
@@ -169,11 +179,11 @@ h4,
 }
 
 .sidebar-menu-panel {
-    transform: translateX(-24px);
+    transform: none !important;
 }
 
 .sidebar-menu-panel:hover {
-    transform: translateX(0);
+    transform: none !important;
 }
 
 .sidebar-right-panel {

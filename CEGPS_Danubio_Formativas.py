@@ -144,7 +144,7 @@ app.layout = html.Div([
         "boxShadow":"0 18px 40px rgba(0,0,0,0.45)",
         "border":"1px solid rgba(137,188,239,0.20)",
         "marginTop":"5px",
-        "marginBottom":"20px",
+        "marginBottom":"30px",
         "overflow":"hidden"
     }
 ),
@@ -180,7 +180,8 @@ app.layout = html.Div([
                                             "borderBottom":"1px solid rgba(137,188,239,0.18)",
                                             "borderRadius":"0",
                                             "padding":"16px",
-                                            "marginBottom":"12px",
+                                            "marginBottom":"8px",
+                                            "fontsize":"8px",
                                             "fontWeight":"600"
                                         },
                                         selected_style={
@@ -191,7 +192,7 @@ app.layout = html.Div([
                                             "borderBottom":"1px solid #48f788",
                                             "borderRadius":"0",
                                             "padding":"16px",
-                                            "marginBottom":"12px",
+                                            "marginBottom":"8px",
                                             "fontWeight":"700"
                                         }
                                     ),
@@ -208,7 +209,8 @@ app.layout = html.Div([
                                             "borderBottom":"1px solid rgba(137,188,239,0.18)",
                                             "borderRadius":"0",
                                             "padding":"16px",
-                                            "marginBottom":"12px",
+                                            "marginBottom":"8px",
+                                            "fontsize":"8px",
                                             "fontWeight":"600"
                                         },
                                         selected_style={
@@ -219,7 +221,7 @@ app.layout = html.Div([
                                             "borderBottom":"1px solid #48f788",
                                             "borderRadius":"0",
                                             "padding":"16px",
-                                            "marginBottom":"12px",
+                                            "marginBottom":"8px",
                                             "fontWeight":"700"
                                         }
                                     ),
@@ -236,7 +238,8 @@ app.layout = html.Div([
                                             "borderBottom":"1px solid rgba(137,188,239,0.18)",
                                             "borderRadius":"0",
                                             "padding":"16px",
-                                            "marginBottom":"12px",
+                                            "marginBottom":"8px",
+                                            "fontsize":"8px",
                                             "fontWeight":"600"
                                         },
                                         selected_style={
@@ -247,7 +250,7 @@ app.layout = html.Div([
                                             "borderBottom":"1px solid #48f788",
                                             "borderRadius":"0",
                                             "padding":"16px",
-                                            "marginBottom":"12px",
+                                            "marginBottom":"8px",
                                             "fontWeight":"700"
                                         }
                                     ),
@@ -263,8 +266,9 @@ app.layout = html.Div([
                                             "borderTop":"1px solid rgba(137,188,239,0.18)",
                                             "borderBottom":"1px solid rgba(137,188,239,0.18)",
                                             "borderRadius":"0",
-                                            "padding":"14px 12px",
-                                            "marginBottom":"10px",
+                                            "padding":"8px 8px",
+                                            "marginBottom":"8px",
+                                            "fontsize":"8px",
                                             "fontWeight":"600",
                                             "width":"100%",
                                             "boxSizing":"border-box"
@@ -276,8 +280,8 @@ app.layout = html.Div([
                                             "borderTop":"1px solid #48f788",
                                             "borderBottom":"1px solid #48f788",
                                             "borderRadius":"0",
-                                            "padding":"14px 12px",
-                                            "marginBottom":"10px",
+                                            "padding":"8px 8px",
+                                            "marginBottom":"8px",
                                             "fontWeight":"700",
                                             "width":"100%",
                                             "boxSizing":"border-box"
@@ -317,7 +321,7 @@ app.layout = html.Div([
                     "width": "240px",
                     "minWidth": "240px",
                     "position": "sticky",
-                    "top": "28px",
+                    "top": "20px",
                     "alignSelf": "flex-start"
                 }
             ),

@@ -845,7 +845,8 @@ def actualizar_tab(
 
         return dcc.Graph(
             figure=fig,
-            style={"width":"100%","height":"100%"}
+            style={"width":"100%","height":"100%","border":"1px solid rgba(137,188,239,0.18)",
+                   "borderRadius":"12px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)"}
         )
 
     # ACTIVIDAD POR JUGADOR

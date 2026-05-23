@@ -328,7 +328,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-png.svg",
-                                    style={"width":"26px","height":"26px"}
+                                    style={"width":"14px","height":"14px"}
                                 ),
                                 id="download-graph-png",
                                 n_clicks=0,
@@ -338,7 +338,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-pdf.svg",
-                                    style={"width":"26px","height":"26px"}
+                                    style={"width":"14px","height":"14px"}
                                 ),
                                 id="download-graph-pdf",
                                 n_clicks=0,
@@ -348,7 +348,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-csv.svg",
-                                    style={"width":"26px","height":"26px"}
+                                    style={"width":"14px","height":"14px"}
                                 ),
                                 id="download-table-csv",
                                 n_clicks=0,
@@ -358,7 +358,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-xlsx.svg",
-                                    style={"width":"26px","height":"26px"}
+                                    style={"width":"14px","height":"14px"}
                                 ),
                                 id="download-table-xlsx",
                                 n_clicks=0,
@@ -619,16 +619,22 @@ app.layout = html.Div([
                 ],
                 className="sidebar-panel sidebar-right-panel",
                 style={
-                    "width": "300px",
-                    "minWidth": "300px",
-                    "padding":"22px",
-                    "backgroundColor":"#011c24",
-                    "borderRadius":"24px",
-                    "border":"1px solid rgba(137, 188, 239, 0.16)",
-                    "boxShadow":"0 18px 48px rgba(0, 0, 0, 0.35)",
-                    "position":"sticky",
-                    "top":"28px"
-                }
+    "width":"300px",
+    "minWidth":"300px",
+
+    "padding":"22px",
+    "backgroundColor":"#011c24",
+
+    "borderRadius":"24px",
+    "border":"1px solid rgba(137, 188, 239, 0.16)",
+    "boxShadow":"0 18px 48px rgba(0,0,0,0.35)",
+
+    "position":"sticky",
+    "top":"28px",
+
+    "height":"calc(100vh - 56px)",
+    "overflowY":"auto"
+}
             )
         ],
         style={

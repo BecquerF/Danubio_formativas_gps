@@ -130,7 +130,7 @@ app.layout = html.Div([
             src="/assets/logo_dataload_2.png",
             style={
                 "width":"100%",
-                "boxBoxing":"border-box",
+                "boxSizing":"border-box",
                 "height":"auto",
                 "display":"block",
                 "objectFit":"contain"
@@ -141,7 +141,7 @@ app.layout = html.Div([
     style={
         "background":"rgba(13, 24, 34, 0.95)",
         "padding":"1px",
-        "borderRadius":"20px",
+        "borderRadius":"12px",
         "boxShadow":"0 18px 40px rgba(0,0,0,0.45)",
         "border":"1px solid rgba(137,188,239,0.20)",
         "marginTop":"5px",

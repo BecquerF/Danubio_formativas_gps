@@ -107,6 +107,7 @@ app.layout = html.Div([
                 "fontWeight":"700",
                 "marginTop":"0px",
                 "marginBottom":"0px",
+                "marginLeft":"-10px",
                 "fontFamily":"'Clash Display Semibold'",
                 "lineHeight":"1.05",
                 "letterSpacing":"0.02em"

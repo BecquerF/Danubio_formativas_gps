@@ -104,10 +104,10 @@ app.layout = html.Div([
             style={
                 "color":"#ffffff",
                 "textAlign":"center",
-                "fontSize":"34px",
-                "fontWeight":"600",
+                "fontSize":"38px",
+                "fontWeight":"700",
                 "marginTop":"0",
-                "marginBottom":"18px",
+                "marginBottom":"10px",
                 "fontFamily":"'Clash Display', 'Helvetica Neue'",
                 "lineHeight":"1.05",
                 "letterSpacing":"0.02em"
@@ -120,16 +120,14 @@ app.layout = html.Div([
         }
     ),
 
-    # HEADER
     html.Div([
-
         html.Img(
             src="/assets/logo_dataload.png",
             style={
                 "width":"160px",
                 "display":"block",
                 "borderRadius":"18px",
-                "marginBottom":"20px",
+                "marginBottom":"12px",
                 "maxHeight":"150px",
                 "objectFit":"contain",
                 "backgroundColor":"rgba(13, 24, 34, 0.95)",
@@ -137,266 +135,256 @@ app.layout = html.Div([
                 "border":"1px solid rgba(137, 188, 239, 0.45)"
             }
         ),
-
-        html.P(
+        html.Div(
             f"Última actualización: {ultima_actualizacion}",
             style={
                 "color":"#dcdcdc",
-                "textAlign":"right",
-                "padding":"10px",
                 "fontSize":"13px",
-                "position":"bottom"
-            }
-        ),
-
-        html.Div(
-            "Creador y Desarrollador: Bécquer Fernández",
-            style={
-                "position": "fixed",
-                "right": "0",
-                "top": "50%",
-                "transform": "translateY(-50%) rotate(90deg)",
-                "transformOrigin": "top right",
-                "color": "#ffffff",
-                "backgroundColor": "rgba(0,0,0,0.4)",
-                "padding": "8px 12px",
-                "fontSize": "10px",
-                "fontWeight": "400",
-                "letterSpacing": "1px",
-                "zIndex": "9999"
+                "textAlign":"right",
+                "padding":"10px"
             }
         )
-
     ],
     style={
         "display": "flex",
+        "justifyContent": "space-between",
         "alignItems": "center",
-        "gap": "22px",
+        "gap": "18px",
         "flexWrap": "wrap",
-        "paddingBottom": "14px"
+        "paddingBottom": "20px"
     }),
 
-    # CONTENEDOR PRINCIPAL
     html.Div([
 
-     # IZQUIERDA → ÁREA GRÁFICOS
-html.Div([
-
-    dcc.Tabs(
-
-        id="tabs",
-        value="comparativas",
-        className="tab-menu",
-
-        children=[
-
-            dcc.Tab(
-                label="Comparativas",
-                value="comparativas",
-                className="tab-item",
-                selected_className="tab-item-selected",
-
-                style={
-                    "backgroundColor":"#011c24",
-                    "color":"#F5F7FA",
-                    "border":"2px solid #3c4d52",
-                    "borderRadius":"8px",
-                    "padding":"10px 20px",
-                    "marginRight":"10px",
-                    "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(124,58,237,0.18)",
-                    "fontWeight":"600",
-                    "transition":"all 0.3s ease",
-                    "cursor":"pointer"
-                },
-
-                selected_style={
-                    "backgroundColor":"#89bcef",
-                    "color":"#000c0f",
-                    "border":"2px solid #48f788",
-                    "borderRadius":"8px",
-                    "padding":"10px 20px",
-                    "marginRight":"10px",
-                    "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(137,188,239,0.25)",
-                    "fontWeight":"700",
-                    "transition":"all 0.3s ease"
-                }
-            ),
-
-            dcc.Tab(
-                label="Cronológico",
-                value="cronologico",
-                className="tab-item",
-                selected_className="tab-item-selected",
-
-                style={
-                    "backgroundColor":"#011c24",
-                    "color":"#F5F7FA",
-                    "border":"2px solid #3c4d52",
-                    "borderRadius":"8px",
-                    "padding":"10px 20px",
-                    "marginRight":"10px",
-                    "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(124,58,237,0.18)",
-                    "fontWeight":"600",
-                    "transition":"all 0.3s ease",
-                    "cursor":"pointer"
-                },
-
-                selected_style={
-                    "backgroundColor":"#89bcef",
-                    "color":"#000c0f",
-                    "border":"2px solid #48f788",
-                    "borderRadius":"8px",
-                    "padding":"10px 20px",
-                    "marginRight":"10px",
-                    "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(137,188,239,0.25)",
-                    "fontWeight":"700",
-                    "transition":"all 0.3s ease"
-                }
-            ),
-            dcc.Tab(
-                label="Actividad por Jugador",
-                value="actividad",
-                className="tab-item",
-                selected_className="tab-item-selected",
-
-                style={
-                    "backgroundColor":"#011c24",
-                    "color":"#F5F7FA",
-                    "border":"2px solid #3c4d52",
-                    "borderRadius":"8px",
-                    "padding":"10px 20px",
-                    "marginRight":"10px",
-                    "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(124,58,237,0.18)",
-                    "fontWeight":"600",
-                    "transition":"all 0.3s ease",
-                    "cursor":"pointer"
-                },
-
-                selected_style={
-                    "backgroundColor":"#89bcef",
-                    "color":"#000c0f",
-                    "border":"2px solid #48f788",
-                    "borderRadius":"8px",
-                    "padding":"10px 20px",
-                    "marginRight":"10px",
-                    "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(137,188,239,0.25)",
-                    "fontWeight":"700",
-                    "transition":"all 0.3s ease"
-                }
-            ),
-            dcc.Tab(
-                label="ACWR (Zona Segura)",
-                value="acwr",
-                className="tab-item",
-                selected_className="tab-item-selected",
-
-                style={
-                    "backgroundColor":"#011c24",
-                    "color":"#F5F7FA",
-                    "border":"2px solid #3c4d52",
-                    "borderRadius":"8px",
-                    "padding":"10px 20px",
-                    "marginRight":"10px",
-                    "marginBottom":"8px",
-                    "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 6px 10px rgba(124,58,237,0.18)",
-                    "fontWeight":"600",
-                    "transition":"all 0.3s ease",
-                    "cursor":"pointer"
-                },
-
-                selected_style={
-                    "backgroundColor":"#89bcef",
-                    "color":"#000c0f",
-                    "border":"2px solid #48f788",
-                    "borderRadius":"8px",
-                    "padding":"10px 20px",
-                    "marginRight":"10px",
-                    "marginBottom":"8px",
-                    "boxShadow":"inset 0 -2px 0 rgba(0,0,0,0.2), 0 8px 18px rgba(137,188,239,0.25)",
-                    "fontWeight":"700",
-                    "transition":"all 0.3s ease"
-                }
-            ),
-        ]
-    ),
-
-    html.Div([
-        html.Button(
-            html.Img(
-                src="/assets/icon-download-png.svg",
-                style={"width":"26px","height":"26px"}
-            ),
-            id="download-graph-png",
-            n_clicks=0,
-            title="Descargar gráfico PNG",
-            className="download-btn"
-        ),
-        html.Button(
-            html.Img(
-                src="/assets/icon-download-pdf.svg",
-                style={"width":"26px","height":"26px"}
-            ),
-            id="download-graph-pdf",
-            n_clicks=0,
-            title="Descargar gráfico PDF",
-            className="download-btn"
-        ),
-        html.Button(
-            html.Img(
-                src="/assets/icon-download-csv.svg",
-                style={"width":"26px","height":"26px"}
-            ),
-            id="download-table-csv",
-            n_clicks=0,
-            title="Descargar tabla CSV",
-            className="download-btn"
-        ),
-        html.Button(
-            html.Img(
-                src="/assets/icon-download-xlsx.svg",
-                style={"width":"26px","height":"26px"}
-            ),
-            id="download-table-xlsx",
-            n_clicks=0,
-            title="Descargar tabla XLSX",
-            className="download-btn"
+        html.Div([
+            html.Div([
+                html.H2("Menú", className="sidebar-title"),
+                dcc.Tabs(
+                    id="tabs",
+                    value="comparativas",
+                    className="tab-menu vertical-tabs",
+                    children=[
+                        dcc.Tab(
+                            label="Comparativas",
+                            value="comparativas",
+                            className="tab-item vertical-tab",
+                            selected_className="tab-item-selected",
+                            style={
+                                "backgroundColor":"#011c24",
+                                "color":"#F5F7FA",
+                                "border":"2px solid #3c4d52",
+                                "borderRadius":"16px",
+                                "padding":"18px 18px",
+                                "marginBottom":"14px",
+                                "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
+                                "fontWeight":"700",
+                                "writingMode":"vertical-rl",
+                                "textOrientation":"upright",
+                                "textAlign":"center",
+                                "whiteSpace":"nowrap",
+                                "cursor":"pointer"
+                            },
+                            selected_style={
+                                "backgroundColor":"#89bcef",
+                                "color":"#000c0f",
+                                "border":"2px solid #48f788",
+                                "borderRadius":"16px",
+                                "padding":"18px 18px",
+                                "marginBottom":"14px"
+                            }
+                        ),
+                        dcc.Tab(
+                            label="Cronológico",
+                            value="cronologico",
+                            className="tab-item vertical-tab",
+                            selected_className="tab-item-selected",
+                            style={
+                                "backgroundColor":"#011c24",
+                                "color":"#F5F7FA",
+                                "border":"2px solid #3c4d52",
+                                "borderRadius":"16px",
+                                "padding":"18px 18px",
+                                "marginBottom":"14px",
+                                "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
+                                "fontWeight":"700",
+                                "writingMode":"vertical-rl",
+                                "textOrientation":"upright",
+                                "textAlign":"center",
+                                "whiteSpace":"nowrap",
+                                "cursor":"pointer"
+                            },
+                            selected_style={
+                                "backgroundColor":"#89bcef",
+                                "color":"#000c0f",
+                                "border":"2px solid #48f788",
+                                "borderRadius":"16px",
+                                "padding":"18px 18px",
+                                "marginBottom":"14px"
+                            }
+                        ),
+                        dcc.Tab(
+                            label="Actividad",
+                            value="actividad",
+                            className="tab-item vertical-tab",
+                            selected_className="tab-item-selected",
+                            style={
+                                "backgroundColor":"#011c24",
+                                "color":"#F5F7FA",
+                                "border":"2px solid #3c4d52",
+                                "borderRadius":"16px",
+                                "padding":"18px 18px",
+                                "marginBottom":"14px",
+                                "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
+                                "fontWeight":"700",
+                                "writingMode":"vertical-rl",
+                                "textOrientation":"upright",
+                                "textAlign":"center",
+                                "whiteSpace":"nowrap",
+                                "cursor":"pointer"
+                            },
+                            selected_style={
+                                "backgroundColor":"#89bcef",
+                                "color":"#000c0f",
+                                "border":"2px solid #48f788",
+                                "borderRadius":"16px",
+                                "padding":"18px 18px",
+                                "marginBottom":"14px"
+                            }
+                        ),
+                        dcc.Tab(
+                            label="ACWR",
+                            value="acwr",
+                            className="tab-item vertical-tab",
+                            selected_className="tab-item-selected",
+                            style={
+                                "backgroundColor":"#011c24",
+                                "color":"#F5F7FA",
+                                "border":"2px solid #3c4d52",
+                                "borderRadius":"16px",
+                                "padding":"18px 18px",
+                                "marginBottom":"14px",
+                                "boxShadow":"inset 0 1px 0 rgba(245,245,245,0.05), 0 8px 18px rgba(124,58,237,0.18)",
+                                "fontWeight":"700",
+                                "writingMode":"vertical-rl",
+                                "textOrientation":"upright",
+                                "textAlign":"center",
+                                "whiteSpace":"nowrap",
+                                "cursor":"pointer"
+                            },
+                            selected_style={
+                                "backgroundColor":"#89bcef",
+                                "color":"#000c0f",
+                                "border":"2px solid #48f788",
+                                "borderRadius":"16px",
+                                "padding":"18px 18px",
+                                "marginBottom":"14px"
+                            }
+                        )
+                    ]
+                )
+            ],
+            className="sidebar-panel sidebar-menu-panel",
+            style={
+                "padding":"24px",
+                "minWidth":"220px",
+                "maxWidth":"260px",
+                "backgroundColor":"#011c24",
+                "borderRadius":"24px",
+                "border":"1px solid rgba(137, 188, 239, 0.16)",
+                "boxShadow":"0 20px 60px rgba(0, 0, 0, 0.35)"
+            }
         )
     ],
     style={
-        "display":"flex",
-        "flexWrap":"wrap",
-        "gap":"12px",
-        "marginBottom":"16px"
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "18px",
+        "width": "260px",
+        "minWidth": "260px",
+        "position": "sticky",
+        "top": "28px",
+        "alignSelf": "flex-start"
     }),
 
-    dcc.Download(id="download-graph"),
-    dcc.Download(id="download-table"),
-
-    html.Div(
-        id="contenido-tab"
-    )
-
-],
-
-style={
-    "flex":"1 1 0",
-    "minWidth":"0",
-    "display":"inline-block",
-    "verticalAlign":"top",
-    "paddingRight":"12px"
-}),
-        # DERECHA → PANEL FILTROS
+    html.Div([
         html.Div([
-
-            # CATEGORÍAS
             html.Div([
+                html.Button(
+                    html.Img(
+                        src="/assets/icon-download-png.svg",
+                        style={"width":"26px","height":"26px"}
+                    ),
+                    id="download-graph-png",
+                    n_clicks=0,
+                    title="Descargar gráfico PNG",
+                    className="download-btn"
+                ),
+                html.Button(
+                    html.Img(
+                        src="/assets/icon-download-pdf.svg",
+                        style={"width":"26px","height":"26px"}
+                    ),
+                    id="download-graph-pdf",
+                    n_clicks=0,
+                    title="Descargar gráfico PDF",
+                    className="download-btn"
+                ),
+                html.Button(
+                    html.Img(
+                        src="/assets/icon-download-csv.svg",
+                        style={"width":"26px","height":"26px"}
+                    ),
+                    id="download-table-csv",
+                    n_clicks=0,
+                    title="Descargar tabla CSV",
+                    className="download-btn"
+                ),
+                html.Button(
+                    html.Img(
+                        src="/assets/icon-download-xlsx.svg",
+                        style={"width":"26px","height":"26px"}
+                    ),
+                    id="download-table-xlsx",
+                    n_clicks=0,
+                    title="Descargar tabla XLSX",
+                    className="download-btn"
+                )
+            ],
+            style={
+                "display":"flex",
+                "flexWrap":"wrap",
+                "gap":"12px",
+                "marginBottom":"16px"
+            }),
+            dcc.Download(id="download-graph"),
+            dcc.Download(id="download-table"),
+            html.Div(
+                id="contenido-tab",
+                style={
+                    "flex":"1 1 0",
+                    "minHeight":"700px",
+                    "width":"100%"
+                }
+            )
+        ],
+        style={
+            "display":"flex",
+            "flexDirection":"column",
+            "flex":"1 1 0",
+            "minWidth":"0",
+            "gap":"18px"
+        })
+    ],
+    style={
+        "flex":"1 1 0",
+        "display":"flex",
+        "flexDirection":"column",
+        "minWidth":"0"
+    }),
 
+    html.Div([
+        html.Div([
+            html.Div([
                 html.H4(
                     "Categorías",
                     style={
@@ -404,28 +392,16 @@ style={
                         "fontSize":"13px",
                         "fontWeight":"600",
                         "fontFamily":"'Clash Display', 'Helvetica Neue'",
-                        "marginBottom":"12px",
-                        "columnCount":"2"
+                        "marginBottom":"12px"
                     }
                 ),
-
                 dcc.Checklist(
                     id="categoria",
-
                     options=[
-                        {
-                            "label":c,
-                            "value":c
-                        }
-                        for c in sorted(
-                            df["Category"]
-                            .dropna()
-                            .unique()
-                        )
+                        {"label":c, "value":c}
+                        for c in sorted(df["Category"].dropna().unique())
                     ],
-
                     inline=False,
-
                     labelStyle={
                         "display":"inline-block",
                         "width":"48%",
@@ -434,20 +410,15 @@ style={
                         "marginBottom":"8px"
                     }
                 )
-
             ],
             style={
                 "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
                 "padding":"16px",
                 "borderRadius":"18px",
-                "marginBottom":"12px",
                 "border":"1px solid rgba(137,188,239,0.18)",
                 "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             }),
-
-            # MÉTRICAS
             html.Div([
-
                 html.H4(
                     "Métricas",
                     style={
@@ -455,26 +426,17 @@ style={
                         "fontSize":"13px",
                         "fontWeight":"600",
                         "fontFamily":"'Clash Display', 'Helvetica Neue'",
-                        "marginBottom":"12px",
-                        "columnCount":"2"
+                        "marginBottom":"12px"
                     }
                 ),
-
                 dcc.Checklist(
                     id="metrica",
-
                     options=[
-                        {
-                            "label":m,
-                            "value":m
-                        }
+                        {"label":m, "value":m}
                         for m in metricas
                     ],
-
                     value=["Distance"],
-
                     inline=False,
-
                     labelStyle={
                         "display":"inline-block",
                         "width":"48%",
@@ -483,45 +445,38 @@ style={
                         "marginBottom":"8px"
                     }
                 ),
-                html.Div(
-                    [
-                        html.P(
-                            "Fecha de actividad",
-                            style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"8px"}
-                        ),
-                        dcc.DatePickerSingle(
-                            id="fecha-actividad",
-                            date=fecha_max.date(),
-                            min_date_allowed=df["Date"].min().date(),
-                            max_date_allowed=df["Date"].max().date(),
-                            display_format="DD/MM/YYYY",
-                            style={
-                                "width": "100%",
-                                "backgroundColor": "#011c24",
-                                "color": "#f5f5f5",
-                                "border": "1px solid rgba(137,188,239,0.22)",
-                                "borderRadius": "8px",
-                                "padding": "8px"
-                            }
-                        )
-                    ],
-                    id="actividad-fecha-container",
-                    style={"display": "none", "marginTop": "16px"}
-                )
-
+                html.Div([
+                    html.P(
+                        "Fecha de actividad",
+                        style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"8px"}
+                    ),
+                    dcc.DatePickerSingle(
+                        id="fecha-actividad",
+                        date=fecha_max.date(),
+                        min_date_allowed=df["Date"].min().date(),
+                        max_date_allowed=df["Date"].max().date(),
+                        display_format="DD/MM/YYYY",
+                        style={
+                            "width": "100%",
+                            "backgroundColor": "#011c24",
+                            "color": "#f5f5f5",
+                            "border": "1px solid rgba(137,188,239,0.22)",
+                            "borderRadius": "8px",
+                            "padding": "8px"
+                        }
+                    )
+                ],
+                id="actividad-fecha-container",
+                style={"display": "none", "marginTop": "16px"})
             ],
             style={
                 "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
                 "padding":"16px",
                 "borderRadius":"18px",
-                "marginBottom":"12px",
                 "border":"1px solid rgba(137,188,239,0.18)",
                 "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             }),
-
-            # COMPARAR POR
             html.Div([
-
                 html.H4(
                     "Comparar por",
                     style={
@@ -529,24 +484,16 @@ style={
                         "fontSize":"13px",
                         "fontWeight":"600",
                         "fontFamily":"'Clash Display', 'Helvetica Neue'",
-                        "marginBottom":"12px",
-                        "columnCount":"2"
+                        "marginBottom":"12px"
                     }
                 ),
-
                 dcc.RadioItems(
                     id="referencia",
-
                     options=[
-                        {
-                            "label":r,
-                            "value":r
-                        }
+                        {"label":r, "value":r}
                         for r in referencias
                     ],
-
                     value="Category",
-
                     labelStyle={
                         "display":"inline-block",
                         "width":"48%",
@@ -555,20 +502,15 @@ style={
                         "marginBottom":"8px"
                     }
                 )
-
             ],
             style={
                 "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
                 "padding":"16px",
                 "borderRadius":"18px",
-                "marginBottom":"12px",
                 "border":"1px solid rgba(137,188,239,0.18)",
                 "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             }),
-
-            # FILTROS COMPARATIVOS
             html.Div([
-
                 html.H4(
                     "Filtrar por",
                     style={
@@ -576,11 +518,9 @@ style={
                         "fontSize":"13px",
                         "fontWeight":"600",
                         "fontFamily":"'Clash Display', 'Helvetica Neue'",
-                        "marginBottom":"12px",
-                        "columnCount":"2"
+                        "marginBottom":"12px"
                     }
                 ),
-
                 html.Div([
                     html.Div([
                         html.P(
@@ -590,16 +530,13 @@ style={
                         dcc.Dropdown(
                             id="jugador",
                             options=[
-                                {"label":x,"value":x}
-                                for x in sorted(
-                                    df["Player Name"].dropna().unique()
-                                )
+                                {"label":x, "value":x}
+                                for x in sorted(df["Player Name"].dropna().unique())
                             ],
                             multi=True,
                             style={"marginBottom": "12px"}
                         )
                     ], style={"width": "100%"}),
-
                     html.Div([
                         html.P(
                             "Athlete Tags",
@@ -608,16 +545,13 @@ style={
                         dcc.Dropdown(
                             id="athlete",
                             options=[
-                                {"label":x,"value":x}
-                                for x in sorted(
-                                    df["Athlete Tags"].dropna().unique()
-                                )
+                                {"label":x, "value":x}
+                                for x in sorted(df["Athlete Tags"].dropna().unique())
                             ],
                             multi=True,
                             style={"marginBottom": "12px"}
                         )
                     ], style={"width": "100%"}),
-
                     html.Div([
                         html.P(
                             "Game Tags",
@@ -626,16 +560,13 @@ style={
                         dcc.Dropdown(
                             id="gametag",
                             options=[
-                                {"label":x,"value":x}
-                                for x in sorted(
-                                    df["Game Tags"].dropna().unique()
-                                )
+                                {"label":x, "value":x}
+                                for x in sorted(df["Game Tags"].dropna().unique())
                             ],
                             multi=True,
                             style={"marginBottom": "12px"}
                         )
                     ], style={"width": "100%"}),
-
                     html.Div([
                         html.P(
                             "Period Tags",
@@ -644,51 +575,58 @@ style={
                         dcc.Dropdown(
                             id="periodtag",
                             options=[
-                                {"label":x,"value":x}
-                                for x in sorted(
-                                    df["Period Tags"].dropna().unique()
-                                )
+                                {"label":x, "value":x}
+                                for x in sorted(df["Period Tags"].dropna().unique())
                             ],
                             multi=True
                         )
                     ], style={"width": "100%"})
-
-                ], style={"display": "grid", "gridTemplateColumns": "1fr", "gap": "12px"})
-
+                ],
+                style={"display": "grid", "gridTemplateColumns": "1fr", "gap": "12px"})
             ],
             style={
-                    "background":"linear-gradient(180deg, rgba(11,13,18,0.95), rgba(11,12,14,0.95))",
-                    "padding":"16px",
-                    "borderRadius":"18px",
-                    "marginBottom":"12px",
-                    "border":"1px solid rgba(124,58,237,0.28)",
+                "background":"linear-gradient(180deg, rgba(11,13,18,0.95), rgba(11,12,14,0.95))",
+                "padding":"16px",
+                "borderRadius":"18px",
+                "border":"1px solid rgba(124,58,237,0.28)",
+                "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
             })
-
         ],
-        className="sidebar-panel",
         style={
-             "width":"360px",
-    "display":"inline-block",
-    "paddingLeft":"16px",
-    "verticalAlign":"top",
-
-    "height":"calc(100vh - 160px)",
-    "overflowY":"auto",
-    "paddingRight":"12px"
+            "display":"grid",
+            "gridTemplateColumns":"1fr 1fr",
+            "gap":"16px"
         })
-
-    ])
+    ],
+    className="sidebar-panel sidebar-right-panel",
+    style={
+        "width": "300px",
+        "minWidth": "280px",
+        "padding":"22px",
+        "backgroundColor":"#011c24",
+        "borderRadius":"24px",
+        "border":"1px solid rgba(137, 188, 239, 0.16)",
+        "boxShadow":"0 18px 48px rgba(0, 0, 0, 0.35)"
+    })
 
 ],
 style={
-    "backgroundColor":"#000c0f",
-    "padding":"20px",
-    "fontFamily":"'Manrope', 'Segoe UI'",
-    "display":"flex",
-    "alignItems":"flex-start",
-    "gap":"24px",
-    "width":"100%"
+    "display": "flex",
+    "alignItems": "flex-start",
+    "gap": "18px",
+    "width": "100%",
+    "minHeight": "calc(100vh - 180px)"
 })
+
+],
+style={
+    "backgroundColor": "#061b27",
+    "color":"#ffffff",
+    "padding":"28px 24px 36px 24px",
+    "fontFamily":"'Manrope', 'Segoe UI', sans-serif",
+    "minHeight":"100vh"
+}
+)
 
 @app.callback(
     Output("actividad-fecha-container","style"),

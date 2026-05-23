@@ -139,7 +139,7 @@ app.layout = html.Div([
 
     style={
         "background":"rgba(13, 24, 34, 0.95)",
-        "padding":"14px",
+        "padding":"1px",
         "borderRadius":"20px",
         "boxShadow":"0 18px 40px rgba(0,0,0,0.45)",
         "border":"1px solid rgba(137,188,239,0.20)",

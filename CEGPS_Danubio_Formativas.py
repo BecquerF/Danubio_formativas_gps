@@ -134,7 +134,9 @@ app.layout = html.Div([
                 "boxSizing":"border-box",
                 "height":"auto",
                 "display":"block",
-                "objectFit":"contain"
+                "objectFit":"contain",
+                "position":"relative",
+                "top":"-10xp",
             }
         )
     ],

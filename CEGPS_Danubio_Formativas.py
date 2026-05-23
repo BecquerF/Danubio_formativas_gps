@@ -130,6 +130,7 @@ app.layout = html.Div([
             src="/assets/logo_dataload_2.png",
             style={
                 "width":"100%",
+                "boxBoxing":"border-box",
                 "height":"auto",
                 "display":"block",
                 "objectFit":"contain"
@@ -157,6 +158,8 @@ app.layout = html.Div([
                                     "fontSize":"22px",
                                     "fontWeight":"700",
                                     "marginBottom":"25px",
+                                    "width":"100%",
+                                    "boxSizing":"border-box",
                                     "textAlign":"center",
                                     "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'"
                                 }

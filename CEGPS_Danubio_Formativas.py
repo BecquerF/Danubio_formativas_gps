@@ -300,11 +300,11 @@ app.layout = html.Div([
                                 f"Última actualización: {ultima_actualizacion}",
                                 style={
                                     "color":"#dcdcdc",
-                                    "fontSize":"7px",
+                                    "fontSize":"8px",
                                     "textAlign":"center",
                                     "marginTop":"8px",
                                     "width":"100%",
-                                    "padding":"0 8px"
+                                    "padding":"0 4px"
                                 }
                             )
                         ],
@@ -328,8 +328,8 @@ app.layout = html.Div([
 
     "gap":"6px",
 
-    "width":"180px",
-    "minWidth":"180px",
+    "width":"120px",
+    "minWidth":"120px",
 
     "position":"sticky",
     "top":"20px",

@@ -139,17 +139,6 @@ app.layout = html.Div([
                                     "boxShadow":"0 18px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(137, 188, 239, 0.16)",
                                     "border":"1px solid rgba(137, 188, 239, 0.45)"
                                 }
-                            ),
-                            html.Div(
-                                f"Última actualización: {ultima_actualizacion}",
-                                style={
-                                    "color":"#dcdcdc",
-                                    "fontSize":"13px",
-                                    "textAlign":"right",
-                                    "marginTop":"10px",
-                                    "width":"100%",
-                                    "paddingRight":"15px"
-                                }
                             )
                         ],
                         style={
@@ -169,30 +158,38 @@ app.layout = html.Div([
                                     "fontWeight":"700",
                                     "marginBottom":"25px",
                                     "textAlign":"center",
-                                    "fontFamily":"'ITC Avant Garde Gothic'"
+                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'"
                                 }
                             ),
                             dcc.Tabs(
                                 id="tabs",
                                 value="comparativas",
+                                className="tab-menu",
+                                style={"width":"100%","padding":"0","background":"transparent","border":"none"},
                                 children=[
                                     dcc.Tab(
                                         label="COMPARATIVAS",
                                         value="comparativas",
+                                        className="tab-item",
+                                        selected_className="tab-item-selected",
                                         style={
                                             "backgroundColor":"transparent",
                                             "color":"#edf1f2",
-                                            "border":"1px solid #3c4d52",
-                                            "borderRadius":"12px",
+                                            "border":"none",
+                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
+                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
+                                            "borderRadius":"0",
                                             "padding":"16px",
                                             "marginBottom":"12px",
                                             "fontWeight":"600"
                                         },
                                         selected_style={
-                                            "backgroundColor":"#48f788",
-                                            "color":"#000c0f",
-                                            "border":"1px solid #48f788",
-                                            "borderRadius":"12px",
+                                            "backgroundColor":"transparent",
+                                            "color":"#48f788",
+                                            "border":"none",
+                                            "borderTop":"1px solid #48f788",
+                                            "borderBottom":"1px solid #48f788",
+                                            "borderRadius":"0",
                                             "padding":"16px",
                                             "marginBottom":"12px",
                                             "fontWeight":"700"
@@ -201,20 +198,26 @@ app.layout = html.Div([
                                     dcc.Tab(
                                         label="CRONOLÓGICO",
                                         value="cronologico",
+                                        className="tab-item",
+                                        selected_className="tab-item-selected",
                                         style={
                                             "backgroundColor":"transparent",
                                             "color":"#edf1f2",
-                                            "border":"1px solid #3c4d52",
-                                            "borderRadius":"12px",
+                                            "border":"none",
+                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
+                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
+                                            "borderRadius":"0",
                                             "padding":"16px",
                                             "marginBottom":"12px",
                                             "fontWeight":"600"
                                         },
                                         selected_style={
-                                            "backgroundColor":"#48f788",
-                                            "color":"#000c0f",
-                                            "border":"1px solid #48f788",
-                                            "borderRadius":"12px",
+                                            "backgroundColor":"transparent",
+                                            "color":"#48f788",
+                                            "border":"none",
+                                            "borderTop":"1px solid #48f788",
+                                            "borderBottom":"1px solid #48f788",
+                                            "borderRadius":"0",
                                             "padding":"16px",
                                             "marginBottom":"12px",
                                             "fontWeight":"700"
@@ -223,20 +226,26 @@ app.layout = html.Div([
                                     dcc.Tab(
                                         label="ACTIVIDAD",
                                         value="actividad",
+                                        className="tab-item",
+                                        selected_className="tab-item-selected",
                                         style={
                                             "backgroundColor":"transparent",
                                             "color":"#edf1f2",
-                                            "border":"1px solid #3c4d52",
-                                            "borderRadius":"12px",
+                                            "border":"none",
+                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
+                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
+                                            "borderRadius":"0",
                                             "padding":"16px",
                                             "marginBottom":"12px",
                                             "fontWeight":"600"
                                         },
                                         selected_style={
-                                            "backgroundColor":"#48f788",
-                                            "color":"#000c0f",
-                                            "border":"1px solid #48f788",
-                                            "borderRadius":"12px",
+                                            "backgroundColor":"transparent",
+                                            "color":"#48f788",
+                                            "border":"none",
+                                            "borderTop":"1px solid #48f788",
+                                            "borderBottom":"1px solid #48f788",
+                                            "borderRadius":"0",
                                             "padding":"16px",
                                             "marginBottom":"12px",
                                             "fontWeight":"700"
@@ -245,27 +254,48 @@ app.layout = html.Div([
                                     dcc.Tab(
                                         label="ACWR",
                                         value="acwr",
+                                        className="tab-item",
+                                        selected_className="tab-item-selected",
                                         style={
                                             "backgroundColor":"transparent",
                                             "color":"#edf1f2",
-                                            "border":"1px solid #3c4d52",
-                                            "borderRadius":"12px",
-                                            "padding":"16px",
-                                            "marginBottom":"12px",
-                                            "fontWeight":"600"
+                                            "border":"none",
+                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
+                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
+                                            "borderRadius":"0",
+                                            "padding":"14px 12px",
+                                            "marginBottom":"10px",
+                                            "fontWeight":"600",
+                                            "width":"100%",
+                                            "boxSizing":"border-box"
                                         },
                                         selected_style={
-                                            "backgroundColor":"#48f788",
-                                            "color":"#000c0f",
-                                            "border":"1px solid #48f788",
-                                            "borderRadius":"12px",
-                                            "padding":"16px",
-                                            "marginBottom":"12px",
-                                            "fontWeight":"700"
+                                            "backgroundColor":"transparent",
+                                            "color":"#48f788",
+                                            "border":"none",
+                                            "borderTop":"1px solid #48f788",
+                                            "borderBottom":"1px solid #48f788",
+                                            "borderRadius":"0",
+                                            "padding":"14px 12px",
+                                            "marginBottom":"10px",
+                                            "fontWeight":"700",
+                                            "width":"100%",
+                                            "boxSizing":"border-box"
                                         }
                                     )
                                 ],
                                 vertical=True
+                            ),
+                            html.Div(
+                                f"Última actualización: {ultima_actualizacion}",
+                                style={
+                                    "color":"#dcdcdc",
+                                    "fontSize":"12px",
+                                    "textAlign":"center",
+                                    "marginTop":"8px",
+                                    "width":"100%",
+                                    "padding":"0 8px"
+                                }
                             )
                         ],
                         className="sidebar-panel sidebar-menu-panel",
@@ -273,10 +303,10 @@ app.layout = html.Div([
                             "padding":"16px",
                             "width":"220px",
                             "maxWidth":"220px",
-                            "backgroundColor":"transparent",
+                            "background":"linear-gradient(180deg, #000c0f 0%, #011c24 100%)",
                             "borderRadius":"24px",
-                            "border":"none",
-                            "boxShadow":"none"
+                            "border":"1px solid rgba(137, 188, 239, 0.18)",
+                            "boxShadow":"0 18px 40px rgba(0, 0, 0, 0.25)"
                         }
                     )
                 ],
@@ -422,9 +452,12 @@ app.layout = html.Div([
                                 ],
                                 value=["Distance"],
                                 inline=False,
+                                style={
+                                    "display": "grid",
+                                    "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+                                    "gap": "10px"
+                                },
                                 labelStyle={
-                                    "display":"inline-block",
-                                    "width":"48%",
                                     "color":"white",
                                     "fontSize":"10px",
                                     "marginBottom":"8px"
@@ -480,21 +513,21 @@ app.layout = html.Div([
                                     for r in referencias
                                 ],
                                 value="Category",
+                                style={
+                                    "display": "grid",
+                                    "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+                                    "gap": "10px"
+                                },
                                 labelStyle={
-                                    "display":"inline-block",
-                                    "width":"48%",
                                     "color":"white",
                                     "fontSize":"10px",
                                     "marginBottom":"8px"
                                 }
                             )
                         ],
+                        className="filter-card",
                         style={
-                            "background":"linear-gradient(180deg, rgba(12,13,15,0.96), rgba(11,12,14,0.96))",
-                            "padding":"16px",
-                            "borderRadius":"18px",
-                            "border":"1px solid rgba(137,188,239,0.18)",
-                            "boxShadow":"0 18px 40px rgba(5,5,5,0.45)"
+                            "padding":"16px"
                         }
                     ),
                     html.Div(

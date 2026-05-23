@@ -4,16 +4,46 @@
     font-weight: 600;
     font-display: swap;
     src: url('/assets/fonts/ClashDisplay-Semibold.eot');
-    src: url('/assets/fonts/ClashDisplay-Semibold.eot?#iefix') format('embedded-opentype');
+    src: url('/assets/fonts/ClashDisplay-Semibold.eot?#iefix') format('embedded-opentype'),
+         url('/assets/fonts/ClashDisplay-Semibold.otf') format('opentype');
 }
 
-:root, body, .tab-menu, .tab-item, .download-btn, .sidebar-panel, .dash-table {
-    font-family: 'Manrope', 'Segoe UI', sans-serif;
+@font-face {
+    font-family: 'Manrope Light';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('/assets/fonts/Manrope-Light.ttf') format('truetype');
 }
 
-h1, h2, h3, h4, .tab-item, .section-title {
+:root, body, .tab-menu, .download-btn, .sidebar-panel, .dash-table {
+    font-family: 'Manrope Light', 'Segoe UI', sans-serif;
+}
+
+h1, h2, h3, h4, .tab-item, .section-title, .sidebar-title {
     font-family: 'Clash Display Semibold', 'Helvetica Neue', sans-serif;
     font-weight: 600;
+}
+
+body,
+.dash-table-container,
+.dash-table,
+.dcc-graph,
+.sidebar-panel,
+.download-btn,
+.tab-menu,
+.tab-item {
+    font-size: 14px;
+}
+
+h1,
+h2,
+h3,
+h4,
+.tab-item,
+.section-title,
+.sidebar-title {
+    font-size: min(2.2rem, 1.6em);
 }
 
 .download-btn {

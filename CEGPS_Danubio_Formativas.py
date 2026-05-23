@@ -615,7 +615,7 @@ style={
     "backgroundColor": "#061b27",
     "color":"#ffffff",
     "padding":"28px 24px 36px 24px",
-    "fontFamily":"'Manrope', 'Segoe UI', sans-serif",
+    "fontFamily":"'Manrope Light', 'Segoe UI', sans-serif",
     "minHeight":"100vh"
 }
 )

@@ -115,7 +115,7 @@ app.layout = html.Div([
         style={
             "width":"100%",
             "textAlign":"center",
-            "paddingTop":"35px",
+            "paddingTop":"15px",
             "paddingBottom":"8px"
         }
     ),
@@ -186,7 +186,8 @@ app.layout = html.Div([
                                             "borderRadius":"0",
                                             "padding":"8px 10px",
                                             "marginBottom":"2px",
-                                            "fontSize":"12px",
+                                            "marginRight":"-10px",
+                                            "fontSize":"10px",
                                             "fontWeight":"600",
                                             "width":"100%",
 "boxSizing":"border-box",
@@ -200,6 +201,7 @@ app.layout = html.Div([
                                             "borderRadius":"0",
                                             "padding":"8px 10px",
                                             "marginBottom":"2px",
+                                            "marginRight":"-10px",
                                             "fontWeight":"700"
                                         }
                                     ),
@@ -217,7 +219,8 @@ app.layout = html.Div([
                                             "borderRadius":"0",
                                             "padding":"8px 10px",
                                             "marginBottom":"2px",
-                                            "fontSize":"12px",
+                                            "marginRight":"-10px",
+                                            "fontSize":"10px",
                                             "fontWeight":"600",
                                             "width":"100%",
 "boxSizing":"border-box",
@@ -231,6 +234,7 @@ app.layout = html.Div([
                                             "borderRadius":"0",
                                             "padding":"8px 10px",
                                             "marginBottom":"2px",
+                                            "marginRight":"-10px",
                                             "fontWeight":"700"
                                         }
                                     ),
@@ -248,7 +252,8 @@ app.layout = html.Div([
                                             "borderRadius":"0",
                                             "padding":"8px 10px",
                                             "marginBottom":"2px",
-                                            "fontSize":"12px",
+                                            "marginRight":"-10px",
+                                            "fontSize":"10px",
                                             "fontWeight":"600",
                                             "width":"100%",
 "boxSizing":"border-box",
@@ -262,6 +267,7 @@ app.layout = html.Div([
                                             "borderRadius":"0",
                                             "padding":"8px 10px",
                                             "marginBottom":"2px",
+                                            "marginRight":"-10px",
                                             "fontWeight":"700"
                                         }
                                     ),
@@ -279,7 +285,8 @@ app.layout = html.Div([
                                             "borderRadius":"0",
                                             "padding":"8px 10px",
                                             "marginBottom":"2px",
-                                            "fontSize":"12px",
+                                            "marginRight":"-10px",
+                                            "fontSize":"10px",
                                             "fontWeight":"600",
                                             "width":"100%",
                                             "boxSizing":"border-box"
@@ -293,6 +300,7 @@ app.layout = html.Div([
                                             "borderRadius":"0",
                                             "padding":"8px 10px",
                                             "marginBottom":"2px",
+                                            "marginRight":"-10px",
                                             "fontWeight":"700",
                                             "width":"100%",
                                             "boxSizing":"border-box"
@@ -309,7 +317,7 @@ app.layout = html.Div([
                                     "textAlign":"center",
                                     "marginTop":"8px",
                                     "width":"100%",
-                                    "padding":"0 4px"
+                                    "padding":"0 3px"
                                 }
                             )
                         ],

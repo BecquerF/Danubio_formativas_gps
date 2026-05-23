@@ -106,7 +106,7 @@ app.layout = html.Div([
                 "textAlign":"top",
                 "fontSize":"38px",
                 "fontWeight":"700",
-                "marginTop":"0px",
+                "marginTop":"10px",
                 "margincolor":"#a3e3d0",
                 "marginBottom":"10px",
                 "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
@@ -142,7 +142,7 @@ app.layout = html.Div([
         "color":"#dcdcdc",
         "fontSize":"13px",
         "textAlign":"right",
-        "marginTop":"30px",
+        "marginTop":"100px",
         "width":"100%",
         "paddingRight":"15px"
     }
@@ -859,7 +859,7 @@ def actualizar_tab(
                     "color": "white",
                     "textAlign": "center",
                     "marginBottom": "20px",
-                    "fontFamily":"'Clash Display Semibold Semibold', 'Helvetica Neue'",
+                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                     "fontWeight":"600"
                 }
             ),
@@ -869,7 +869,7 @@ def actualizar_tab(
                     "color": "#a3e3d0",
                     "textAlign": "center",
                     "marginBottom": "15px",
-                    "fontFamily":"'Clash Display Semibold Semibold', 'Helvetica Neue'",
+                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                     "fontWeight":"600"
                 }
             ),

@@ -364,7 +364,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-png.svg",
-                                    style={"width":"14px","height":"14px"}
+                                    style={"width":"14px","height":"14px","backgroundColor":"#edf1f2"}
                                 ),
                                 id="download-graph-png",
                                 n_clicks=0,
@@ -374,7 +374,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-pdf.svg",
-                                    style={"width":"14px","height":"14px"}
+                                    style={"width":"14px","height":"14px","backgroundColor":"#edf1f2"}
                                 ),
                                 id="download-graph-pdf",
                                 n_clicks=0,
@@ -384,7 +384,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-csv.svg",
-                                    style={"width":"14px","height":"14px"}
+                                    style={"width":"14px","height":"14px", "backgroundColor":"#edf1f2"}
                                 ),
                                 id="download-table-csv",
                                 n_clicks=0,
@@ -394,7 +394,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-xlsx.svg",
-                                    style={"width":"14px","height":"14px"}
+                                    style={"width":"14px","height":"14px", "backgroundColor":"#edf1f2"}
                                 ),
                                 id="download-table-xlsx",
                                 n_clicks=0,
@@ -404,9 +404,11 @@ app.layout = html.Div([
                         ],
                         style={
                             "display":"flex",
+                            "justifyContent":"center",
                             "flexWrap":"wrap",
                             "gap":"12px",
-                            "marginBottom":"16px"
+                            "marginTop":"16px",
+                            "paddingBottom":"18px",
                         }
                     ),
                     dcc.Download(id="download-graph"),

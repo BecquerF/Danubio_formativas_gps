@@ -184,7 +184,7 @@ h4,
 .sidebar-menu-panel,
 .sidebar-right-panel {
     position: sticky;
-    top: 28px;
+    top: 18px;
     max-height: calc(100vh - 56px);
 }
 

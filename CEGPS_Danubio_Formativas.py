@@ -127,27 +127,26 @@ app.layout = html.Div([
                     html.Div(
                         [
                             html.Img(
-    src="/assets/logo_dataload_2.png",
+            src="/assets/logo_dataload_2.png",
+            style={
+                "width":"100%",
+                "height":"auto",
+                "display":"block",
+                "objectFit":"contain"
+            }
+        )
+    ],
+
     style={
-        "width":"100%",
-        "display":"block",
-        "borderRadius":"18px",
+        "background":"rgba(13, 24, 34, 0.95)",
+        "padding":"14px",
+        "borderRadius":"20px",
+        "boxShadow":"0 18px 40px rgba(0,0,0,0.45)",
+        "border":"1px solid rgba(137,188,239,0.20)",
         "marginBottom":"20px",
-        "maxHeight":"100px",
-        "objectFit":"contain",
-        "backgroundColor":"rgba(13, 24, 34, 0.95)",
-        "boxShadow":"0 18px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(137, 188, 239, 0.16)",
+        "overflow":"hidden"
     }
-)
-                        ],
-                        style={
-    "display":"flex",
-    "flexDirection":"column",
-    "gap":"12px",
-    "width":"100%",
-    "padding":"0px"
-}
-                    ),
+),
                     html.Div(
                         [
                             html.H2(

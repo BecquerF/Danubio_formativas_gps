@@ -688,7 +688,7 @@ app.layout = html.Div([
 style={
     "color":"#ffffff",
     "padding": "28px 24px 36px",
-    "fontFamily": "'Manrope Light', 'Segoe UI', sans-serif",
+    "fontFamily": "'Clash Display Semibold', 'Segoe UI', sans-serif",
     "margin": "0",
     "minHeight": "100vh"
 }
@@ -1088,7 +1088,7 @@ def actualizar_tab(
                                 "filter_query": "{Distance_ACWR} < 0.8",
                                 "column_id": "Distance_ACWR"
                             },
-                            "backgroundColor": "#8B0000",
+                            "backgroundColor": "#A40A1C",
                             "color": "white"
                         },
                         {
@@ -1096,7 +1096,7 @@ def actualizar_tab(
                                 "filter_query": "{Distance_ACWR} >= 0.8 && {Distance_ACWR} <= 1.3",
                                 "column_id": "Distance_ACWR"
                             },
-                            "backgroundColor": "#4f7942",
+                            "backgroundColor": "#a3e3d0",
                             "color": "white"
                         },
                         {
@@ -1104,7 +1104,7 @@ def actualizar_tab(
                                 "filter_query": "{Distance_ACWR} > 1.3",
                                 "column_id": "Distance_ACWR"
                             },
-                            "backgroundColor": "#89bcef",
+                            "backgroundColor": "#ff5e5e",
                             "color": "black"
                         },
                         {
@@ -1112,7 +1112,7 @@ def actualizar_tab(
                                 "filter_query": "{Player Load_ACWR} < 0.8",
                                 "column_id": "Player Load_ACWR"
                             },
-                            "backgroundColor": "#8B0000",
+                            "backgroundColor": "#A40A1C",
                             "color": "white"
                         },
                         {
@@ -1120,7 +1120,7 @@ def actualizar_tab(
                                 "filter_query": "{Player Load_ACWR} >= 0.8 && {Player Load_ACWR} <= 1.3",
                                 "column_id": "Player Load_ACWR"
                             },
-                            "backgroundColor": "#4f7942",
+                            "backgroundColor": "#a3e3d0",
                             "color": "white"
                         },
                         {
@@ -1128,7 +1128,7 @@ def actualizar_tab(
                                 "filter_query": "{Player Load_ACWR} > 1.3",
                                 "column_id": "Player Load_ACWR"
                             },
-                            "backgroundColor": "#89bcef",
+                            "backgroundColor": "#ff5e5e",
                             "color": "black"
                         },
                         {
@@ -1136,7 +1136,7 @@ def actualizar_tab(
                                 "filter_query": "{Acceleration Efforts_ACWR} < 0.8",
                                 "column_id": "Acceleration Efforts_ACWR"
                             },
-                            "backgroundColor": "#8B0000",
+                            "backgroundColor": "#A40A1C",
                             "color": "white"
                         },
                         {
@@ -1144,7 +1144,7 @@ def actualizar_tab(
                                 "filter_query": "{Acceleration Efforts_ACWR} >= 0.8 && {Acceleration Efforts_ACWR} <= 1.3",
                                 "column_id": "Acceleration Efforts_ACWR"
                             },
-                            "backgroundColor": "#4f7942",
+                            "backgroundColor": "#a3e3d0",
                             "color": "white"
                         },
                         {
@@ -1152,7 +1152,7 @@ def actualizar_tab(
                                 "filter_query": "{Acceleration Efforts_ACWR} > 1.3",
                                 "column_id": "Acceleration Efforts_ACWR"
                             },
-                            "backgroundColor": "#89bcef",
+                            "backgroundColor": "#ff5e5e",
                             "color": "black"
                         },
                         {
@@ -1160,7 +1160,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Distance_ACWR} < 0.8",
                                 "column_id": "Sprint Distance_ACWR"
                             },
-                            "backgroundColor": "#8B0000",
+                            "backgroundColor": "#A40A1C",
                             "color": "white"
                         },
                         {
@@ -1168,7 +1168,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Distance_ACWR} >= 0.8 && {Sprint Distance_ACWR} <= 1.3",
                                 "column_id": "Sprint Distance_ACWR"
                             },
-                            "backgroundColor": "#4f7942",
+                            "backgroundColor": "#a3e3d0",
                             "color": "white"
                         },
                         {
@@ -1176,7 +1176,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Distance_ACWR} > 1.3",
                                 "column_id": "Sprint Distance_ACWR"
                             },
-                            "backgroundColor": "#89bcef",
+                            "backgroundColor": "#ff5e5e",
                             "color": "black"
                         },
                         {
@@ -1184,7 +1184,7 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Distance_ACWR} < 0.8",
                                 "column_id": "High Speed Distance_ACWR"
                             },
-                            "backgroundColor": "#8B0000",
+                            "backgroundColor": "#A40A1C",
                             "color": "white"
                         },
                         {
@@ -1192,7 +1192,7 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Distance_ACWR} >= 0.8 && {High Speed Distance_ACWR} <= 1.3",
                                 "column_id": "High Speed Distance_ACWR"
                             },
-                            "backgroundColor": "#4f7942",
+                            "backgroundColor": "#a3e3d0",
                             "color": "white"
                         },
                         {
@@ -1200,7 +1200,7 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Distance_ACWR} > 1.3",
                                 "column_id": "High Speed Distance_ACWR"
                             },
-                            "backgroundColor": "#89bcef",
+                            "backgroundColor": "#ff5e5e",
                             "color": "black"
                         },
                         {
@@ -1208,7 +1208,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Efforts_ACWR} < 0.8",
                                 "column_id": "Sprint Efforts_ACWR"
                             },
-                            "backgroundColor": "#8B0000",
+                            "backgroundColor": "#A40A1C",
                             "color": "white"
                         },
                         {
@@ -1216,7 +1216,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Efforts_ACWR} >= 0.8 && {Sprint Efforts_ACWR} <= 1.3",
                                 "column_id": "Sprint Efforts_ACWR"
                             },
-                            "backgroundColor": "#4f7942",
+                            "backgroundColor": "#a3e3d0",
                             "color": "white"
                         },
                         {
@@ -1224,7 +1224,7 @@ def actualizar_tab(
                                 "filter_query": "{Sprint Efforts_ACWR} > 1.3",
                                 "column_id": "Sprint Efforts_ACWR"
                             },
-                            "backgroundColor": "#89bcef",
+                            "backgroundColor": "#ff5e5e",
                             "color": "black"
                         },
                         {
@@ -1232,7 +1232,7 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Efforts_ACWR} < 0.8",
                                 "column_id": "High Speed Efforts_ACWR"
                             },
-                            "backgroundColor": "#8B0000",
+                            "backgroundColor": "#A40A1C",
                             "color": "white"
                         },
                         {
@@ -1240,7 +1240,7 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Efforts_ACWR} >= 0.8 && {High Speed Efforts_ACWR} <= 1.3",
                                 "column_id": "High Speed Efforts_ACWR"
                             },
-                            "backgroundColor": "#4f7942",
+                            "backgroundColor": "#a3e3d0",
                             "color": "white"
                         },
                         {
@@ -1248,15 +1248,15 @@ def actualizar_tab(
                                 "filter_query": "{High Speed Efforts_ACWR} > 1.3",
                                 "column_id": "High Speed Efforts_ACWR"
                             },
-                            "backgroundColor": "#89bcef",
-                            "color": "black"
+                            "backgroundColor": "#ff5e5e",
+                            "color": "white"
                         },
                         {
                             "if": {
                                 "filter_query": "{Impacts_ACWR} < 0.8",
                                 "column_id": "Impacts_ACWR"
                             },
-                            "backgroundColor": "#8B0000",
+                            "backgroundColor": "#A40A1C",
                             "color": "white"
                         },
                         {
@@ -1264,7 +1264,7 @@ def actualizar_tab(
                                 "filter_query": "{Impacts_ACWR} >= 0.8 && {Impacts_ACWR} <= 1.3",
                                 "column_id": "Impacts_ACWR"
                             },
-                            "backgroundColor": "#4f7942",
+                            "backgroundColor": "#a3e3d0",
                             "color": "white"
                         },
                         {
@@ -1272,8 +1272,8 @@ def actualizar_tab(
                                 "filter_query": "{Impacts_ACWR} > 1.3",
                                 "column_id": "Impacts_ACWR"
                             },
-                            "backgroundColor": "#89bcef",
-                            "color": "black"
+                            "backgroundColor": "#ff5e5e",
+                            "color": "white"
                         }
                     ],
                     page_size=20

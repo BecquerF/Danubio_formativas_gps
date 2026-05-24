@@ -97,6 +97,9 @@ ultima_actualizacion = (
 )
 
 app.layout = html.Div([
+
+    # ===== TÍTULO =====
+
     html.Div(
         html.H1(
             "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
@@ -105,337 +108,213 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontSize":"38px",
                 "fontWeight":"700",
-                "marginTop":"0px",
-                "marginBottom":"0px",
-                "marginLeft":"-10px",
                 "fontFamily":"'Clash Display Semibold'",
                 "lineHeight":"1.05",
                 "letterSpacing":"0.02em",
                 "borderBottom":"2px solid #48f788",
                 "paddingBottom":"12px",
+                "margin":"0"
             }
         ),
         style={
             "width":"100%",
-            "textAlign":"center",
             "paddingTop":"15px",
             "paddingBottom":"8px"
         }
     ),
 
-    html.Div(
-        [
+    # ===== CONTENIDO GENERAL =====
+
+    html.Div([
+
+        # ==================================================
+        # SIDEBAR IZQUIERDO
+        # ==================================================
+
+        html.Div([
+
+            # LOGO
+
+            html.Div([
+
+                html.Img(
+                    src="/assets/logo_dataload_2.png",
+                    style={
+                        "width":"100%",
+                        "height":"auto",
+                        "display":"block",
+                        "objectFit":"contain",
+                        "position":"relative",
+                        "top":"-10px"
+                    }
+                )
+
+            ],
+
+            style={
+                "background":"rgba(13,24,34,0.95)",
+                "padding":"1px",
+                "borderRadius":"12px",
+                "border":"1px solid rgba(137,188,239,0.20)",
+                "boxShadow":"0 18px 40px rgba(0,0,0,0.45)",
+                "marginBottom":"20px",
+                "overflow":"hidden"
+            }),
+
+            # MENÚ
+
+            html.Div([
+
+                html.H2(
+                    "MENÚ",
+                    style={
+                        "color":"#edf1f2",
+                        "fontSize":"22px",
+                        "fontWeight":"700",
+                        "textAlign":"center",
+                        "marginBottom":"20px"
+                    }
+                ),
+
+                dcc.Tabs(
+                    id="tabs",
+                    value="comparativas",
+                    vertical=True,
+                    children=[
+
+                        dcc.Tab(
+                            label="COMPARATIVAS",
+                            value="comparativas"
+                        ),
+
+                        dcc.Tab(
+                            label="CRONOLÓGICO",
+                            value="cronologico"
+                        ),
+
+                        dcc.Tab(
+                            label="ACTIVIDAD",
+                            value="actividad"
+                        ),
+
+                        dcc.Tab(
+                            label="ACWR",
+                            value="acwr"
+                        )
+
+                    ]
+                ),
+
+                html.Div(
+                    f"Última actualización: {ultima_actualizacion}",
+                    style={
+                        "color":"#dcdcdc",
+                        "fontSize":"8px",
+                        "marginTop":"12px",
+                        "textAlign":"center"
+                    }
+                )
+
+            ],
+
+            style={
+                "padding":"12px",
+                "background":"linear-gradient(180deg,#000c0f,#011c24)",
+                "borderRadius":"12px",
+                "border":"1px solid rgba(137,188,239,.18)"
+            })
+
+        ],
+
+        style={
+            "display":"flex",
+            "flexDirection":"column",
+            "width":"120px",
+            "minWidth":"120px",
+            "gap":"6px",
+            "position":"sticky",
+            "top":"20px",
+            "alignSelf":"flex-start"
+        }),
+
+        # ==================================================
+        # CONTENIDO CENTRAL
+        # ==================================================
+
+        html.Div([
+
+            dcc.Download(id="download-graph"),
+            dcc.Download(id="download-table"),
+
+            # GRÁFICO
+
             html.Div(
-                [
-                    html.Div(
-                        [
-                            html.Img(
-         src="/assets/logo_dataload_2.png", 
-         style={ "width":"100%", 
-                                                   "boxSizing":"border-box", 
-                                                   "height":"auto", 
-                                                   "display":"block", 
-                                                   "objectFit":"contain", 
-                                                   "position":"relative",
-                                                   "top":"-10xp"
-}
-        )
-    ],
-
-    style={
-        "background":"rgba(13, 24, 34, 0.95)",
-        "padding":"1px",
-        "borderRadius":"12px",
-        "boxShadow":"0 18px 40px rgba(0,0,0,0.45)",
-        "border":"1px solid rgba(137,188,239,0.20)",
-        "marginTop":"5px",
-        "marginBottom":"30px",
-        "overflow":"hidden"
-    }
-),
-                    html.Div(
-                        [
-                            html.H2(
-                                "MENÚ",
-                                style={
-                                    "color":"#edf1f2",
-                                    "fontSize":"22px",
-                                    "fontWeight":"700",
-                                    "padding":"8px 10px",
-                                    "marginBottom":"25px",
-                                    "marginRight":"-10px",
-                                    "width":"100%",
-                                    "boxSizing":"border-box",
-                                    "textAlign":"center",
-                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'"
-                                }
-                                ),
-                            dcc.Tabs(
-                                id="tabs",
-                                value="comparativas",
-                                className="tab-menu",
-                                style={"width":"100%","padding":"0","background":"transparent","border":"none"},
-                                children=[
-                                    dcc.Tab(
-                                        label="COMPARATIVAS",
-                                        value="comparativas",
-                                        className="tab-item",
-                                        selected_className="tab-item-selected",
-                                        style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#edf1f2",
-                                            "border":"none",
-                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
-                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "textAlign":"center",
-                                            "fontSize":"10px",
-                                            "fontWeight":"600",
-                                            "width":"100%",
-"boxSizing":"border-box",
-                                        },
-                                        selected_style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#48f788",
-                                            "border":"none",
-                                            "borderTop":"1px solid #48f788",
-                                            "borderBottom":"1px solid #48f788",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "fontWeight":"700"
-                                        }
-                                    ),
-                                    dcc.Tab(
-                                        label="CRONOLÓGICO",
-                                        value="cronologico",
-                                        className="tab-item",
-                                        selected_className="tab-item-selected",
-                                        style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#edf1f2",
-                                            "border":"none",
-                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
-                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "textAlign":"center",
-                                            "fontSize":"10px",
-                                            "fontWeight":"600",
-                                            "width":"100%",
-"boxSizing":"border-box",
-                                        },
-                                        selected_style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#48f788",
-                                            "border":"none",
-                                            "borderTop":"1px solid #48f788",
-                                            "borderBottom":"1px solid #48f788",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "fontWeight":"700"
-                                        }
-                                    ),
-                                    dcc.Tab(
-                                        label="ACTIVIDAD",
-                                        value="actividad",
-                                        className="tab-item",
-                                        selected_className="tab-item-selected",
-                                        style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#edf1f2",
-                                            "border":"none",
-                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
-                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "textAlign":"center",
-                                            "fontSize":"10px",
-                                            "fontWeight":"600",
-                                            "width":"100%",
-"boxSizing":"border-box",
-                                        },
-                                        selected_style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#48f788",
-                                            "border":"none",
-                                            "borderTop":"1px solid #48f788",
-                                            "borderBottom":"1px solid #48f788",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "fontWeight":"700"
-                                        }
-                                    ),
-                                    dcc.Tab(
-                                        label="ACWR",
-                                        value="acwr",
-                                        className="tab-item",
-                                        selected_className="tab-item-selected",
-                                        style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#edf1f2",
-                                            "border":"none",
-                                            "borderTop":"1px solid rgba(137,188,239,0.18)",
-                                            "borderBottom":"1px solid rgba(137,188,239,0.18)",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "textAlign":"center",
-                                            "fontSize":"10px",
-                                            "fontWeight":"600",
-                                            "width":"100%",
-                                            "boxSizing":"border-box"
-                                        },
-                                        selected_style={
-                                            "backgroundColor":"transparent",
-                                            "color":"#48f788",
-                                            "border":"none",
-                                            "borderTop":"1px solid #48f788",
-                                            "borderBottom":"1px solid #48f788",
-                                            "borderRadius":"0",
-                                            "padding":"8px 10px",
-                                            "marginBottom":"2px",
-                                            "marginRight":"-10px",
-                                            "fontWeight":"700",
-                                            "width":"100%",
-                                            "boxSizing":"border-box"
-                                        }
-                                    )
-                                ],
-                                vertical=True
-                            ),
-                            html.Div(
-                                f"Última actualización: {ultima_actualizacion}",
-                                style={
-                                    "color":"#dcdcdc",
-                                    "fontSize":"8px",
-                                    "textAlign":"center",
-                                    "marginTop":"8px",
-                                    "width":"100%",
-                                    "padding":"0 3px"
-                                }
-                            )
-                        ],
-                        className="sidebar-panel sidebar-menu-panel",
-                        style={
-    "padding":"12px",
-    "width":"100%",
-    "boxSizing":"border-box",
-
-    "background":"linear-gradient(180deg, #000c0f 0%, #011c24 100%)",
-
-    "borderRadius":"12px",
-    "border":"1px solid rgba(137,188,239,0.18)",
-    "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
-}
-                    )
-                ],
+                id="contenido-tab",
                 style={
-    "display":"flex",
-    "flexDirection":"column",
-
-    "gap":"6px",
-
-    "width":"120px",
-    "minWidth":"120px",
-
-    "position":"sticky",
-    "top":"20px",
-
-    "alignSelf":"flex-start",
-
-    "boxSizing":"border-box",
-    "borderVertical":"1px solid rgba(137,188,239,0.20)",
-}
-            ),
-            html.Div(
-                [
-                    html.Div(
-                        [
-                            html.Button(
-                                html.Img(
-                                    src="/assets/icon-download-png.svg",
-                                    style={"width":"20px","height":"20px", "backgroundColor":"#011c24"}
-                                ),
-                                id="download-graph-png",
-                                n_clicks=0,
-                                title="Descargar gráfico PNG",
-                                className="download-btn"
-                            ),
-                            html.Button(
-                                html.Img(
-                                    src="/assets/icon-download-pdf.svg",
-                                    style={"width":"20px","height":"20px","backgroundColor":"#011c24"}
-                                ),
-                                id="download-graph-pdf",
-                                n_clicks=0,
-                                title="Descargar gráfico PDF",
-                                className="download-btn"
-                            ),
-                            html.Button(
-                                html.Img(
-                                    src="/assets/icon-download-csv.svg",
-                                    style={"width":"20px","height":"20px", "backgroundColor":"#011c24"}
-                                ),
-                                id="download-table-csv",
-                                n_clicks=0,
-                                title="Descargar tabla CSV",
-                                className="download-btn"
-                            ),
-                            html.Button(
-                                html.Img(
-                                    src="/assets/icon-download-xlsx.svg",
-                                    style={"width":"20px","height":"20px", "backgroundColor":"#011c24"}
-                                ),
-                                id="download-table-xlsx",
-                                n_clicks=0,
-                                title="Descargar tabla XLSX",
-                                className="download-btn"
-                            )
-                        ],
-                        style={
-                            "display":"flex",
-                            "justifyContent":"center",
-                            "flexWrap":"wrap",
-                            "gap":"12px",
-                            "marginTop":"16px",
-                            "paddingBottom":"18px",
-                        }
-                    ),
-                    dcc.Download(id="download-graph"),
-                    dcc.Download(id="download-table"),
-                    html.Div(
-                        id="contenido-tab",
-                        style={
-                            "flex":"1 1 0",
-                            "minHeight":"calc(100vh - 220px)",
-                            "width":"100%",
-                            "position":"sticky",
-                            "top":"140px"
-                        }
-                    )
-                ],
-                style={
-                    "display":"flex",
-                    "flexDirection":"column",
-                    "flex":"1 1 0",
-                    "minWidth":"0",
-                    "gap":"18px"
+                    "width":"100%",
+                    "minHeight":"calc(100vh - 220px)"
                 }
             ),
+
+            # BOTONES DE DESCARGA
+
+            html.Div([
+
+                html.Button(
+                    html.Img(
+                        src="/assets/icon-download-png.svg",
+                        style={"width":"20px"}
+                    ),
+                    id="download-graph-png",
+                    className="download-btn"
+                ),
+
+                html.Button(
+                    html.Img(
+                        src="/assets/icon-download-pdf.svg",
+                        style={"width":"20px"}
+                    ),
+                    id="download-graph-pdf",
+                    className="download-btn"
+                ),
+
+                html.Button(
+                    html.Img(
+                        src="/assets/icon-download-csv.svg",
+                        style={"width":"20px"}
+                    ),
+                    id="download-table-csv",
+                    className="download-btn"
+                ),
+
+                html.Button(
+                    html.Img(
+                        src="/assets/icon-download-xlsx.svg",
+                        style={"width":"20px"}
+                    ),
+                    id="download-table-xlsx",
+                    className="download-btn"
+                )
+
+            ],
+
+            style={
+                "display":"flex",
+                "justifyContent":"center",
+                "gap":"12px",
+                "marginTop":"20px",
+                "paddingBottom":"18px"
+            })
+
+        ],
+
+        style={
+            "display":"flex",
+            "flexDirection":"column",
+            "flex":"1",
+            "gap":"18px"
+        }),
+
             html.Div(
                 [
                     html.Div(
@@ -573,92 +452,148 @@ app.layout = html.Div([
                         }
                     ),
                     html.Div(
-                        [
-                            html.H4(
-                                "Filtrar por",
-                                style={
-                                    "color":"#a3e3d0",
-                                    "fontSize":"13px",
-                                    "fontWeight":"600",
-                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
-                                    "marginBottom":"12px"
-                                }
-                            ),
-                            html.Div(
-                                [
-                                    html.Div(
-                                        [
-                                            html.P(
-                                                "Jugador",
-                                                style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"6px"}
-                                            ),
-                                            dcc.Dropdown(
-                                                id="jugador",
-                                                options=[
-                                                    {"label":x, "value":x}
-                                                    for x in sorted(df["Player Name"].dropna().unique())
-                                                ],
-                                                multi=True,
-                                                style={"marginBottom": "12px"}
-                                            )
-                                        ], style={"width": "100%"}),
-                                        html.Div(
-                                            [
-                                                html.P(
-                                                    "Athlete Tags",
-                                                    style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"6px"}
-                                                ),
-                                                dcc.Dropdown(
-                                                    id="athlete",
-                                                    options=[
-                                                        {"label":x, "value":x}
-                                                        for x in sorted(df["Athlete Tags"].dropna().unique())
-                                                    ],
-                                                    multi=True,
-                                                    style={"marginBottom": "12px"}
-                                                )
-                                            ], style={"width": "100%"}),
-                                        html.Div(
-                                            [
-                                                html.P(
-                                                    "Game Tags",
-                                                    style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"6px"}
-                                                ),
-                                                dcc.Dropdown(
-                                                    id="gametag",
-                                                    options=[
-                                                        {"label":x, "value":x}
-                                                        for x in sorted(df["Game Tags"].dropna().unique())
-                                                    ],
-                                                    multi=True,
-                                                    style={"marginBottom": "12px"}
-                                                )
-                                            ], style={"width": "100%"}),
-                                        html.Div(
-                                            [
-                                                html.P(
-                                                    "Period Tags",
-                                                    style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"6px"}
-                                                ),
-                                                dcc.Dropdown(
-                                                    id="periodtag",
-                                                    options=[
-                                                        {"label":x, "value":x}
-                                                        for x in sorted(df["Period Tags"].dropna().unique())
-                                                    ],
-                                                    multi=True
-                                                )
-                                            ], style={"width": "100%"})
-                                    ],
-                                    style={"display": "grid", "gridTemplateColumns": "1fr", "gap": "12px"}
+    [
+        html.H4(
+            "Filtrar por",
+            style={
+                "color":"#a3e3d0",
+                "fontSize":"13px",
+                "fontWeight":"600",
+                "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                "marginBottom":"12px"
+            }
+        ),
+
+        html.Div(
+
+            [
+
+                html.Div(
+                    [
+                        html.P(
+                            "Jugador",
+                            style={
+                                "color":"#f5f5f5",
+                                "fontSize":"10px",
+                                "marginBottom":"6px"
+                            }
+                        ),
+
+                        dcc.Dropdown(
+                            id="jugador",
+                            options=[
+                                {"label":x,"value":x}
+                                for x in sorted(
+                                    df["Player Name"]
+                                    .dropna()
+                                    .unique()
                                 )
-                        ],
-                        className="filter-card",
-                        style={
-                            "padding":"16px"
-                        }
-                    )
-                ],
+                            ],
+                            multi=True
+                        )
+
+                    ]
+                ),
+
+                html.Div(
+                    [
+                        html.P(
+                            "Athlete Tags",
+                            style={
+                                "color":"#f5f5f5",
+                                "fontSize":"10px",
+                                "marginBottom":"6px"
+                            }
+                        ),
+
+                        dcc.Dropdown(
+                            id="athlete",
+                            options=[
+                                {"label":x,"value":x}
+                                for x in sorted(
+                                    df["Athlete Tags"]
+                                    .dropna()
+                                    .unique()
+                                )
+                            ],
+                            multi=True
+                        )
+
+                    ]
+                ),
+
+                html.Div(
+                    [
+                        html.P(
+                            "Game Tags",
+                            style={
+                                "color":"#f5f5f5",
+                                "fontSize":"10px",
+                                "marginBottom":"6px"
+                            }
+                        ),
+
+                        dcc.Dropdown(
+                            id="gametag",
+                            options=[
+                                {"label":x,"value":x}
+                                for x in sorted(
+                                    df["Game Tags"]
+                                    .dropna()
+                                    .unique()
+                                )
+                            ],
+                            multi=True
+                        )
+
+                    ]
+                ),
+
+                html.Div(
+                    [
+                        html.P(
+                            "Period Tags",
+                            style={
+                                "color":"#f5f5f5",
+                                "fontSize":"10px",
+                                "marginBottom":"6px"
+                            }
+                        ),
+
+                        dcc.Dropdown(
+                            id="periodtag",
+                            options=[
+                                {"label":x,"value":x}
+                                for x in sorted(
+                                    df["Period Tags"]
+                                    .dropna()
+                                    .unique()
+                                )
+                            ],
+                            multi=True
+                        )
+
+                    ]
+                )
+
+            ],
+
+            style={
+                "display":"grid",
+                "gridTemplateColumns":"1fr",
+                "gap":"12px"
+            }
+
+        )
+
+    ],
+
+    className="filter-card",
+    style={
+        "padding":"16px"
+    }
+
+)],
                 className="sidebar-panel sidebar-right-panel",
                 style={
     "width":"200px",
@@ -696,7 +631,6 @@ style={
     "minHeight": "100vh"
 }
 )
-
 @app.callback(
     Output("actividad-fecha-container","style"),
     Input("tabs","value")

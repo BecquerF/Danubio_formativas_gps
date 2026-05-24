@@ -368,7 +368,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-png.svg",
-                                    style={"width":"20px","height":"20px", "backgroundColor":"none"}
+                                    style={"width":"20px","height":"20px", "backgroundColor":"#011c24"}
                                 ),
                                 id="download-graph-png",
                                 n_clicks=0,

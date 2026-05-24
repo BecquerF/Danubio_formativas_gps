@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<svg baseProfile="full" height="50" version="1.1" viewBox="0,0,50,50" width="50" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs /><polygon fill="white" points="7,2 7,47 42,47 42,14 30,2" /></svg>
+<svg baseProfile="full" height="50" version="1.1" width="50" xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink"><defs /><polygon fill="black" points="7,2 7,47 42,47 42,14 30,2" /></svg>

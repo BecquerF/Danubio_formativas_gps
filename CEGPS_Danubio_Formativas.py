@@ -378,7 +378,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-pdf.svg",
-                                    style={"width":"20px","height":"20px","backgroundColor":"#edf1f2"}
+                                    style={"width":"20px","height":"20px","backgroundColor":"#011c24"}
                                 ),
                                 id="download-graph-pdf",
                                 n_clicks=0,
@@ -388,7 +388,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-csv.svg",
-                                    style={"width":"20px","height":"20px", "backgroundColor":"#edf1f2"}
+                                    style={"width":"20px","height":"20px", "backgroundColor":"#011c24"}
                                 ),
                                 id="download-table-csv",
                                 n_clicks=0,
@@ -398,7 +398,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-xlsx.svg",
-                                    style={"width":"20px","height":"20px", "backgroundColor":"#edf1f2"}
+                                    style={"width":"20px","height":"20px", "backgroundColor":"#011c24"}
                                 ),
                                 id="download-table-xlsx",
                                 n_clicks=0,

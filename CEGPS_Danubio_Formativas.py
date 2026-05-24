@@ -660,8 +660,8 @@ app.layout = html.Div([
                 ],
                 className="sidebar-panel sidebar-right-panel",
                 style={
-    "width":"300px",
-    "minWidth":"300px",
+    "width":"400px",
+    "minWidth":"400px",
 
     "padding":"22px",
     "backgroundColor":"#011c24",

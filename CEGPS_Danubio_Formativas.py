@@ -58,19 +58,19 @@ app.title = "DATA LOAD - Sports Performance Platform"
 
 metricas = [
     "Distance",
+    "Meterage Per Minute",
     "Player Load",
+    "Player Load Per Minute"
     "Max Velocity",
-    "Deceleration Efforts",
-    "Acceleration Efforts",
     "Accel + Decel Efforts",
     "Accel + Decel Efforts Per Minute",
-    "Sprint Distance",
     "High Speed Distance",
-    "Sprint Efforts",
+    "High Speed Distance Per Minute",
     "High Speed Efforts",
-    "Impacts",
+    "Sprint Distance",
     "Sprint Dist Per Min",
-    "High Speed Distance Per Minute"
+    "Sprint Efforts",
+    "Impacts"
 ]
 
 referencias = [

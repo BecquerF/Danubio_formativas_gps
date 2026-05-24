@@ -180,26 +180,71 @@ app.layout = html.Div([
                     id="tabs",
                     value="comparativas",
                     vertical=True,
+                    style={
+                        "color":"#edf1f2",
+                        "fontSize":"12px",
+                        "fontWeight":"600",
+                        "border":"#a3e3d0 solid 1px",
+                        "borderRadius":"1px",
+                        "padding":"10px 12px",
+                        "marginBottom":"12px"
+                    },
                     children=[
 
                         dcc.Tab(
                             label="COMPARATIVAS",
-                            value="comparativas"
+                            value="comparativas",
+                             style={
+                        "color":"#edf1f2",
+                        "fontSize":"12px",
+                        "fontWeight":"600",
+                        "border":"#a3e3d0 solid 1px",
+                        "borderRadius":"1px",
+                        "padding":"10px 12px",
+                        "marginBottom":"12px"
+                    }
                         ),
 
                         dcc.Tab(
                             label="CRONOLÓGICO",
-                            value="cronologico"
+                            value="cronologico",
+                            style={
+                                "color":"#edf1f2",
+                                "fontSize":"12px",
+                                "fontWeight":"600",
+                                "border":"#a3e3d0 solid 1px",
+                                "borderRadius":"1px",
+                                "padding":"10px 12px",
+                                "marginBottom":"12px"
+                            }   
                         ),
 
                         dcc.Tab(
                             label="ACTIVIDAD",
-                            value="actividad"
+                            value="actividad",
+                            style={
+                                "color":"#edf1f2",
+                                "fontSize":"12px",
+                                "fontWeight":"600",
+                                "border":"#a3e3d0 solid 1px",
+                                "borderRadius":"1px",
+                                "padding":"10px 12px",
+                                "marginBottom":"12px"
+                            }
                         ),
 
                         dcc.Tab(
                             label="ACWR",
-                            value="acwr"
+                            value="acwr",
+                            style={
+                                "color":"#edf1f2",
+                                "fontSize":"12px",
+                                "fontWeight":"600",
+                                "border":"#a3e3d0 solid 1px",
+                                "borderRadius":"1px",
+                                "padding":"10px 12px",
+                                "marginBottom":"12px"
+                            }
                         )
 
                     ]
@@ -252,6 +297,7 @@ app.layout = html.Div([
                 id="contenido-tab",
                 style={
                     "width":"100%",
+                    "we"
                     "minHeight":"calc(100vh - 220px)"
                 }
             ),
@@ -628,7 +674,7 @@ style={
     "padding": "28px 24px 36px",
     "fontFamily": "'Clash Display Semibold', 'Segoe UI', sans-serif",
     "margin": "0",
-    "minHeight": "100vh"
+    "minHeight": "calc(100vh - 220px)"
 }
 )
 @app.callback(

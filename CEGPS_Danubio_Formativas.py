@@ -663,7 +663,7 @@ app.layout = html.Div([
     "width":"200px",
     "minWidth":"200px",
 
-    "padding":"22px",
+    "padding":"30px",
     "backgroundColor":"#011c24",
 
     "borderRadius":"24px",

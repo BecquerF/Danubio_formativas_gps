@@ -357,7 +357,8 @@ app.layout = html.Div([
 
     "alignSelf":"flex-start",
 
-    "boxSizing":"border-box"
+    "boxSizing":"border-box",
+    "borderVertical":"1px solid rgba(137,188,239,0.20)",
 }
             ),
             html.Div(
@@ -367,7 +368,7 @@ app.layout = html.Div([
                             html.Button(
                                 html.Img(
                                     src="/assets/icon-download-png.svg",
-                                    style={"width":"20px","height":"20px","backgroundColor":"#edf1f2"}
+                                    style={"width":"20px","height":"20px", "backgroundColor":"none"}
                                 ),
                                 id="download-graph-png",
                                 n_clicks=0,

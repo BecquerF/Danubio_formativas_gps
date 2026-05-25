@@ -993,7 +993,8 @@ def actualizar_tab(
                     page_size=20,
                     style_table={
                         "overflowX": "auto",
-                        "minWidth": "100%"
+                        "minWidth": "100%",
+                        "border":"1px solid rgba(137,188,239,0.18)"
                     },
                     style_header={
                         "backgroundColor": "#000000",
@@ -1079,7 +1080,8 @@ def actualizar_tab(
                 "ACWR - Últimos 7 días vs 21 días",
                 style={
                     "color": "white",
-                    "textAlign": "center"
+                    "textAlign": "center",
+                    "border":"1px solid rgba(137,188,239,0.18)"
                 }
             ),
             dcc.Loading(
@@ -1395,7 +1397,7 @@ def actualizar_tab(
 
         return dcc.Graph(
             figure=fig,
-            style={"width":"100%","height":"100%"}
+            style={"width":"100%","height":"100%", "border":"1px solid rgba(137,188,239,0.18)"}
         )
 
 

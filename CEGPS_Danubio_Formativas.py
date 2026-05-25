@@ -342,7 +342,7 @@ app.layout = html.Div([
         "maxWidth":"1000px",
         "minWidth":"1000px",
         "height":"600px",
-        "marginTop":"10px",
+        "marginTop":"1px",
 
         "overflowX":"hidden",
         "overflowY":"hidden",

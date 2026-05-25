@@ -198,7 +198,7 @@ h4,
 }
 
 .sidebar-right-panel {
-    transform: translateX(120px);
+    transform: translateX(90px);
     transition: 0.35s ease;
     overflow: visible;
     opacity: 0.22;

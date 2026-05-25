@@ -345,7 +345,8 @@ app.layout = html.Div([
         "overflowX":"hidden",
         "overflowY":"hidden",
 
-        "position":"relative"
+        "position":"relative",
+        "border":"1px solid rgba(137,188,239,.18)"
     }
 ),
 
@@ -356,7 +357,7 @@ app.layout = html.Div([
                 html.Button(
                     html.Img(
                         src="/assets/icon-download-png.svg",
-                        style={"width":"20px"}
+                        style={"width":"20px", "border":"1px solid rgba(137,188,239,.18)"}
                     ),
                     id="download-graph-png",
                     className="download-btn"
@@ -365,7 +366,7 @@ app.layout = html.Div([
                 html.Button(
                     html.Img(
                         src="/assets/icon-download-pdf.svg",
-                        style={"width":"20px"}
+                        style={"width":"20px", "border":"1px solid rgba(137,188,239,.18)"}
                     ),
                     id="download-graph-pdf",
                     className="download-btn"
@@ -374,7 +375,7 @@ app.layout = html.Div([
                 html.Button(
                     html.Img(
                         src="/assets/icon-download-csv.svg",
-                        style={"width":"20px"}
+                        style={"width":"20px", "border":"1px solid rgba(137,188,239,.18)"}
                     ),
                     id="download-table-csv",
                     className="download-btn"
@@ -383,7 +384,7 @@ app.layout = html.Div([
                 html.Button(
                     html.Img(
                         src="/assets/icon-download-xlsx.svg",
-                        style={"width":"20px"}
+                        style={"width":"20px","border":"1px solid rgba(137,188,239,.18)"}
                     ),
                     id="download-table-xlsx",
                     className="download-btn"
@@ -808,7 +809,7 @@ def actualizar_tab(
             var_name="Métrica",
             value_name="Valor"
         )
-
+        
         fig=px.bar(
 
             promedio,
@@ -831,6 +832,7 @@ def actualizar_tab(
                 "#72d2e4"
             ],
             template="plotly_dark"
+            
         )
 
         fig.update_traces(

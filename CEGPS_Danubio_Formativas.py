@@ -196,8 +196,8 @@ app.layout = html.Div([
                 "fontSize":"12px",
                 "fontWeight":"600",
 
-                "border":"1px solid rgba(137,188,239,.18)",
-                "padding":"10px 12px",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"12px 12px",
                 "marginBottom":"12px"
             },
 
@@ -206,8 +206,8 @@ app.layout = html.Div([
                 "fontSize":"12px",
                 "fontWeight":"700",
 
-                "border":"1px solid #a3e3d0",
-                "padding":"10px 12px",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"12px 12px",
 
                 "backgroundColor":"#011c24",
                 "marginBottom":"12px"
@@ -221,8 +221,8 @@ app.layout = html.Div([
                 "color":"#edf1f2",
                 "fontSize":"12px",
                 "fontWeight":"600",
-                "border":"1px solid rgba(137,188,239,.18)",
-                "padding":"10px 12px",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"12px 12px",
                 "marginBottom":"12px"
             },
              selected_style={
@@ -230,8 +230,8 @@ app.layout = html.Div([
                 "fontSize":"12px",
                 "fontWeight":"700",
 
-                "border":"1px solid #a3e3d0",
-                "padding":"10px 12px",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"12px 12px",
 
                 "backgroundColor":"#011c24",
                 "marginBottom":"12px"
@@ -245,8 +245,8 @@ app.layout = html.Div([
                 "color":"#edf1f2",
                 "fontSize":"12px",
                 "fontWeight":"600",
-                "border":"1px solid rgba(137,188,239,.18)",
-                "padding":"10px 12px",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"12px 12px",
                 "marginBottom":"12px"
             },
             selected_style={
@@ -254,8 +254,8 @@ app.layout = html.Div([
                 "fontSize":"12px",
                 "fontWeight":"700",
 
-                "border":"1px solid #a3e3d0",
-                "padding":"10px 12px",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"12px 12px",
 
                 "backgroundColor":"#011c24",
                 "marginBottom":"12px"
@@ -269,8 +269,8 @@ app.layout = html.Div([
                 "color":"#edf1f2",
                 "fontSize":"12px",
                 "fontWeight":"600",
-                "border":"1px solid rgba(137,188,239,.18)",
-                "padding":"10px 12px",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"12px 12px",
                 "marginBottom":"12px"
             },
             selected_style={
@@ -278,8 +278,8 @@ app.layout = html.Div([
                 "fontSize":"12px",
                 "fontWeight":"700",
 
-                "border":"1px solid #a3e3d0",
-                "padding":"10px 12px",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"12px 12px",
 
                 "backgroundColor":"#011c24",
                 "marginBottom":"12px"
@@ -346,7 +346,8 @@ app.layout = html.Div([
         "overflowY":"hidden",
 
         "position":"relative",
-        "border":"1px solid rgba(137,188,239,.18)"
+        "border":"2px solid rgba(137,188,239,.18)",
+        "boxShadow":"0 18px 40px rgba(0,0,0,0.25)",
     }
 ),
 
@@ -885,9 +886,19 @@ def actualizar_tab(
 
         return dcc.Graph("Comparativas por" + referencia,
             figure=fig,
-            style={"width":"100%","height":"100%",
-                   "borderRadius":"12px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)"}
-        )
+            style={"width":"100%","height":"100%"}
+        ),
+        style={"border":"1px solid rgba(137,188,239,0.18)",
+        "borderRadius":"18px",
+        "overflow":"hidden",
+        "background":"#0b0c0e",
+         "boxShadow":(
+        "0 0 20px rgba(72,247,136,0.10), "
+        "0 0 50px rgba(137,188,239,0.08), "
+        "0 18px 40px rgba(0,0,0,0.35)"),
+        "padding":"10px"
+    }
+
 
     # ACTIVIDAD POR JUGADOR
     elif tab=="actividad":

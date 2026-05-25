@@ -156,7 +156,7 @@ app.layout = html.Div([
                 "borderRadius":"12px",
                 "border":"1px solid rgba(137,188,239,0.20)",
                 "boxShadow":"0 18px 40px rgba(0,0,0,0.45)",
-                "marginBottom":"20px",
+                "marginBottom":"15px",
                 "overflow":"hidden"
             }),
 
@@ -303,7 +303,7 @@ app.layout = html.Div([
             ],
 
             style={
-                "padding":"10px 12px",
+                "padding":"12px 12px",
                 "background":"linear-gradient(180deg,#000c0f,#011c24)",
                 "borderRadius":"12px",
                 "border":"1px solid rgba(137,188,239,.18)"
@@ -346,8 +346,7 @@ app.layout = html.Div([
         "overflowY":"hidden",
 
         "position":"relative",
-        "border":"2px solid rgba(137,188,239,.18)",
-        "boxShadow":"0 18px 40px rgba(0,0,0,0.25)",
+        "boxShadow":"0 18px 40px rgba(1, 28, 36, 1)",
     }
 ),
 

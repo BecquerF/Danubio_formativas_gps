@@ -110,7 +110,7 @@ h4,
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
-#contenido-tab {
+contents-tab {
     position: relative;
     top: 60px;
     min-height: calc(100vh - 120px)

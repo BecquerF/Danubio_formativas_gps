@@ -176,9 +176,8 @@ app.layout = html.Div([
                         src="/assets/logo_dataload_2.png",
                         style={
                             "position": "absolute",
-                            "left": "0",
-                            "top": "50%",
-                            "transform": "translateY(-50%)",
+                            "left": "24px",
+                            "top": "22px",
                             "width": "110px",
                             "height": "auto",
                             "objectFit": "contain",
@@ -991,11 +990,11 @@ def actualizar_tab(
                     xref="paper",
                     yref="paper",
                     x=0.98,
-                    y=0.90,
+                    y=0.08,
                     xanchor="right",
-                    yanchor="top",
-                    sizex=0.14,
-                    sizey=0.12,
+                    yanchor="bottom",
+                    sizex=0.12,
+                    sizey=0.10,
                     opacity=0.7,
                     layer="above"
                 )
@@ -1194,6 +1193,13 @@ def actualizar_tab(
             suffixes=("", "_Promedio")
         ).fillna(0)
 
+        columnas_promedios = [
+            {"name": "Player Name", "id": "Player Name"}
+        ] + [
+            {"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}}
+            for m in metricas_actividad
+        ]
+
         columnas_comparativa = [
             {"name": "Player Name", "id": "Player Name"}
         ] + [
@@ -1248,44 +1254,131 @@ def actualizar_tab(
                 style={
                     "color": "#a3e3d0",
                     "textAlign": "center",
-                    "marginBottom": "15px",
+                    "marginBottom": "18px",
                     "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                     "fontWeight":"600"
                 }
             ),
-            dcc.Loading(
-                dash_table.DataTable(
-                    data=tabla_comparativa.to_dict("records"),
-                    columns=columnas_comparativa,
-                    filter_action="native",
-                    sort_action="native",
-                    fixed_columns={"headers": True, "data": 1},
-                    page_size=20,
-                    style_table={
-                        "overflowX": "auto",
-                        "minWidth": "100%",
-                        "border":"1px solid rgba(137,188,239,0.18)",
-                        "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
-                    },
-                    style_header={
-                        "backgroundColor": "#000000",
-                        "color": "white",
-                        "fontWeight": "bold",
-                        "position": "sticky",
-                        "top": 0
-                    },
-                    style_cell={
-                        "backgroundColor": "#1a1a1a",
-                        "color": "white",
-                        "fontSize": "11px",
-                        "textAlign": "center",
-                        "minWidth": "100px",
-                        "whiteSpace": "normal"
-                    },
-                    style_data_conditional=style_data_condicional
-                )
+            html.Div(
+                [
+                    html.Div(
+                        [
+                            html.H4(
+                                "Promedios de la actividad",
+                                style={
+                                    "color": "#edf1f2",
+                                    "fontSize": "14px",
+                                    "fontWeight": "600",
+                                    "marginBottom": "12px",
+                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'"
+                                }
+                            ),
+                            dcc.Loading(
+                                dash_table.DataTable(
+                                    data=promedio_jugador.to_dict("records"),
+                                    columns=columnas_promedios,
+                                    filter_action="native",
+                                    sort_action="native",
+                                    fixed_columns={"headers": True, "data": 1},
+                                    page_size=20,
+                                    style_table={
+                                        "overflowX": "auto",
+                                        "minWidth": "100%",
+                                        "border":"1px solid rgba(137,188,239,0.18)",
+                                        "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
+                                    },
+                                    style_header={
+                                        "backgroundColor": "#000000",
+                                        "color": "white",
+                                        "fontWeight": "bold",
+                                        "position": "sticky",
+                                        "top": 0
+                                    },
+                                    style_cell={
+                                        "backgroundColor": "#1a1a1a",
+                                        "color": "white",
+                                        "fontSize": "11px",
+                                        "textAlign": "center",
+                                        "minWidth": "100px",
+                                        "whiteSpace": "normal"
+                                    }
+                                )
+                            )
+                        ],
+                        style={
+                            "padding": "18px",
+                            "background": "#071016",
+                            "border": "1px solid rgba(137,188,239,0.18)",
+                            "borderRadius": "20px"
+                        }
+                    ),
+                    html.Div(
+                        [
+                            html.H4(
+                                "Comparativo actual vs promedio",
+                                style={
+                                    "color": "#edf1f2",
+                                    "fontSize": "14px",
+                                    "fontWeight": "600",
+                                    "marginBottom": "12px",
+                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'"
+                                }
+                            ),
+                            dcc.Loading(
+                                dash_table.DataTable(
+                                    data=tabla_comparativa.to_dict("records"),
+                                    columns=columnas_comparativa,
+                                    filter_action="native",
+                                    sort_action="native",
+                                    fixed_columns={"headers": True, "data": 1},
+                                    page_size=20,
+                                    style_table={
+                                        "overflowX": "auto",
+                                        "minWidth": "100%",
+                                        "border":"1px solid rgba(137,188,239,0.18)",
+                                        "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
+                                    },
+                                    style_header={
+                                        "backgroundColor": "#000000",
+                                        "color": "white",
+                                        "fontWeight": "bold",
+                                        "position": "sticky",
+                                        "top": 0
+                                    },
+                                    style_cell={
+                                        "backgroundColor": "#1a1a1a",
+                                        "color": "white",
+                                        "fontSize": "11px",
+                                        "textAlign": "center",
+                                        "minWidth": "100px",
+                                        "whiteSpace": "normal"
+                                    },
+                                    style_data_conditional=style_data_conditional
+                                )
+                            )
+                        ],
+                        style={
+                            "padding": "18px",
+                            "background": "#071016",
+                            "border": "1px solid rgba(137,188,239,0.18)",
+                            "borderRadius": "20px"
+                        }
+                    )
+                ],
+                style={
+                    "display": "grid",
+                    "gap": "24px"
+                }
             )
-        ])
+        ],
+        style={
+            "padding": "22px",
+            "background": "#0b0c0e",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "24px",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+        }
+        )
 
 
     # ACWR
@@ -1661,11 +1754,11 @@ def actualizar_tab(
                     xref="paper",
                     yref="paper",
                     x=0.98,
-                    y=0.90,
+                    y=0.08,
                     xanchor="right",
-                    yanchor="top",
-                    sizex=0.14,
-                    sizey=0.12,
+                    yanchor="bottom",
+                    sizex=0.12,
+                    sizey=0.10,
                     opacity=0.7,
                     layer="above"
                 )
@@ -1803,11 +1896,11 @@ def descargar_grafico(
                     xref="paper",
                     yref="paper",
                     x=0.98,
-                    y=0.90,
+                    y=0.08,
                     xanchor="right",
-                    yanchor="top",
-                    sizex=0.14,
-                    sizey=0.12,
+                    yanchor="bottom",
+                    sizex=0.12,
+                    sizey=0.10,
                     opacity=0.7,
                     layer="above"
                 )
@@ -1886,11 +1979,11 @@ def descargar_grafico(
                     xref="paper",
                     yref="paper",
                     x=0.98,
-                    y=0.90,
+                    y=0.08,
                     xanchor="right",
-                    yanchor="top",
-                    sizex=0.14,
-                    sizey=0.12,
+                    yanchor="bottom",
+                    sizex=0.12,
+                    sizey=0.10,
                     opacity=0.7,
                     layer="above"
                 )

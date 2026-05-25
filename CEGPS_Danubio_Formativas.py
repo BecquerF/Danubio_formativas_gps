@@ -314,8 +314,8 @@ app.layout = html.Div([
         style={
             "display":"flex",
             "flexDirection":"column",
-            "width":"300px",
-            "minWidth":"300px",
+            "width":"140px",
+            "minWidth":"140px",
             "gap":"6px",
             "position":"relative",
             "top":"20px",
@@ -338,8 +338,8 @@ app.layout = html.Div([
     style={
         "flex":"0",
         "width":"100%",
-        "maxWidth":"300px",
-        "minWidth":"300px",
+        "maxWidth":"800px",
+        "minWidth":"800px",
 
         "overflowX":"hidden",
         "overflowY":"hidden",

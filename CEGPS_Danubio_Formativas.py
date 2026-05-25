@@ -81,12 +81,11 @@ referencias = [
     "Period Tags"
 ]
 
-tab_titles = {
+tab_titles = {"comparativas": "Comparativas",
+    "cronologico": "Cronologico",
     "actividad": "Actividad_por_Jugador",
     "acwr": "ACWR_Zona_Segura",
-    "comparativas": "Comparativas",
-    "cronologico": "Cronologico"   
-}
+}    
 
 from datetime import datetime, timedelta
 
@@ -187,10 +186,10 @@ app.layout = html.Div([
 
     children=[
 
-        dcc.Tab("Comparativa por", 
+        dcc.Tab( 
             label="COMPARATIVAS",
             value="comparativas",
-
+            title={"title": "Comparativas por " + metricas, "position": "center"},
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
@@ -333,8 +332,7 @@ app.layout = html.Div([
 
             # GRÁFICO
 
-            html.Div(
-    id="contenido-tab",
+            html.Div(    id="contenido-tab",
     style={
         "flex":"0",
         "width":"100%",

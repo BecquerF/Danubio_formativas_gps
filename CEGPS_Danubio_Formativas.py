@@ -883,7 +883,7 @@ def actualizar_tab(
             title_font_color="#a3e3d0"
         )
 
-        return dcc.Graph(
+        return dcc.Graph("Comparativas por" + referencia,
             figure=fig,
             style={"width":"100%","height":"100%",
                    "borderRadius":"12px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)"}
@@ -1081,7 +1081,6 @@ def actualizar_tab(
                 style={
                     "color": "white",
                     "textAlign": "center",
-                    "border":"1px solid rgba(137,188,239,0.18)",
                     "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
                 }
             ),

@@ -172,45 +172,65 @@ app.layout = html.Div([
         [
             html.Div(
                 [
-                    html.Img(
-                        src="/assets/logo_dataload_2.png",
+                    html.Div(
+                        [
+                            html.Img(
+                                src="/assets/logo_dataload_2.png",
+                                style={
+                                    "width": "120px",
+                                    "height": "auto",
+                                    "objectFit": "contain"
+                                }
+                            )
+                        ],
                         style={
-                            "position": "absolute",
-                            "left": "24px",
-                            "top": "22px",
-                            "width": "110px",
-                            "height": "auto",
-                            "objectFit": "contain",
-                            "zIndex": 2
+                            "flex": "0 0 auto",
+                            "display": "flex",
+                            "alignItems": "center"
                         }
                     ),
-                    html.H1(
-                        "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
+                    html.Div(
+                        [
+                            html.H1(
+                                "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
+                                style={
+                                    "color": "#ffffff",
+                                    "textAlign": "left",
+                                    "fontSize": "32px",
+                                    "fontWeight": "700",
+                                    "fontFamily": "'Clash Display Semibold'",
+                                    "lineHeight": "1.05",
+                                    "letterSpacing": "0.02em",
+                                    "margin": "0",
+                                    "boxSizing": "border-box"
+                                }
+                            ),
+                            html.P(
+                                "Plataforma de análisis deportivo para Danubio Formativas 2026",
+                                style={
+                                    "color": "#d0f0d9",
+                                    "margin": "10px 0 0",
+                                    "fontSize": "15px",
+                                    "fontFamily": "'Manrope Light', sans-serif",
+                                    "lineHeight": "1.4"
+                                }
+                            )
+                        ],
                         style={
-                            "color": "#ffffff",
-                            "textAlign": "center",
-                            "fontSize": "38px",
-                            "fontWeight": "700",
-                            "fontFamily": "'Clash Display Semibold'",
-                            "lineHeight": "1.05",
-                            "letterSpacing": "0.02em",
-                            "borderBottom": "2px solid #48f788",
-                            "padding": "40px 24px 12px",
-                            "margin": "0 auto",
-                            "maxWidth": "1080px",
-                            "boxSizing": "border-box"
+                            "flex": "1 1 auto",
+                            "minWidth": "0"
                         }
                     )
                 ],
                 style={
-                    "position": "relative",
                     "width": "100%",
                     "maxWidth": "1200px",
                     "margin": "0 auto",
-                    "padding": "0 24px",
+                    "padding": "18px 24px",
                     "display": "flex",
                     "alignItems": "center",
-                    "justifyContent": "center",
+                    "justifyContent": "flex-start",
+                    "gap": "18px",
                     "boxSizing": "border-box"
                 }
             )
@@ -437,8 +457,8 @@ app.layout = html.Div([
         style={
             "display":"flex",
             "flexDirection":"column",
-            "width":"140px",
-            "minWidth":"140px",
+            "width":"240px",
+            "minWidth":"240px",
             "gap":"6px",
             "position":"relative",
             "top":"20px",
@@ -576,8 +596,9 @@ app.layout = html.Div([
                                 style={
                                     "color":"#a3e3d0",
                                     "fontSize":"13px",
-                                    "fontWeight":"600",
+                                    "fontWeight":"500",
                                     "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                                    "padding":"12px 12px",
                                     "marginBottom":"12px"
                                 }
                             ),
@@ -1173,6 +1194,41 @@ def actualizar_tab(
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
         metricas_actividad = [m for m in metricas if m in dff.columns]
 
+        if dff_fecha.empty:
+            return html.Div(
+                [
+                    html.H3(
+                        "Actividad Comparativa Individual",
+                        style={
+                            "color": "white",
+                            "textAlign": "center",
+                            "marginBottom": "12px",
+                            "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
+                            "fontWeight": "600"
+                        }
+                    ),
+                    html.P(
+                        "No hay datos para la fecha seleccionada. Por favor ajusta la fecha o los filtros.",
+                        style={
+                            "color": "#edf1f2",
+                            "textAlign": "center",
+                            "fontSize": "14px",
+                            "padding": "24px",
+                            "background": "#071016",
+                            "border": "1px solid rgba(137,188,239,0.18)",
+                            "borderRadius": "20px"
+                        }
+                    )
+                ],
+                style={
+                    "padding": "22px",
+                    "background": "#0b0c0e",
+                    "border": "1px solid rgba(137,188,239,0.18)",
+                    "borderRadius": "24px",
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                }
+            )
+
         resumen_fecha = (
             dff_fecha
             .groupby("Player Name")[metricas_actividad]
@@ -1189,9 +1245,14 @@ def actualizar_tab(
         tabla_comparativa = resumen_fecha.merge(
             promedio_jugador,
             on="Player Name",
-            how="outer",
+            how="left",
             suffixes=("", "_Promedio")
-        ).fillna(0)
+        )
+
+        if tabla_comparativa.empty:
+            tabla_comparativa = pd.DataFrame(columns=["Player Name"] + metricas_actividad + [f"{m}_Promedio" for m in metricas_actividad])
+        else:
+            tabla_comparativa = tabla_comparativa.fillna(0)
 
         columnas_promedios = [
             {"name": "Player Name", "id": "Player Name"}

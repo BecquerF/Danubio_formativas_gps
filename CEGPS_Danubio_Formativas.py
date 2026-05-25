@@ -88,6 +88,7 @@ tab_titles = {
     "comparativas": "Comparativo",
     "cronologico": "Cronológico",
     "actividad": "Actividad_por_Jugador",
+    "actividad_comparativa": "Actividad_Comparativa_Individual",
     "acwr": "ACWR_Zona_Segura",
 }
 
@@ -168,25 +169,42 @@ app.layout = html.Div([
     # ===== TÍTULO =====
 
     html.Div(
-        html.H1(
-            "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
-            style={
-                "color":"#ffffff",
-                "textAlign":"center",
-                "fontSize":"38px",
-                "fontWeight":"700",
-                "fontFamily":"'Clash Display Semibold'",
-                "lineHeight":"1.05",
-                "letterSpacing":"0.02em",
-                "borderBottom":"2px solid #48f788",
-                "paddingBottom":"12px",
-                "margin":"0"
-            }
-        ),
+        [
+            html.Img(
+                src="/assets/logo_dataload_2.png",
+                style={
+                    "position": "absolute",
+                    "top": "18px",
+                    "left": "24px",
+                    "width": "110px",
+                    "height": "auto",
+                    "objectFit": "contain",
+                    "zIndex": 2
+                }
+            ),
+            html.H1(
+                "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
+                style={
+                    "color":"#ffffff",
+                    "textAlign":"center",
+                    "fontSize":"38px",
+                    "fontWeight":"700",
+                    "fontFamily":"'Clash Display Semibold'",
+                    "lineHeight":"1.05",
+                    "letterSpacing":"0.02em",
+                    "borderBottom":"2px solid #48f788",
+                    "padding":"40px 24px 12px",
+                    "margin":"0 auto",
+                    "maxWidth":"1200px",
+                    "boxSizing":"border-box"
+                }
+            )
+        ],
         style={
-            "width":"100%",
-            "paddingTop":"15px",
-            "paddingBottom":"8px"
+            "position": "relative",
+            "width": "100%",
+            "paddingTop": "10px",
+            "paddingBottom": "4px"
         }
     ),
 
@@ -199,33 +217,6 @@ app.layout = html.Div([
         # ==================================================
 
         html.Div([
-
-            # LOGO
-
-            html.Div([
-
-                html.Img(
-                    src="/assets/logo_dataload_2.png",
-                    style={
-                        "width":"100%",
-                        "height":"auto",
-                        "display":"block",
-                        "objectFit":"contain",
-                        "position":"relative"
-                    }
-                )
-
-            ],
-
-            style={
-                "background":"rgba(13,24,34,0.95)",
-                "padding":"1px",
-                "borderRadius":"12px",
-                "border":"1px solid rgba(137,188,239,0.20)",
-                "boxShadow":"0 18px 40px rgba(0,0,0,0.45)",
-                "marginBottom":"15px",
-                "overflow":"hidden"
-            }),
 
             # MENÚ
 
@@ -246,6 +237,7 @@ app.layout = html.Div([
     id="tabs",
     value="actividad",
     vertical=True,
+    className="tab-menu",
     style={
         "width":"100%",
         "background":"transparent",
@@ -257,11 +249,16 @@ app.layout = html.Div([
         dcc.Tab( 
             label="ACTIVIDAD",
             value="actividad",
+            className="tab-item",
+            selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
+                "borderLeft":"none",
+                "borderRight":"none",
+                "borderBottom":"none",
                 "padding":"12px 12px",
                 "marginBottom":"12px"
             },
@@ -271,6 +268,40 @@ app.layout = html.Div([
                 "fontSize":"12px",
                 "fontWeight":"700",
                 "borderTop":"1px solid #a3e3d0",
+                "borderLeft":"none",
+                "borderRight":"none",
+                "borderBottom":"none",
+                "padding":"12px 12px",
+                "backgroundColor":"#011c24",
+                "marginBottom":"12px"
+            }
+        ),
+
+        dcc.Tab(
+            label="ACTIVIDAD COMPARATIVA INDIVIDUAL",
+            value="actividad_comparativa",
+            className="tab-item",
+            selected_className="tab-item-selected",
+            style={
+                "color":"#edf1f2",
+                "fontSize":"12px",
+                "fontWeight":"600",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "borderLeft":"none",
+                "borderRight":"none",
+                "borderBottom":"none",
+                "padding":"12px 12px",
+                "marginBottom":"12px"
+            },
+
+            selected_style={
+                "color":"#a3e3d0",
+                "fontSize":"12px",
+                "fontWeight":"700",
+                "borderTop":"1px solid #a3e3d0",
+                "borderLeft":"none",
+                "borderRight":"none",
+                "borderBottom":"none",
                 "padding":"12px 12px",
                 "backgroundColor":"#011c24",
                 "marginBottom":"12px"
@@ -280,11 +311,16 @@ app.layout = html.Div([
         dcc.Tab(
             label="ACWR",
             value="acwr",
+            className="tab-item",
+            selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
+                "borderLeft":"none",
+                "borderRight":"none",
+                "borderBottom":"none",
                 "padding":"12px 12px",
                 "marginBottom":"12px"
             },
@@ -302,11 +338,16 @@ app.layout = html.Div([
         dcc.Tab(
             label="COMPARATIVO",
             value="comparativas",
+            className="tab-item",
+            selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
+                "borderLeft":"none",
+                "borderRight":"none",
+                "borderBottom":"none",
                 "padding":"12px 12px",
                 "marginTop":"20px",
                 "marginBottom":"12px"
@@ -316,6 +357,9 @@ app.layout = html.Div([
                 "fontSize":"12px",
                 "fontWeight":"700",
                 "borderTop":"1px solid #a3e3d0",
+                "borderLeft":"none",
+                "borderRight":"none",
+                "borderBottom":"none",
                 "padding":"12px 12px",
                 "backgroundColor":"#011c24",
                 "marginBottom":"12px"
@@ -325,11 +369,16 @@ app.layout = html.Div([
         dcc.Tab(
             label="CRONOLÓGICO",
             value="cronologico",
+            className="tab-item",
+            selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
+                "borderLeft":"none",
+                "borderRight":"none",
+                "borderBottom":"none",
                 "padding":"12px 12px",
                 "marginBottom":"12px"
             },
@@ -338,6 +387,9 @@ app.layout = html.Div([
                 "fontSize":"12px",
                 "fontWeight":"700",
                 "borderTop":"1px solid #a3e3d0",
+                "borderLeft":"none",
+                "borderRight":"none",
+                "borderBottom":"none",
                 "padding":"12px 12px",
                 "backgroundColor":"#011c24",
                 "marginBottom":"12px"
@@ -495,13 +547,48 @@ app.layout = html.Div([
                                 labelStyle={
                                     "color":"white",
                                     "fontSize":"10px",
-                                    "marginBottom":"8px"
+                                    "marginBottom":"6px"
                                 }
                             )
                         ],
                         className="filter-card",
                         style={
-                            "padding":"16px"
+                            "padding":"14px"
+                        }
+                    ),
+                    html.Div(
+                        [
+                            html.H4(
+                                "Fecha de actividad",
+                                style={
+                                    "color":"#a3e3d0",
+                                    "fontSize":"13px",
+                                    "fontWeight":"600",
+                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                                    "marginBottom":"12px"
+                                }
+                            ),
+                            dcc.DatePickerSingle(
+                                id="fecha-actividad",
+                                date=fecha_max.date(),
+                                min_date_allowed=df["Date"].min().date(),
+                                max_date_allowed=df["Date"].max().date(),
+                                display_format="DD/MM/YYYY",
+                                style={
+                                    "width": "100%",
+                                    "backgroundColor": "#011c24",
+                                    "color": "#f5f5f5",
+                                    "border": "1px solid rgba(137,188,239,0.22)",
+                                    "borderRadius": "8px",
+                                    "padding": "8px"
+                                }
+                            )
+                        ],
+                        id="actividad-fecha-container",
+                        className="filter-card",
+                        style={
+                            "display": "none",
+                            "padding":"14px"
                         }
                     ),
                     html.Div(
@@ -532,38 +619,13 @@ app.layout = html.Div([
                                 labelStyle={
                                     "color":"white",
                                     "fontSize":"10px",
-                                    "marginBottom":"8px"
+                                    "marginBottom":"6px"
                                 }
-                            ),
-                            html.Div(
-                                [
-                                    html.P(
-                                        "Fecha de actividad",
-                                        style={"color":"#f5f5f5","fontSize":"10px","marginBottom":"8px"}
-                                    ),
-                                    dcc.DatePickerSingle(
-                                        id="fecha-actividad",
-                                        date=fecha_max.date(),
-                                        min_date_allowed=df["Date"].min().date(),
-                                        max_date_allowed=df["Date"].max().date(),
-                                        display_format="DD/MM/YYYY",
-                                        style={
-                                            "width": "100%",
-                                            "backgroundColor": "#011c24",
-                                            "color": "#f5f5f5",
-                                            "border": "1px solid rgba(137,188,239,0.22)",
-                                            "borderRadius": "8px",
-                                            "padding": "8px"
-                                        }
-                                    )
-                                ],
-                                id="actividad-fecha-container",
-                                style={"display": "none", "marginTop": "16px"}
                             )
                         ],
                         className="filter-card",
                         style={
-                            "padding":"16px"
+                            "padding":"14px"
                         }
                     ),
                     html.Div(
@@ -603,166 +665,146 @@ app.layout = html.Div([
                         }
                     ),
                     html.Div(
-    [
-        html.H4(
-            "Filtrar por",
-            style={
-                "color":"#a3e3d0",
-                "fontSize":"13px",
-                "fontWeight":"600",
-                "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
-                "marginBottom":"12px"
-            }
-        ),
+                        [
+                            html.H4(
+                                "Filtrar por",
+                                style={
+                                    "color":"#a3e3d0",
+                                    "fontSize":"13px",
+                                    "fontWeight":"600",
+                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                                    "marginBottom":"12px"
+                                }
+                            ),
 
-        html.Div(
+                            html.Div(
+                                [
+                                    html.Div(
+                                        [
+                                            html.P(
+                                                "Jugador",
+                                                style={
+                                                    "color":"#f5f5f5",
+                                                    "fontSize":"10px",
+                                                    "marginBottom":"6px"
+                                                }
+                                            ),
+                                            dcc.Dropdown(
+                                                id="jugador",
+                                                options=[
+                                                    {"label": x, "value": x}
+                                                    for x in sorted(
+                                                        df["Player Name"]
+                                                        .dropna()
+                                                        .unique()
+                                                    )
+                                                ],
+                                                multi=True
+                                            )
+                                        ]
+                                    ),
 
-            [
+                                    html.Div(
+                                        [
+                                            html.P(
+                                                "Athlete Tags",
+                                                style={
+                                                    "color":"#f5f5f5",
+                                                    "fontSize":"10px",
+                                                    "marginBottom":"6px"
+                                                }
+                                            ),
+                                            dcc.Dropdown(
+                                                id="athlete",
+                                                options=[
+                                                    {"label": x, "value": x}
+                                                    for x in sorted(
+                                                        df["Athlete Tags"]
+                                                        .dropna()
+                                                        .unique()
+                                                    )
+                                                ],
+                                                multi=True
+                                            )
+                                        ]
+                                    ),
 
-                html.Div(
-                    [
-                        html.P(
-                            "Jugador",
-                            style={
-                                "color":"#f5f5f5",
-                                "fontSize":"10px",
-                                "marginBottom":"6px"
-                            }
-                        ),
+                                    html.Div(
+                                        [
+                                            html.P(
+                                                "Game Tags",
+                                                style={
+                                                    "color":"#f5f5f5",
+                                                    "fontSize":"10px",
+                                                    "marginBottom":"6px"
+                                                }
+                                            ),
+                                            dcc.Dropdown(
+                                                id="gametag",
+                                                options=[
+                                                    {"label": x, "value": x}
+                                                    for x in sorted(
+                                                        df["Game Tags"]
+                                                        .dropna()
+                                                        .unique()
+                                                    )
+                                                ],
+                                                multi=True
+                                            )
+                                        ]
+                                    ),
 
-                        dcc.Dropdown(
-                            id="jugador",
-                            options=[
-                                {"label":x,"value":x}
-                                for x in sorted(
-                                    df["Player Name"]
-                                    .dropna()
-                                    .unique()
-                                )
-                            ],
-                            multi=True
-                        )
-
-                    ]
-                ),
-
-                html.Div(
-                    [
-                        html.P(
-                            "Athlete Tags",
-                            style={
-                                "color":"#f5f5f5",
-                                "fontSize":"10px",
-                                "marginBottom":"6px"
-                            }
-                        ),
-
-                        dcc.Dropdown(
-                            id="athlete",
-                            options=[
-                                {"label":x,"value":x}
-                                for x in sorted(
-                                    df["Athlete Tags"]
-                                    .dropna()
-                                    .unique()
-                                )
-                            ],
-                            multi=True
-                        )
-
-                    ]
-                ),
-
-                html.Div(
-                    [
-                        html.P(
-                            "Game Tags",
-                            style={
-                                "color":"#f5f5f5",
-                                "fontSize":"10px",
-                                "marginBottom":"6px"
-                            }
-                        ),
-
-                        dcc.Dropdown(
-                            id="gametag",
-                            options=[
-                                {"label":x,"value":x}
-                                for x in sorted(
-                                    df["Game Tags"]
-                                    .dropna()
-                                    .unique()
-                                )
-                            ],
-                            multi=True
-                        )
-
-                    ]
-                ),
-
-                html.Div(
-                    [
-                        html.P(
-                            "Period Tags",
-                            style={
-                                "color":"#f5f5f5",
-                                "fontSize":"10px",
-                                "marginBottom":"6px"
-                            }
-                        ),
-
-                        dcc.Dropdown(
-                            id="periodtag",
-                            options=[
-                                {"label":x,"value":x}
-                                for x in sorted(
-                                    df["Period Tags"]
-                                    .dropna()
-                                    .unique()
-                                )
-                            ],
-                            multi=True
-                        )
-
-                    ]
-                )
-
-            ],
-
-            style={
-                "display":"grid",
-                "gridTemplateColumns":"1fr",
-                "gap":"12px"
-            }
-
-        )
-
-    ],
-
-    className="filter-card",
-    style={
-        "padding":"16px"
-    }
-
-)],
+                                    html.Div(
+                                        [
+                                            html.P(
+                                                "Period Tags",
+                                                style={
+                                                    "color":"#f5f5f5",
+                                                    "fontSize":"10px",
+                                                    "marginBottom":"6px"
+                                                }
+                                            ),
+                                            dcc.Dropdown(
+                                                id="periodtag",
+                                                options=[
+                                                    {"label": x, "value": x}
+                                                    for x in sorted(
+                                                        df["Period Tags"]
+                                                        .dropna()
+                                                        .unique()
+                                                    )
+                                                ],
+                                                multi=True
+                                            )
+                                        ]
+                                    )
+                                ],
+                                className="filter-card",
+                                style={
+                                    "padding": "16px"
+                                }
+                            )
+                        ],
+                        className="filter-card",
+                        style={
+                            "padding": "16px"
+                        }
+                    )
+                ],
                 className="sidebar-panel sidebar-right-panel",
                 style={
-    "width":"200px",
-    "minWidth":"200px",
-
-    "padding":"30px",
-    "backgroundColor":"#011c24",
-
-    "borderRadius":"24px",
-    "border":"1px solid rgba(137, 188, 239, 0.16)",
-    "boxShadow":"0 18px 48px rgba(0,0,0,0.35)",
-
-    "position":"sticky",
-    "top":"28px",
-
-    "height":"calc(100vh - 56px)",
-    "overflowY":"auto"
-}
+                    "width": "220px",
+                    "minWidth": "220px",
+                    "padding": "24px",
+                    "backgroundColor": "#011c24",
+                    "borderRadius": "24px",
+                    "border": "1px solid rgba(137, 188, 239, 0.16)",
+                    "boxShadow": "0 18px 48px rgba(0,0,0,0.35)",
+                    "position": "sticky",
+                    "top": "28px",
+                    "height": "calc(100vh - 56px)",
+                    "overflowY": "auto"
+                }
             )
         ],
         style={
@@ -775,19 +817,20 @@ app.layout = html.Div([
     )
 ],
 style={
-    "color":"#ffffff",
+    "color": "#ffffff",
     "padding": "28px 24px 36px",
     "fontFamily": "'Clash Display Semibold', 'Segoe UI', sans-serif",
     "margin": "0",
     "minHeight": "calc(100vh - 220px)"
 }
 )
+
 @app.callback(
     Output("actividad-fecha-container","style"),
     Input("tabs","value")
 )
 def toggle_actividad_fecha(tab):
-    if tab == "actividad":
+    if tab in ["actividad", "actividad_comparativa"]:
         return {"display": "block", "marginTop": "10px"}
     return {"display": "none"}
 
@@ -1105,6 +1148,127 @@ def actualizar_tab(
                         "whiteSpace": "normal"
                     },
                     style_data_conditional=estilos_condicionales
+                )
+            )
+        ])
+
+
+    # ACTIVIDAD COMPARATIVA INDIVIDUAL
+    elif tab=="actividad_comparativa":
+
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        metricas_actividad = [m for m in metricas if m in dff.columns]
+
+        resumen_fecha = (
+            dff_fecha
+            .groupby("Player Name")[metricas_actividad]
+            .mean()
+            .reset_index()
+        )
+        promedio_jugador = (
+            dff
+            .groupby("Player Name")[metricas_actividad]
+            .mean()
+            .reset_index()
+        )
+
+        tabla_comparativa = resumen_fecha.merge(
+            promedio_jugador,
+            on="Player Name",
+            how="outer",
+            suffixes=("", "_Promedio")
+        ).fillna(0)
+
+        columnas_comparativa = [
+            {"name": "Player Name", "id": "Player Name"}
+        ] + [
+            {"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}}
+            for m in metricas_actividad
+        ] + [
+            {"name": f"{m} Promedio", "id": f"{m}_Promedio", "type": "numeric", "format": {"specifier": ".2f"}}
+            for m in metricas_actividad
+        ]
+
+        style_data_condicional = []
+        for m in metricas_actividad:
+            prom_col = f"{m}_Promedio"
+            style_data_condicional.append({
+                "if": {
+                    "filter_query": f"{{{m}}} > {{{prom_col}}}",
+                    "column_id": m
+                },
+                "backgroundColor": "#017351",
+                "color": "white"
+            })
+            style_data_condicional.append({
+                "if": {
+                    "filter_query": f"{{{m}}} >= {{{prom_col}}} * 0.95 && {{{m}}} <= {{{prom_col}}} * 1.05",
+                    "column_id": m
+                },
+                "backgroundColor": "#F4C95D",
+                "color": "black"
+            })
+            style_data_condicional.append({
+                "if": {
+                    "filter_query": f"{{{m}}} < {{{prom_col}}} * 0.95",
+                    "column_id": m
+                },
+                "backgroundColor": "#A40A1C",
+                "color": "white"
+            })
+
+        return html.Div([
+            html.H3(
+                "Actividad Comparativa Individual",
+                style={
+                    "color": "white",
+                    "textAlign": "center",
+                    "marginBottom": "20px",
+                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                    "fontWeight":"600"
+                }
+            ),
+            html.H4(
+                f"{fecha_dt.strftime('%d/%m/%Y')}",
+                style={
+                    "color": "#a3e3d0",
+                    "textAlign": "center",
+                    "marginBottom": "15px",
+                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                    "fontWeight":"600"
+                }
+            ),
+            dcc.Loading(
+                dash_table.DataTable(
+                    data=tabla_comparativa.to_dict("records"),
+                    columns=columnas_comparativa,
+                    filter_action="native",
+                    sort_action="native",
+                    fixed_columns={"headers": True, "data": 1},
+                    page_size=20,
+                    style_table={
+                        "overflowX": "auto",
+                        "minWidth": "100%",
+                        "border":"1px solid rgba(137,188,239,0.18)",
+                        "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
+                    },
+                    style_header={
+                        "backgroundColor": "#000000",
+                        "color": "white",
+                        "fontWeight": "bold",
+                        "position": "sticky",
+                        "top": 0
+                    },
+                    style_cell={
+                        "backgroundColor": "#1a1a1a",
+                        "color": "white",
+                        "fontSize": "11px",
+                        "textAlign": "center",
+                        "minWidth": "100px",
+                        "whiteSpace": "normal"
+                    },
+                    style_data_conditional=style_data_condicional
                 )
             )
         ])
@@ -1835,6 +1999,22 @@ def descargar_tabla(
         ]
         columnas_presentes = [c for c in columnas_requeridas if c in dff_fecha.columns]
         df_export = dff_fecha[columnas_presentes]
+    elif tab == "actividad_comparativa":
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        metricas_actividad = [m for m in metricas if m in dff.columns]
+        resumen_fecha = (
+            dff_fecha.groupby("Player Name")[metricas_actividad].mean().reset_index()
+        )
+        promedio_jugador = (
+            dff.groupby("Player Name")[metricas_actividad].mean().reset_index()
+        )
+        df_export = resumen_fecha.merge(
+            promedio_jugador,
+            on="Player Name",
+            how="outer",
+            suffixes=("", "_Promedio")
+        ).fillna(0)
     elif tab == "acwr":
         metricas_acwr = list(dict.fromkeys([
             "Distance",

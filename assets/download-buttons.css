@@ -87,7 +87,9 @@ h4,
     background: transparent !important;
     color: #48f788 !important;
     border-top: 1px solid #48f788 !important;
-    border-bottom: 1px solid #48f788 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
     box-shadow: none !important;
 }
 
@@ -139,12 +141,14 @@ h4,
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
     border: none;
     border-top: 1px solid rgba(137, 188, 239, 0.18);
-    border-bottom: 1px solid rgba(137, 188, 239, 0.18);
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
     border-radius: 0;
     background: transparent;
     width: 100%;
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 14px 12px;
+    margin-bottom: 10px;
 }
 
 .tab-item:hover {

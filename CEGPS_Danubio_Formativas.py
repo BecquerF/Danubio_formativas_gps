@@ -319,10 +319,15 @@ app.layout = html.Div([
             html.Div(
     id="contenido-tab",
     style={
+        "flex":"1",
         "width":"100%",
+        "maxWidth":"100%",
         "minWidth":"0",
-        "overflow":"hidden",
-        "minHeight":"calc(100vh - 220px)"
+
+        "overflowX":"hidden",
+        "overflowY":"hidden",
+
+        "position":"relative"
     }
 ),
 

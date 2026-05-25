@@ -111,7 +111,7 @@ h4,
 }
 
 #contenido-tab {
-    position: sticky;
+    position: relative;
     top: 140px;
     min-height: calc(100vh - 120px);
 }

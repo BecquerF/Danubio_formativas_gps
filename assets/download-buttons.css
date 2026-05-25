@@ -4,7 +4,7 @@
     font-weight: 600;
     font-display: swap;
     src: url('/assets/fonts/ClashDisplay-Semibold.eot');
-    src: url('/assets/fonts/ClashDisplay-Semibold.eot?#iefix') format('embedded-opentype'),
+    src: url('/assets/fonts/ClashDisplay-Semibold.eot?') format('embedded-opentype'),
          url('/assets/fonts/ClashDisplay-Semibold.otf') format('opentype');
 }
 

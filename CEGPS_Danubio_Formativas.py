@@ -170,38 +170,53 @@ app.layout = html.Div([
 
     html.Div(
         [
-            html.Img(
-                src="/assets/logo_dataload_2.png",
+            html.Div(
+                [
+                    html.Img(
+                        src="/assets/logo_dataload_2.png",
+                        style={
+                            "position": "absolute",
+                            "left": "0",
+                            "top": "50%",
+                            "transform": "translateY(-50%)",
+                            "width": "110px",
+                            "height": "auto",
+                            "objectFit": "contain",
+                            "zIndex": 2
+                        }
+                    ),
+                    html.H1(
+                        "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
+                        style={
+                            "color": "#ffffff",
+                            "textAlign": "center",
+                            "fontSize": "38px",
+                            "fontWeight": "700",
+                            "fontFamily": "'Clash Display Semibold'",
+                            "lineHeight": "1.05",
+                            "letterSpacing": "0.02em",
+                            "borderBottom": "2px solid #48f788",
+                            "padding": "40px 24px 12px",
+                            "margin": "0 auto",
+                            "maxWidth": "1080px",
+                            "boxSizing": "border-box"
+                        }
+                    )
+                ],
                 style={
-                    "position": "absolute",
-                    "top": "18px",
-                    "left": "24px",
-                    "width": "110px",
-                    "height": "auto",
-                    "objectFit": "contain",
-                    "zIndex": 2
-                }
-            ),
-            html.H1(
-                "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
-                style={
-                    "color":"#ffffff",
-                    "textAlign":"center",
-                    "fontSize":"38px",
-                    "fontWeight":"700",
-                    "fontFamily":"'Clash Display Semibold'",
-                    "lineHeight":"1.05",
-                    "letterSpacing":"0.02em",
-                    "borderBottom":"2px solid #48f788",
-                    "padding":"40px 24px 12px",
-                    "margin":"0 auto",
-                    "maxWidth":"1200px",
-                    "boxSizing":"border-box"
+                    "position": "relative",
+                    "width": "100%",
+                    "maxWidth": "1200px",
+                    "margin": "0 auto",
+                    "padding": "0 24px",
+                    "display": "flex",
+                    "alignItems": "center",
+                    "justifyContent": "center",
+                    "boxSizing": "border-box"
                 }
             )
         ],
         style={
-            "position": "relative",
             "width": "100%",
             "paddingTop": "10px",
             "paddingBottom": "4px"
@@ -349,7 +364,6 @@ app.layout = html.Div([
                 "borderRight":"none",
                 "borderBottom":"none",
                 "padding":"12px 12px",
-                "marginTop":"20px",
                 "marginBottom":"12px"
             },
             selected_style={
@@ -976,13 +990,13 @@ def actualizar_tab(
                     source="data:image/png;base64," + LOGO_BASE64,
                     xref="paper",
                     yref="paper",
-                    x=0.02,
-                    y=1.05,
-                    xanchor="left",
-                    yanchor="bottom",
-                    sizex=0.18,
+                    x=0.98,
+                    y=0.90,
+                    xanchor="right",
+                    yanchor="top",
+                    sizex=0.14,
                     sizey=0.12,
-                    opacity=0.75,
+                    opacity=0.7,
                     layer="above"
                 )
             )
@@ -1646,13 +1660,13 @@ def actualizar_tab(
                     source="data:image/png;base64," + LOGO_BASE64,
                     xref="paper",
                     yref="paper",
-                    x=0.02,
-                    y=1.05,
-                    xanchor="left",
-                    yanchor="bottom",
-                    sizex=0.18,
+                    x=0.98,
+                    y=0.90,
+                    xanchor="right",
+                    yanchor="top",
+                    sizex=0.14,
                     sizey=0.12,
-                    opacity=0.75,
+                    opacity=0.7,
                     layer="above"
                 )
             )
@@ -1788,13 +1802,13 @@ def descargar_grafico(
                     source="data:image/png;base64," + LOGO_BASE64,
                     xref="paper",
                     yref="paper",
-                    x=0.02,
-                    y=1.05,
-                    xanchor="left",
-                    yanchor="bottom",
-                    sizex=0.18,
+                    x=0.98,
+                    y=0.90,
+                    xanchor="right",
+                    yanchor="top",
+                    sizex=0.14,
                     sizey=0.12,
-                    opacity=0.75,
+                    opacity=0.7,
                     layer="above"
                 )
             )
@@ -1871,13 +1885,13 @@ def descargar_grafico(
                     source="data:image/png;base64," + LOGO_BASE64,
                     xref="paper",
                     yref="paper",
-                    x=0.02,
-                    y=1.05,
-                    xanchor="left",
-                    yanchor="bottom",
-                    sizex=0.18,
+                    x=0.98,
+                    y=0.90,
+                    xanchor="right",
+                    yanchor="top",
+                    sizex=0.14,
                     sizey=0.12,
-                    opacity=0.75,
+                    opacity=0.7,
                     layer="above"
                 )
             )
@@ -2080,3 +2094,4 @@ def descargar_tabla(
 
 if __name__ == "__main__":
     app.run(debug=True)
+

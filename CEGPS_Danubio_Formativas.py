@@ -271,7 +271,8 @@ app.layout = html.Div([
                 "fontSize":"12px",
                 "fontWeight":"600",
                 "border":"1px solid rgba(137,188,239,.18)",
-                "padding":"8px"
+                "padding":"10px 12px",
+                "marginBottom":"12px"
             },
             selected_style={
                 "color":"#a3e3d0",
@@ -338,8 +339,8 @@ app.layout = html.Div([
     style={
         "flex":"0",
         "width":"100%",
-        "maxWidth":"1200px",
-        "minWidth":"1200px",
+        "maxWidth":"1000px",
+        "minWidth":"1000px",
         "height":"600px",
         "marginTop":"10px",
 
@@ -849,8 +850,13 @@ def actualizar_tab(
         fig.update_layout(
             paper_bgcolor="#0b0c0e",
             plot_bgcolor="#0b0c0e",
-            font={
-                "color":"#f5f5f5"
+            title={
+                "text":"Comparativas",
+                "font": {
+                    "color": "#f5f5f5",
+                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
+                    "size": 22
+                }
             },
             legend=dict(
                 bgcolor="rgba(11,12,14,0.75)",

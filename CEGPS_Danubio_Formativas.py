@@ -202,6 +202,7 @@ app.layout = html.Div([
                                     "lineHeight": "1.05",
                                     "letterSpacing": "0.02em",
                                     "margin": "0",
+                                    "border": "1px solid rgba(137,188,239,0.18)",
                                     "boxSizing": "border-box"
                                 }
                             ),
@@ -224,8 +225,6 @@ app.layout = html.Div([
                 ],
                 style={
                     "width": "100%",
-                    "maxWidth": "1200px",
-                    "margin": "0 auto",
                     "padding": "18px 24px",
                     "display": "flex",
                     "alignItems": "center",
@@ -300,7 +299,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
-                "fontWeight":"700",
+                "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
                 "borderRight":"none",
@@ -331,7 +330,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
-                "fontWeight":"700",
+                "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
                 "borderRight":"none",
@@ -361,7 +360,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
-                "fontWeight":"700",
+                "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "padding":"12px 12px",
                 "backgroundColor":"#011c24",
@@ -388,7 +387,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
-                "fontWeight":"700",
+                "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
                 "borderRight":"none",
@@ -418,7 +417,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
-                "fontWeight":"700",
+                "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
                 "borderRight":"none",
@@ -457,8 +456,8 @@ app.layout = html.Div([
         style={
             "display":"flex",
             "flexDirection":"column",
-            "width":"240px",
-            "minWidth":"240px",
+            "width":"210px",
+            "minWidth":"210px",
             "gap":"6px",
             "position":"relative",
             "top":"20px",
@@ -1232,11 +1231,13 @@ def actualizar_tab(
         resumen_fecha = (
             dff_fecha
             .groupby("Player Name")[metricas_actividad]
-            .mean()
+            .sum()
             .reset_index()
         )
+
+        dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
         promedio_jugador = (
-            dff
+            dff_acumulado
             .groupby("Player Name")[metricas_actividad]
             .mean()
             .reset_index()
@@ -1284,7 +1285,7 @@ def actualizar_tab(
             })
             style_data_condicional.append({
                 "if": {
-                    "filter_query": f"{{{m}}} >= {{{prom_col}}} * 0.95 && {{{m}}} <= {{{prom_col}}} * 1.05",
+                    "filter_query": f"{{{m}}} >= {{{prom_col}}} * 0.8 && {{{m}}} <= {{{prom_col}}} * 1.3",
                     "column_id": m
                 },
                 "backgroundColor": "#F4C95D",
@@ -1292,7 +1293,7 @@ def actualizar_tab(
             })
             style_data_condicional.append({
                 "if": {
-                    "filter_query": f"{{{m}}} < {{{prom_col}}} * 0.95",
+                    "filter_query": f"{{{m}}} < {{{prom_col}}} * 0.8",
                     "column_id": m
                 },
                 "backgroundColor": "#A40A1C",

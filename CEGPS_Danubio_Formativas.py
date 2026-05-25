@@ -338,8 +338,10 @@ app.layout = html.Div([
     style={
         "flex":"0",
         "width":"100%",
-        "maxWidth":"800px",
-        "minWidth":"800px",
+        "maxWidth":"1200px",
+        "minWidth":"1200px",
+        "height":"600px",
+        "marginTop":"10px",
 
         "overflowX":"hidden",
         "overflowY":"hidden",

@@ -187,7 +187,7 @@ app.layout = html.Div([
 
     children=[
 
-        dcc.Tab(
+        dcc.Tab("Comparativa por", 
             label="COMPARATIVAS",
             value="comparativas",
 
@@ -787,6 +787,7 @@ def actualizar_tab(
         dff=dff[
             dff["Period Tags"].isin(periodtags)
         ]
+        # Construir título dinámico
 
     # COMPARATIVAS
     if tab=="comparativas":
@@ -822,6 +823,7 @@ def actualizar_tab(
             orientation="h",
             
             barmode="group",
+
 
             color_discrete_sequence=[
                 "#edf1f2",

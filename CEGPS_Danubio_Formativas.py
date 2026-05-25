@@ -1,9 +1,12 @@
 import io
+import base64
+from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import dash
 import dash_auth
 from dash import Dash, dcc, html, dash_table, Input, Output, no_update
+from openpyxl.drawing.image import Image as ExcelImage
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
@@ -60,7 +63,7 @@ metricas = [
     "Distance",
     "Meterage Per Minute",
     "Player Load",
-    "Player Load Per Minute"
+    "Player Load Per Minute",
     "Max Velocity",
     "Accel + Decel Efforts",
     "Accel + Decel Efforts Per Minute",
@@ -81,13 +84,78 @@ referencias = [
     "Period Tags"
 ]
 
-tab_titles = {"comparativas": "Comparativas",
-    "cronologico": "Cronologico",
+tab_titles = {
+    "comparativas": "Comparativo",
+    "cronologico": "Cronológico",
     "actividad": "Actividad_por_Jugador",
     "acwr": "ACWR_Zona_Segura",
-}    
+}
+
+LOGO_PATH = Path("assets/logo_dataload_2.png")
+LOGO_BASE64 = ""
+if LOGO_PATH.exists():
+    with open(LOGO_PATH, "rb") as logo_file:
+        LOGO_BASE64 = base64.b64encode(logo_file.read()).decode("ascii")
 
 from datetime import datetime, timedelta
+
+def summarize_items(items, max_items=3, default="todas"):
+    if not items:
+        return default
+    labels = [str(item) for item in items if item is not None]
+    if len(labels) == 0:
+        return default
+    if len(labels) <= max_items:
+        return " / ".join(labels)
+    return " / ".join(labels[:max_items]) + f" +{len(labels)-max_items}"
+
+
+def build_chart_title(tab, categorias, metricas, referencia):
+    categoria_text = summarize_items(categorias, max_items=3)
+    metrica_text = summarize_items(metricas, max_items=3)
+
+    if tab == "comparativas":
+        title = f"Comparativo de {metrica_text} por {referencia}"
+        if categorias:
+            title += f" - Categoría(s): {categoria_text}"
+        return title
+
+    if tab == "cronologico":
+        title = f"Evolución cronológica de {metrica_text}"
+        if categorias:
+            title += f" - Categoría(s): {categoria_text}"
+        return title
+
+    if tab == "actividad":
+        title = "Actividad por jugador"
+        if categorias:
+            title += f" - Categoría(s): {categoria_text}"
+        return title
+
+    if tab == "acwr":
+        title = "ACWR - Últimos 7 días vs 21 días"
+        if categorias:
+            title += f" - Categoría(s): {categoria_text}"
+        return title
+
+    return tab_titles.get(tab, tab)
+
+
+def build_download_metadata(tab, categorias, metricas, referencia):
+    item_name = tab_titles.get(tab, tab)
+    if item_name is None:
+        item_name = tab
+    category_text = summarize_items(categorias, max_items=5)
+    metric_text = summarize_items(metricas, max_items=5)
+    printed_at = datetime.now().strftime("%d/%m/%Y %H:%M")
+    metadata = (
+        f"Descargado: {item_name}\n"
+        f"Impresión: {printed_at}\n"
+        f"Categorías: {category_text}\n"
+        f"Métricas: {metric_text}\n"
+        f"Comparar por: {referencia}\n"
+    )
+    return item_name, metadata, printed_at
 
 ultima_actualizacion = (
     datetime.now() - timedelta(hours=3)
@@ -176,7 +244,7 @@ app.layout = html.Div([
 
                 dcc.Tabs(
     id="tabs",
-    value="comparativas",
+    value="actividad",
     vertical=True,
     style={
         "width":"100%",
@@ -187,57 +255,6 @@ app.layout = html.Div([
     children=[
 
         dcc.Tab( 
-            label="COMPARATIVAS",
-            value="comparativas",
-            title={"title": "Comparativas por " + metricas, "position": "center"},
-            style={
-                "color":"#edf1f2",
-                "fontSize":"12px",
-                "fontWeight":"600",
-
-                "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"12px 12px",
-                "marginBottom":"12px"
-            },
-
-            selected_style={
-                "color":"#a3e3d0",
-                "fontSize":"12px",
-                "fontWeight":"700",
-
-                "borderTop":"1px solid #a3e3d0",
-                "padding":"12px 12px",
-
-                "backgroundColor":"#011c24",
-                "marginBottom":"12px"
-            }
-        ),
-
-        dcc.Tab(
-            label="CRONOLÓGICO",
-            value="cronologico",
-            style={
-                "color":"#edf1f2",
-                "fontSize":"12px",
-                "fontWeight":"600",
-                "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"12px 12px",
-                "marginBottom":"12px"
-            },
-             selected_style={
-                "color":"#a3e3d0",
-                "fontSize":"12px",
-                "fontWeight":"700",
-
-                "borderTop":"1px solid #a3e3d0",
-                "padding":"12px 12px",
-
-                "backgroundColor":"#011c24",
-                "marginBottom":"12px"
-            }
-        ),
-
-        dcc.Tab(
             label="ACTIVIDAD",
             value="actividad",
             style={
@@ -248,14 +265,13 @@ app.layout = html.Div([
                 "padding":"12px 12px",
                 "marginBottom":"12px"
             },
+
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
                 "fontWeight":"700",
-
                 "borderTop":"1px solid #a3e3d0",
                 "padding":"12px 12px",
-
                 "backgroundColor":"#011c24",
                 "marginBottom":"12px"
             }
@@ -276,10 +292,53 @@ app.layout = html.Div([
                 "color":"#a3e3d0",
                 "fontSize":"12px",
                 "fontWeight":"700",
-
                 "borderTop":"1px solid #a3e3d0",
                 "padding":"12px 12px",
+                "backgroundColor":"#011c24",
+                "marginBottom":"12px"
+            }
+        ),
 
+        dcc.Tab(
+            label="COMPARATIVO",
+            value="comparativas",
+            style={
+                "color":"#edf1f2",
+                "fontSize":"12px",
+                "fontWeight":"600",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"12px 12px",
+                "marginTop":"20px",
+                "marginBottom":"12px"
+            },
+            selected_style={
+                "color":"#a3e3d0",
+                "fontSize":"12px",
+                "fontWeight":"700",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"12px 12px",
+                "backgroundColor":"#011c24",
+                "marginBottom":"12px"
+            }
+        ),
+
+        dcc.Tab(
+            label="CRONOLÓGICO",
+            value="cronologico",
+            style={
+                "color":"#edf1f2",
+                "fontSize":"12px",
+                "fontWeight":"600",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"12px 12px",
+                "marginBottom":"12px"
+            },
+            selected_style={
+                "color":"#a3e3d0",
+                "fontSize":"12px",
+                "fontWeight":"700",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"12px 12px",
                 "backgroundColor":"#011c24",
                 "marginBottom":"12px"
             }
@@ -785,7 +844,10 @@ def actualizar_tab(
         dff=dff[
             dff["Period Tags"].isin(periodtags)
         ]
-        # Construir título dinámico
+
+    metricas = metricas or ["Distance"]
+    referencia = referencia or "Category"
+    title_text = build_chart_title(tab, categorias, metricas, referencia)
 
     # COMPARATIVAS
     if tab=="comparativas":
@@ -851,7 +913,7 @@ def actualizar_tab(
             paper_bgcolor="#0b0c0e",
             plot_bgcolor="#0b0c0e",
             title={
-                "text":"Comparativas",
+                "text": title_text,
                 "font": {
                     "color": "#f5f5f5",
                     "family": "'Clash Display Semibold', 'Helvetica Neue'",
@@ -864,6 +926,23 @@ def actualizar_tab(
                 borderwidth=1
             )
         )
+
+        if LOGO_BASE64:
+            fig.add_layout_image(
+                dict(
+                    source="data:image/png;base64," + LOGO_BASE64,
+                    xref="paper",
+                    yref="paper",
+                    x=0.02,
+                    y=1.05,
+                    xanchor="left",
+                    yanchor="bottom",
+                    sizex=0.18,
+                    sizey=0.12,
+                    opacity=0.75,
+                    layer="above"
+                )
+            )
 
         fig.update_xaxes(
             showgrid=True,
@@ -883,20 +962,24 @@ def actualizar_tab(
             title_font_color="#a3e3d0"
         )
 
-        return dcc.Graph("Comparativas por" + referencia,
-            figure=fig,
-            style={"width":"100%","height":"100%"}
-        ),
-        style={"border":"1px solid rgba(137,188,239,0.18)",
-        "borderRadius":"18px",
-        "overflow":"hidden",
-        "background":"#0b0c0e",
-         "boxShadow":(
-        "0 0 20px rgba(72,247,136,0.10), "
-        "0 0 50px rgba(137,188,239,0.08), "
-        "0 18px 40px rgba(0,0,0,0.35)"),
-        "padding":"10px"
-    }
+        return html.Div(
+            dcc.Graph(
+                figure=fig,
+                style={"width":"100%","height":"100%"}
+            ),
+            style={
+                "border":"1px solid rgba(137,188,239,0.18)",
+                "borderRadius":"18px",
+                "overflow":"hidden",
+                "background":"#0b0c0e",
+                "boxShadow":(
+                    "0 0 20px rgba(72,247,136,0.10), "
+                    "0 0 50px rgba(137,188,239,0.08), "
+                    "0 18px 40px rgba(0,0,0,0.35)"
+                ),
+                "padding":"10px"
+            }
+        )
 
 
     # ACTIVIDAD POR JUGADOR
@@ -1373,7 +1456,14 @@ def actualizar_tab(
         )
 
         fig.update_layout(
-            title="Evolución cronológica",
+            title={
+                "text": title_text,
+                "font": {
+                    "color": "#f5f5f5",
+                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
+                    "size": 22
+                }
+            },
             paper_bgcolor="#0b0c0e",
             plot_bgcolor="#0b0c0e",
             font={
@@ -1385,6 +1475,23 @@ def actualizar_tab(
                 borderwidth=1
             )
         )
+
+        if LOGO_BASE64:
+            fig.add_layout_image(
+                dict(
+                    source="data:image/png;base64," + LOGO_BASE64,
+                    xref="paper",
+                    yref="paper",
+                    x=0.02,
+                    y=1.05,
+                    xanchor="left",
+                    yanchor="bottom",
+                    sizex=0.18,
+                    sizey=0.12,
+                    opacity=0.75,
+                    layer="above"
+                )
+            )
 
         fig.update_xaxes(
             tickformat="%d/%m/%Y",
@@ -1405,9 +1512,19 @@ def actualizar_tab(
             title_font_color="#a3e3d0"
         )
 
-        return dcc.Graph(
-            figure=fig,
-            style={"width":"100%","height":"100%", "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"}
+        return html.Div(
+            dcc.Graph(
+                figure=fig,
+                style={"width":"100%","height":"100%"}
+            ),
+            style={
+                "border":"1px solid rgba(137,188,239,0.18)",
+                "borderRadius":"18px",
+                "overflow":"hidden",
+                "background":"#0b0c0e",
+                "boxShadow":"0 18px 40px rgba(0,0,0,0.25)",
+                "padding":"10px"
+            }
         )
 
 
@@ -1458,6 +1575,10 @@ def descargar_grafico(
     if periodtags:
         dff = dff[dff["Period Tags"].isin(periodtags)]
 
+    metricas = metricas or ["Distance"]
+    referencia = referencia or "Category"
+    item_name, metadata, printed_at = build_download_metadata(tab, categorias, metricas, referencia)
+
     if tab == "comparativas":
         promedio = (
             dff.groupby(referencia)[metricas].mean().reset_index()
@@ -1484,26 +1605,50 @@ def descargar_grafico(
             opacity=0.85
         )
         fig.update_layout(
+            title={
+                "text": build_chart_title(tab, categorias, metricas, referencia),
+                "font": {
+                    "color": "#f5f5f5",
+                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
+                    "size": 22
+                }
+            },
             paper_bgcolor="#0b0c0e",
             plot_bgcolor="#0b0c0e",
             font={"color": "#f5f5f5"},
             legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#b7b9c8", borderwidth=1)
         )
+        if LOGO_BASE64:
+            fig.add_layout_image(
+                dict(
+                    source="data:image/png;base64," + LOGO_BASE64,
+                    xref="paper",
+                    yref="paper",
+                    x=0.02,
+                    y=1.05,
+                    xanchor="left",
+                    yanchor="bottom",
+                    sizex=0.18,
+                    sizey=0.12,
+                    opacity=0.75,
+                    layer="above"
+                )
+            )
         fig.update_layout(
             annotations=[
                 dict(
-                    text="Desarrollado por: Bécquer Fernández 🌐 https://www.linkedin.com/in/bécquer-fernandez-2108ab152/",
-                    x=1,
-                    y=-0.08,
+                    text=metadata.replace("\n", " | "),
+                    x=0,
+                    y=-0.12,
                     xref="paper",
                     yref="paper",
                     showarrow=False,
                     font=dict(color="#f5f5f5", size=10),
-                    xanchor="right",
-                    align="right"
+                    xanchor="left",
+                    align="left"
                 )
             ],
-            margin=dict(b=80)
+            margin=dict(b=100)
         )
         fig.update_xaxes(
             showgrid=True,
@@ -1543,27 +1688,50 @@ def descargar_grafico(
             selector=dict(mode="markers")
         )
         fig.update_layout(
-            title="Evolución cronológica",
+            title={
+                "text": build_chart_title(tab, categorias, metricas, referencia),
+                "font": {
+                    "color": "#f5f5f5",
+                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
+                    "size": 22
+                }
+            },
             paper_bgcolor="#0b0c0e",
             plot_bgcolor="#0b0c0e",
             font={"color": "#f5f5f5"},
             legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#b7b9c8", borderwidth=1)
         )
+        if LOGO_BASE64:
+            fig.add_layout_image(
+                dict(
+                    source="data:image/png;base64," + LOGO_BASE64,
+                    xref="paper",
+                    yref="paper",
+                    x=0.02,
+                    y=1.05,
+                    xanchor="left",
+                    yanchor="bottom",
+                    sizex=0.18,
+                    sizey=0.12,
+                    opacity=0.75,
+                    layer="above"
+                )
+            )
         fig.update_layout(
             annotations=[
                 dict(
-                    text="Desarrollado por: Bécquer Fernández 🌐 https://www.linkedin.com/in/bécquer-fernandez-2108ab152/",
-                    x=1,
-                    y=-0.08,
+                    text=metadata.replace("\n", " | "),
+                    x=0,
+                    y=-0.12,
                     xref="paper",
                     yref="paper",
                     showarrow=False,
                     font=dict(color="#f5f5f5", size=10),
-                    xanchor="right",
-                    align="right"
+                    xanchor="left",
+                    align="left"
                 )
             ],
-            margin=dict(b=80)
+            margin=dict(b=100)
         )
         fig.update_xaxes(
             tickformat="%d/%m/%Y",
@@ -1639,6 +1807,10 @@ def descargar_tabla(
     if periodtags:
         dff = dff[dff["Period Tags"].isin(periodtags)]
 
+    metricas = metricas or ["Distance"]
+    referencia = referencia or "Category"
+    item_name, metadata, printed_at = build_download_metadata(tab, categorias, metricas, referencia)
+
     if tab == "comparativas":
         df_export = dff.groupby(referencia)[metricas].mean().reset_index()
     elif tab == "actividad":
@@ -1697,11 +1869,9 @@ def descargar_tabla(
 
     tab_name = tab_titles.get(tab, tab)
     if trigger_id == "download-table-csv":
-        metadata = (
-            "Desarrollado por: Bécquer Fernández 🌐 https://www.linkedin.com/in/bécquer-fernandez-2108ab152/\n\n"
-        )
         buffer = io.BytesIO()
         buffer.write(metadata.encode("utf-8"))
+        buffer.write(b"\n")
         df_export.to_csv(buffer, index=False, line_terminator="\n")
         buffer.seek(0)
         return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.csv")
@@ -1709,12 +1879,22 @@ def descargar_tabla(
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
         worksheet_name = "Datos"
-        df_export.to_excel(writer, sheet_name=worksheet_name, index=False, startrow=4)
+        df_export.to_excel(writer, sheet_name=worksheet_name, index=False, startrow=7)
         workbook = writer.book
         worksheet = writer.sheets[worksheet_name]
-        worksheet.cell(row=1, column=1, value="Desarrollado por: Bécquer Fernández")
-        worksheet.cell(row=2, column=1, value="🌐 https://www.linkedin.com/in/bécquer-fernandez-2108ab152/")
-        worksheet.cell(row=3, column=1, value=f"Tabla: {tab_name}")
+        worksheet.cell(row=1, column=1, value="Danubio Formativas 2026")
+        worksheet.cell(row=2, column=1, value=f"Tabla: {item_name}")
+        worksheet.cell(row=3, column=1, value=f"Impresión: {printed_at}")
+        worksheet.cell(row=4, column=1, value=f"Categorías: {summarize_items(categorias, max_items=10)}")
+        worksheet.cell(row=5, column=1, value=f"Métricas: {summarize_items(metricas, max_items=10)}")
+        worksheet.cell(row=6, column=1, value=f"Comparar por: {referencia}")
+        try:
+            image = ExcelImage(str(LOGO_PATH))
+            image.width = 120
+            image.height = 40
+            worksheet.add_image(image, "G1")
+        except Exception:
+            pass
     buffer.seek(0)
     return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.xlsx")
 

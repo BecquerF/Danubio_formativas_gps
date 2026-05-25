@@ -357,7 +357,7 @@ app.layout = html.Div([
                 html.Button(
                     html.Img(
                         src="/assets/icon-download-png.svg",
-                        style={"width":"20px", "border":"1px solid rgba(137,188,239,.18)"}
+                        style={"width":"16px"}
                     ),
                     id="download-graph-png",
                     className="download-btn"
@@ -366,7 +366,7 @@ app.layout = html.Div([
                 html.Button(
                     html.Img(
                         src="/assets/icon-download-pdf.svg",
-                        style={"width":"20px", "border":"1px solid rgba(137,188,239,.18)"}
+                        style={"width":"16px"}
                     ),
                     id="download-graph-pdf",
                     className="download-btn"
@@ -375,7 +375,7 @@ app.layout = html.Div([
                 html.Button(
                     html.Img(
                         src="/assets/icon-download-csv.svg",
-                        style={"width":"20px", "border":"1px solid rgba(137,188,239,.18)"}
+                        style={"width":"16px"}
                     ),
                     id="download-table-csv",
                     className="download-btn"
@@ -384,7 +384,7 @@ app.layout = html.Div([
                 html.Button(
                     html.Img(
                         src="/assets/icon-download-xlsx.svg",
-                        style={"width":"20px","border":"1px solid rgba(137,188,239,.18)"}
+                        style={"width":"16px"}
                     ),
                     id="download-table-xlsx",
                     className="download-btn"
@@ -885,7 +885,7 @@ def actualizar_tab(
 
         return dcc.Graph(
             figure=fig,
-            style={"width":"100%","height":"100%","border":"1px solid rgba(137,188,239,0.18)",
+            style={"width":"100%","height":"100%",
                    "borderRadius":"12px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)"}
         )
 
@@ -994,7 +994,7 @@ def actualizar_tab(
                     style_table={
                         "overflowX": "auto",
                         "minWidth": "100%",
-                        "border":"1px solid rgba(137,188,239,0.18)"
+                        "border":"1px solid rgba(137,188,239,0.18)", "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
                     },
                     style_header={
                         "backgroundColor": "#000000",
@@ -1081,7 +1081,8 @@ def actualizar_tab(
                 style={
                     "color": "white",
                     "textAlign": "center",
-                    "border":"1px solid rgba(137,188,239,0.18)"
+                    "border":"1px solid rgba(137,188,239,0.18)",
+                    "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
                 }
             ),
             dcc.Loading(
@@ -1397,7 +1398,7 @@ def actualizar_tab(
 
         return dcc.Graph(
             figure=fig,
-            style={"width":"100%","height":"100%", "border":"1px solid rgba(137,188,239,0.18)"}
+            style={"width":"100%","height":"100%", "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"}
         )
 
 

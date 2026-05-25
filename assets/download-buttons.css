@@ -144,7 +144,6 @@ h4,
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
     border: none;
     border-top: 1px solid rgba(137, 188, 239, 0.18);
-    border-bottom: 1px solid rgba(137, 188, 239, 0.18);
     border-radius: 0;
     background: transparent;
     width: 100%;

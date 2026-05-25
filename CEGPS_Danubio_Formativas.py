@@ -194,30 +194,24 @@ app.layout = html.Div([
 
             style={
                 "color":"#edf1f2",
-                "fontSize":"10px",
+                "fontSize":"12px",
                 "fontWeight":"600",
 
                 "border":"1px solid rgba(137,188,239,.18)",
-                "borderRadius":"8px",
-
-                "padding":"8px",
-                "marginBottom":"6px",
-
-                "backgroundColor":"transparent"
+                "padding":"10px 12px",
+                "marginBottom":"12px"
             },
 
             selected_style={
                 "color":"#48f788",
-                "fontSize":"10px",
+                "fontSize":"12px",
                 "fontWeight":"700",
 
                 "border":"1px solid #48f788",
-                "borderRadius":"8px",
+                "padding":"10px 12px",
 
-                "padding":"8px",
-                "marginBottom":"6px",
-
-                "backgroundColor":"rgba(72,247,136,.08)"
+                "backgroundColor":"rgba(72,247,136,.08)",
+                "marginBottom":"12px"
             }
         ),
 
@@ -226,18 +220,16 @@ app.layout = html.Div([
             value="cronologico",
             style={
                 "color":"#edf1f2",
-                "fontSize":"10px",
+                "fontSize":"12px",
                 "fontWeight":"600",
                 "border":"1px solid rgba(137,188,239,.18)",
-                "borderRadius":"8px",
-                "padding":"8px",
-                "marginBottom":"6px"
+                "padding":"10px 12px",
+                "marginBottom":"12px"
             },
             selected_style={
                 "color":"#48f788",
                 "fontWeight":"700",
-                "border":"1px solid #48f788",
-                "borderRadius":"8px"
+                "border":"1px solid #48f788"
             }
         ),
 
@@ -246,18 +238,17 @@ app.layout = html.Div([
             value="actividad",
             style={
                 "color":"#edf1f2",
-                "fontSize":"10px",
+                "fontSize":"12px",
                 "fontWeight":"600",
                 "border":"1px solid rgba(137,188,239,.18)",
                 "borderRadius":"8px",
-                "padding":"8px",
-                "marginBottom":"6px"
+                "padding":"10px 12px",
+                "marginBottom":"12px"
             },
             selected_style={
                 "color":"#48f788",
                 "fontWeight":"700",
-                "border":"1px solid #48f788",
-                "borderRadius":"8px"
+                "border":"1px solid #48f788"
             }
         ),
 
@@ -266,17 +257,15 @@ app.layout = html.Div([
             value="acwr",
             style={
                 "color":"#edf1f2",
-                "fontSize":"10px",
+                "fontSize":"12px",
                 "fontWeight":"600",
                 "border":"1px solid rgba(137,188,239,.18)",
-                "borderRadius":"8px",
                 "padding":"8px"
             },
             selected_style={
                 "color":"#48f788",
                 "fontWeight":"700",
-                "border":"1px solid #48f788",
-                "borderRadius":"8px"
+                "border":"1px solid #48f788"
             }
         )
 
@@ -289,6 +278,7 @@ app.layout = html.Div([
                         "color":"#dcdcdc",
                         "fontSize":"8px",
                         "marginTop":"12px",
+                        "padding":"0px 3px",
                         "textAlign":"center"
                     }
                 )
@@ -296,7 +286,7 @@ app.layout = html.Div([
             ],
 
             style={
-                "padding":"12px",
+                "padding":"10px 12px",
                 "background":"linear-gradient(180deg,#000c0f,#011c24)",
                 "borderRadius":"12px",
                 "border":"1px solid rgba(137,188,239,.18)"
@@ -307,8 +297,8 @@ app.layout = html.Div([
         style={
             "display":"flex",
             "flexDirection":"column",
-            "width":"180px",
-            "minWidth":"180px",
+            "width":"140px",
+            "minWidth":"140px",
             "gap":"6px",
             "position":"sticky",
             "top":"20px",

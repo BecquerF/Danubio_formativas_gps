@@ -144,8 +144,7 @@ app.layout = html.Div([
                         "height":"auto",
                         "display":"block",
                         "objectFit":"contain",
-                        "position":"relative",
-                        "top":"-10px"
+                        "position":"relative"
                     }
                 )
 
@@ -342,7 +341,6 @@ app.layout = html.Div([
         "maxWidth":"1000px",
         "minWidth":"1000px",
         "height":"600px",
-        "marginTop":"1px",
 
         "overflowX":"hidden",
         "overflowY":"hidden",
@@ -397,7 +395,7 @@ app.layout = html.Div([
                 "display":"flex",
                 "justifyContent":"center",
                 "gap":"12px",
-                "marginTop":"20px",
+                "marginTop":"10px",
                 "paddingBottom":"18px"
             })
 

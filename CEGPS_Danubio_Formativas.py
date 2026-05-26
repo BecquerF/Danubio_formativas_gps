@@ -1318,83 +1318,45 @@ def actualizar_tab(
             "backgroundColor": "#017351",
             "color": "white"
         })
-
     return html.Div([
-        html.H3(
-            "Actividad Comparativa Individual",
-            style={
-                "color": "white", "textAlign": "center", "marginBottom": "20px",
-                "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'", "fontWeight": "600"
-            }
-        ),
-        html.H4(
-            f"{fecha_dt.strftime('%d/%m/%Y')}",
-            style={
-                "color": "#a3e3d0", "textAlign": "center", "marginBottom": "18px",
-                "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'", "fontWeight": "600"
-            }
-        ),
-        dcc.Loading(
-            dash_table.DataTable(
-                data=tabla_comparativa.to_dict("records"),
-                columns=columnas_comparativa,
-                filter_action="native",
-                sort_action="native",
-                fixed_columns={"headers": True, "data": 1},
-                page_size=20,
-                style_table={
-                    "overflowX": "auto", "minWidth": "100%",
-                    "border": "1px solid rgba(137,188,239,0.18)",
-                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
-                },
-                style_header={
-                    "backgroundColor": "#000000", "color": "white",
-                    "fontWeight": "bold", "position": "sticky", "top": 0
-                },
-                style_cell={
-                    "backgroundColor": "#1a1a1a", "color": "white",
-                    "fontSize": "11px", "textAlign": "center",
-                    "minWidth": "100px", "whiteSpace": "normal"
-                },
-                style_data_conditional=estilos_condicionales
-            )
+    html.H4(
+        "Comparativo actual vs promedio",
+        style={
+            "color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
+            "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"
+        }
+    ),
+    dcc.Loading(
+        dash_table.DataTable(
+            data=tabla_comparativa.to_dict("records"),
+            columns=columnas_comparativa,
+            filter_action="native",
+            sort_action="native",
+            fixed_columns={"headers": True, "data": 1},
+            page_size=20,
+            style_table={
+                "overflowX": "auto", "minWidth": "100%",
+                "border": "1px solid rgba(137,188,239,0.18)",
+                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+            },
+            style_header={
+                "backgroundColor": "#000000", "color": "white",
+                "fontWeight": "bold", "position": "sticky", "top": 0
+            },
+            style_cell={
+                "backgroundColor": "#1a1a1a", "color": "white",
+                "fontSize": "11px", "textAlign": "center",
+                "minWidth": "100px", "whiteSpace": "normal"
+            },
+            style_data_conditional=estilos_condicionales
         )
-    ], style={
-        "padding": "22px", "background": "#0b0c0e",
-        "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
-        "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
-    })
-    html.Div([
-                html.H4("Comparativo actual vs promedio",
-                        style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
-                               "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
-                dcc.Loading(
-                    dash_table.DataTable(
-                        data=tabla_comparativa.to_dict("records"),
-                        columns=columnas_comparativa,
-                        filter_action="native",
-                        sort_action="native",
-                        fixed_columns={"headers": True, "data": 1},
-                        page_size=20,
-                        style_table={"overflowX": "auto", "minWidth": "100%",
-                                     "border": "1px solid rgba(137,188,239,0.18)",
-                                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
-                        style_header={"backgroundColor": "#000000", "color": "white",
-                                      "fontWeight": "bold", "position": "sticky", "top": 0},
-                        style_cell={"backgroundColor": "#1a1a1a", "color": "white",
-                                    "fontSize": "11px", "textAlign": "center",
-                                    "minWidth": "100px", "whiteSpace": "normal"},
-                        style_data_conditional=estilos_condicionales
-                    )
-                )
-            ], style={"padding": "18px", "background": "#071016",
-                      "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "20px"})
-        ], 
-                style={"display": "grid", "gap": "24px"})
-    ], 
-                style={"padding": "22px", "background": "#0b0c0e",
-              "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
-              "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
+    )
+], style={
+    "padding": "22px", "background": "#0b0c0e",
+    "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
+    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+})
+
 
 
     # ACWR
@@ -1755,118 +1717,100 @@ def actualizar_tab(
         ])
 
     # CRONOLÓGICO
-    if tab=="cronologico": 
-        cronologico=pd.melt(
-
-            dff,
-
-            id_vars=[
-                "Date",
-                "Category"
-            ],
-
-            value_vars=metricas,
-
-            var_name="Métrica",
-
-            value_name="Valor"
-        ) 
-        fig=px.scatter(
+    if tab == "cronologico": 
+        cronologico = pd.melt(
+        dff,
+        id_vars=["Date", "Category"],
+        value_vars=metricas,
+        var_name="Métrica",
+        value_name="Valor"
+    ) 
+        fig = px.scatter(
             cronologico,
-            x="Date",
-            y="Valor",
-            color="Category",
-            symbol="Métrica",
-            color_discrete_sequence=["#edf1f2", "#3c4d52", "#a3e3d0", "#89bcef", "#48f788", "#72d2e4"],
-            template="plotly_dark"
-        )
+        x="Date",
+        y="Valor",
+        color="Category",
+        symbol="Métrica",
+        color_discrete_sequence=["#edf1f2", "#3c4d52", "#a3e3d0", "#89bcef", "#48f788", "#72d2e4"],
+        template="plotly_dark"
+    )
 
-        fig.update_traces(
-            marker=dict(
-                size=10,
-                line=dict(width=1, color="#ffffff")
-            ),
-            selector=dict(mode="markers"),
-            hoverlabel=dict(
-                bgcolor="#011c24",
-                font_size=12,
-                font_color="#f5f5f5"
-            )
-        )
+    fig.update_traces(
+        marker=dict(size=10, line=dict(width=1, color="#ffffff")),
+        selector=dict(mode="markers"),
+        hoverlabel=dict(bgcolor="#011c24", font_size=12, font_color="#f5f5f5")
+    )
 
-        fig.update_layout(
-            title={
-                "text": title_text,
-                "font": {
-                    "color": "#f5f5f5",
-                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
-                    "size": 22
-                }
-            },
-            paper_bgcolor="#0b0c0e",
-            plot_bgcolor="#0b0c0e",
-            font={
-                "color":"#f5f5f5"
-            },
-            legend=dict(
-                bgcolor="rgba(11,12,14,0.75)",
-                bordercolor="#89bcef",
-                borderwidth=1
-            )
-        )
-
-        if LOGO_BASE64:
-            fig.add_layout_image(
-                dict(
-                    source="data:image/png;base64," + LOGO_BASE64,
-                    xref="paper",
-                    yref="paper",
-                    x=0.98,
-                    y=0.08,
-                    xanchor="right",
-                    yanchor="bottom",
-                    sizex=0.12,
-                    sizey=0.10,
-                    opacity=0.7,
-                    layer="above"
-                )
-            )
-
-        fig.update_xaxes(
-            tickformat="%d/%m/%Y",
-            showgrid=True,
-            gridcolor="rgba(137,188,239,0.18)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#89bcef",
-            tickfont_color="#f5f5f5",
-            title_font_color="#a3e3d0"
-        )
-
-        fig.update_yaxes(
-            showgrid=True,
-            gridcolor="rgba(137,188,239,0.18)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#89bcef",
-            tickfont_color="#f5f5f5",
-            title_font_color="#a3e3d0"
-        )
-
-        return html.Div(
-            dcc.Graph(
-                figure=fig,
-                style={"width":"100%","height":"100%"}
-            ),
-            style={
-                "border":"1px solid rgba(137,188,239,0.18)",
-                "borderRadius":"18px",
-                "overflow":"hidden",
-                "background":"#0b0c0e",
-                "boxShadow":"0 18px 40px rgba(0,0,0,0.25)",
-                "padding":"10px"
+    fig.update_layout(
+        title={
+            "text": title_text,
+            "font": {
+                "color": "#f5f5f5",
+                "family": "'Clash Display Semibold', 'Helvetica Neue'",
+                "size": 22
             }
+        },
+        paper_bgcolor="#0b0c0e",
+        plot_bgcolor="#0b0c0e",
+        font={"color": "#f5f5f5"},
+        legend=dict(
+            bgcolor="rgba(11,12,14,0.75)",
+            bordercolor="#89bcef",
+            borderwidth=1
+        )
+    )
+
+    if LOGO_BASE64:
+        fig.add_layout_image(
+            dict(
+                source="data:image/png;base64," + LOGO_BASE64,
+                xref="paper",
+                yref="paper",
+                x=0.98,
+                y=0.08,
+                xanchor="right",
+                yanchor="bottom",
+                sizex=0.12,
+                sizey=0.10,
+                opacity=0.7,
+                layer="above"
+            )
         )
 
+    fig.update_xaxes(
+        tickformat="%d/%m/%Y",
+        showgrid=True,
+        gridcolor="rgba(137,188,239,0.18)",
+        zerolinecolor="rgba(255,255,255,0.08)",
+        linecolor="#89bcef",
+        tickfont_color="#f5f5f5",
+        title_font_color="#a3e3d0"
+    )
 
+    fig.update_yaxes(
+        showgrid=True,
+        gridcolor="rgba(137,188,239,0.18)",
+        zerolinecolor="rgba(255,255,255,0.08)",
+        linecolor="#89bcef",
+        tickfont_color="#f5f5f5",
+        title_font_color="#a3e3d0"
+    )
+
+    return html.Div(
+        dcc.Graph(
+            figure=fig,
+            style={"width": "100%", "height": "100%"}
+        ),
+        style={
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "18px",
+            "overflow": "hidden",
+            "background": "#0b0c0e",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+            "padding": "10px"
+        }
+    )
+    
 @app.callback(
     Output("download-graph","data"),
     Input("download-graph-png","n_clicks"),

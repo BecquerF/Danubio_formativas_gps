@@ -76,6 +76,62 @@ metricas = [
     "Impacts"
 ]
 
+# ======================================================
+# ACTIVIDAD COMPARATIVA INDIVIDUAL
+# ======================================================
+
+metricas_base = metricas.copy()
+
+# Promedios por jugador
+df_Actividad_Comparativa_Individual = (
+
+    df.groupby("Player Name")[metricas_base]
+      .mean()
+      .reset_index()
+
+)
+
+# Renombrar promedio
+df_Actividad_Comparativa_Individual.rename(
+    columns={
+        col: f"{col} Prom"
+        for col in metricas_base
+    },
+    inplace=True
+)
+
+# Agregar acumulados
+for metrica in metricas_base:
+
+    acumulado = (
+
+        df.groupby("Player Name")[metrica]
+          .sum()
+          .reset_index()
+
+    )
+
+    df_Actividad_Comparativa_Individual = (
+
+        df_Actividad_Comparativa_Individual.merge(
+            acumulado,
+            on="Player Name"
+        )
+
+    )
+
+# Ordenar columnas
+orden = ["Player Name"]
+
+for m in metricas_base:
+    orden.extend([m, f"{m} Prom"])
+
+df_Actividad_Comparativa_Individual = (
+    df_Actividad_Comparativa_Individual[orden]
+)
+
+# ======================================================
+
 referencias = [
     "Category",
     "Player Name",
@@ -135,6 +191,12 @@ def build_chart_title(tab, categorias, metricas, referencia):
 
     if tab == "acwr":
         title = "ACWR - Últimos 7 días vs 21 días"
+        if categorias:
+            title += f" - Categoría(s): {categoria_text}"
+        return title
+    
+    if tab == "actividad_comparativa":
+        title = "Actividad comparativa individual"
         if categorias:
             title += f" - Categoría(s): {categoria_text}"
         return title
@@ -202,7 +264,7 @@ app.layout = html.Div([
                                     "lineHeight": "1.05",
                                     "letterSpacing": "0.02em",
                                     "margin": "0",
-                                    "border": "1px solid rgba(137,188,239,0.18)",
+                                    "linecolor": "#89bcef",
                                     "boxSizing": "border-box"
                                 }
                             ),
@@ -287,6 +349,7 @@ app.layout = html.Div([
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
@@ -299,6 +362,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
@@ -318,6 +382,7 @@ app.layout = html.Div([
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
@@ -330,6 +395,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
@@ -349,6 +415,7 @@ app.layout = html.Div([
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
@@ -360,6 +427,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "padding":"12px 12px",
@@ -376,6 +444,7 @@ app.layout = html.Div([
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
@@ -387,6 +456,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
@@ -406,6 +476,7 @@ app.layout = html.Div([
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
@@ -417,6 +488,7 @@ app.layout = html.Div([
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
+                "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
@@ -1180,7 +1252,7 @@ def actualizar_tab(
                         "minWidth": "100px",
                         "whiteSpace": "normal"
                     },
-                    style_data_conditional=estilos_condicionales
+                    style_data_conditional= estilos_condicionales
                 )
             )
         ])
@@ -1188,118 +1260,147 @@ def actualizar_tab(
 
     # ACTIVIDAD COMPARATIVA INDIVIDUAL
     elif tab=="actividad_comparativa":
+    
+        if fecha_actividad:
+            fecha_dt = pd.to_datetime(
+            fecha_actividad
+        ).normalize()
+        else:
+            fecha_dt = dff["Date"].max().normalize()
 
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
-        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
-        metricas_actividad = [m for m in metricas if m in dff.columns]
+    dff_fecha = dff[
+        dff["Date"].dt.normalize() == fecha_dt
+    ]
 
-        if dff_fecha.empty:
-            return html.Div(
-                [
-                    html.H3(
-                        "Actividad Comparativa Individual",
-                        style={
-                            "color": "white",
-                            "textAlign": "center",
-                            "marginBottom": "12px",
-                            "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
-                            "fontWeight": "600"
-                        }
-                    ),
-                    html.P(
-                        "No hay datos para la fecha seleccionada. Por favor ajusta la fecha o los filtros.",
-                        style={
-                            "color": "#edf1f2",
-                            "textAlign": "center",
-                            "fontSize": "14px",
-                            "padding": "24px",
-                            "background": "#071016",
-                            "border": "1px solid rgba(137,188,239,0.18)",
-                            "borderRadius": "20px"
-                        }
-                    )
-                ],
-                style={
-                    "padding": "22px",
-                    "background": "#0b0c0e",
-                    "border": "1px solid rgba(137,188,239,0.18)",
-                    "borderRadius": "24px",
-                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
-                }
-            )
+    metricas_base=[
 
-        resumen_fecha = (
-            dff_fecha
-            .groupby("Player Name")[metricas_actividad]
-            .sum()
-            .reset_index()
-        )
+        "Distance",
+        "Meterage Per Minute",
+        "Player Load",
+        "Player Load Per Minute",
+        "Max Velocity",
+        "Accel + Decel Efforts",
+        "Accel + Decel Efforts Per Minute",
+        "High Speed Distance",
+        "High Speed Distance Per Minute",
+        "High Speed Efforts",
+        "Sprint Distance",
+        "Sprint Dist Per Min",
+        "Sprint Efforts",
+        "Impacts"
 
-        dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
-        promedio_jugador = (
-            dff_acumulado
-            .groupby("Player Name")[metricas_actividad]
-            .mean()
-            .reset_index()
-        )
+    ]
 
-        tabla_comparativa = resumen_fecha.merge(
+    resumen_fecha=(
+
+        dff_fecha
+        .groupby("Player Name")[metricas_base]
+        .sum()
+        .reset_index()
+
+    )
+
+    dff_acumulado=dff[
+        dff["Date"].dt.normalize()<=fecha_dt
+    ]
+
+    promedio_jugador=(
+
+        dff_acumulado
+        .groupby("Player Name")[metricas_base]
+        .mean()
+        .reset_index()
+
+    )
+
+    promedio_jugador=promedio_jugador.rename(
+
+        columns={
+
+            m:f"{m} Prom"
+
+            for m in metricas_base
+        }
+
+    )
+
+    tabla_comparativa=(
+
+        resumen_fecha.merge(
+
             promedio_jugador,
             on="Player Name",
-            how="left",
-            suffixes=("", "_Promedio")
+            how="left"
+
         )
 
-        if tabla_comparativa.empty:
-            tabla_comparativa = pd.DataFrame(columns=["Player Name"] + metricas_actividad + [f"{m}_Promedio" for m in metricas_actividad])
-        else:
-            tabla_comparativa = tabla_comparativa.fillna(0)
+    )
 
-        columnas_promedios = [
-            {"name": "Player Name", "id": "Player Name"}
-        ] + [
-            {"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}}
-            for m in metricas_actividad
-        ]
 
-        columnas_comparativa = [
-            {"name": "Player Name", "id": "Player Name"}
-        ] + [
-            {"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}}
-            for m in metricas_actividad
-        ] + [
-            {"name": f"{m} Promedio", "id": f"{m}_Promedio", "type": "numeric", "format": {"specifier": ".2f"}}
-            for m in metricas_actividad
-        ]
+    if tabla_comparativa.empty:
 
-        style_data_condicional = []
-        for m in metricas_actividad:
-            prom_col = f"{m}_Promedio"
-            style_data_condicional.append({
-                "if": {
-                    "filter_query": f"{{{m}}} > {{{prom_col}}}",
-                    "column_id": m
-                },
-                "backgroundColor": "#017351",
-                "color": "white"
-            })
-            style_data_condicional.append({
-                "if": {
-                    "filter_query": f"{{{m}}} >= {{{prom_col}}} * 0.8 && {{{m}}} <= {{{prom_col}}} * 1.3",
-                    "column_id": m
-                },
-                "backgroundColor": "#F4C95D",
-                "color": "black"
-            })
-            style_data_condicional.append({
-                "if": {
-                    "filter_query": f"{{{m}}} < {{{prom_col}}} * 0.8",
-                    "column_id": m
-                },
-                "backgroundColor": "#A40A1C",
-                "color": "white"
-            })
+        tabla_comparativa=pd.DataFrame(
 
+            columns=["Player Name"] +
+            metricas_base +
+            [f"{m} Prom" for m in metricas_base]
+
+        )
+
+    else:
+
+        tabla_comparativa=tabla_comparativa.fillna(0)
+
+
+    columnas_comparativa=[
+
+        {
+            "name":"Player Name",
+            "id":"Player Name"
+        }
+
+    ]
+
+    for m in metricas_base:
+
+        columnas_comparativa.append({
+
+            "name":m,
+            "id":m,
+            "type":"numeric",
+            "format":{"specifier":".2f"}
+
+        })
+
+        columnas_comparativa.append({
+
+            "name":f"{m} Prom",
+            "id":f"{m} Prom",
+            "type":"numeric",
+            "format":{"specifier":".2f"}
+
+        })
+
+
+    style_data_condicional=[]
+
+    for m in metricas_base:
+
+        prom_col=f"{m} Prom"
+
+        style_data_condicional.append({
+
+            "if":{
+                "filter_query":
+                f"{{{m}}}>{{{prom_col}}}",
+                "column_id":m
+            },
+
+            "backgroundColor":"#017351",
+            "color":"white"
+
+        })
+        
         return html.Div([
             html.H3(
                 "Actividad Comparativa Individual",
@@ -1338,7 +1439,7 @@ def actualizar_tab(
                             dcc.Loading(
                                 dash_table.DataTable(
                                     data=promedio_jugador.to_dict("records"),
-                                    columns=columnas_promedios,
+                                    columns=columnas_presentes,
                                     filter_action="native",
                                     sort_action="native",
                                     fixed_columns={"headers": True, "data": 1},
@@ -1415,7 +1516,7 @@ def actualizar_tab(
                                         "minWidth": "100px",
                                         "whiteSpace": "normal"
                                     },
-                                    style_data_conditional=style_data_conditional
+                                    style_data_conditional= estilos_condicionales
                                 )
                             )
                         ],
@@ -1444,9 +1545,11 @@ def actualizar_tab(
 
 
     # ACWR
-    elif tab=="acwr":
-
+    
+    if tab=="acwr":
+    
         metricas_acwr = list(dict.fromkeys([
+
             "Distance",
             "Player Load",
             "Acceleration Efforts",
@@ -1455,75 +1558,127 @@ def actualizar_tab(
             "Sprint Efforts",
             "High Speed Efforts",
             "Impacts"
-        ]))
 
-        dff["Player Name"] = dff["Player Name"].astype(str).str.strip()
+    ]))
 
-        ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
-        ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
+        dff["Player Name"] = (
+            dff["Player Name"]
+            .astype(str)
+            .str.strip()
+    )
 
-        df21 = dff[
-            dff["Date"] >= ultimos21
-        ]
+    ultimos21 = (
+        dff["Date"].max()
+        - pd.Timedelta(days=21)
+    )
 
-        df7 = dff[
-            dff["Date"] >= ultimos7
-        ]
+    ultimos7 = (
+        dff["Date"].max()
+        - pd.Timedelta(days=7)
+    )
 
-        cronica = (
-            df21
-            .groupby("Player Name")[metricas_acwr]
-            .mean()
-            .reset_index()
-        )
+    df21 = dff[
+        dff["Date"] >= ultimos21
+    ]
 
-        aguda = (
-            df7
-            .groupby("Player Name")[metricas_acwr]
-            .mean()
-            .reset_index()
-        )
+    df7 = dff[
+        dff["Date"] >= ultimos7
+    ]
 
-        tabla = cronica.merge(
-            aguda,
-            on="Player Name",
-            how="outer",
-            suffixes=("_21", "_7")
-        )
+    cronica = (
 
-        tabla = tabla.loc[:, ~tabla.columns.duplicated()]
+        df21
+        .groupby("Player Name")[metricas_acwr]
+        .mean()
+        .reset_index()
 
-        for m in metricas_acwr:
-            tabla[m + "_ACWR"] = (
-                tabla[f"{m}_7"] / tabla[f"{m}_21"]
-            ).round(2)
+    )
 
-        ratio_columns = list(dict.fromkeys([f"{m}_ACWR" for m in metricas_acwr]))
-        tabla = tabla[["Player Name"] + ratio_columns].fillna(0)
+    aguda = (
 
-        return html.Div([
-            html.H3(
-                "ACWR - Últimos 7 días vs 21 días",
-                style={
-                    "color": "white",
-                    "textAlign": "center",
-                    "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
-                }
-            ),
-            dcc.Loading(
-                dash_table.DataTable(
-                    data=tabla.to_dict("records"),
-                    columns=[
-                        {"name": "Player Name", "id": "Player Name"}
-                    ] + [
-                        {
-                            "name": col,
-                            "id": col,
-                            "type": "numeric",
-                            "format": {"specifier": ".2f"}
-                        }
-                        for col in ratio_columns
-                    ],
+        df7
+        .groupby("Player Name")[metricas_acwr]
+        .mean()
+        .reset_index()
+
+    )
+
+    tabla = cronica.merge(
+
+        aguda,
+        on="Player Name",
+        how="outer",
+        suffixes=("_21", "_7")
+
+    )
+
+    tabla = tabla.loc[
+        :,
+        ~tabla.columns.duplicated()
+    ]
+
+    for m in metricas_acwr:
+
+        tabla[f"{m}_ACWR"] = (
+
+            tabla[f"{m}_7"] /
+            tabla[f"{m}_21"]
+
+        ).round(2)
+
+    ratio_columns = [
+
+        f"{m}_ACWR"
+
+        for m in metricas_acwr
+
+    ]
+
+    tabla = tabla[
+        ["Player Name"] + ratio_columns
+    ].fillna(0)
+
+    return html.Div([
+
+        html.H3(
+
+            "ACWR - Últimos 7 días vs 21 días",
+
+            style={
+
+                "color":"white",
+                "textAlign":"center",
+                "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
+
+            }
+
+        ),
+
+        dcc.Loading(
+
+            dash_table.DataTable(
+
+                data=tabla.to_dict("records"),
+
+                columns=[
+
+                    {
+                        "name":"Player Name",
+                        "id":"Player Name"
+                    }
+
+                ] + [
+
+                    {
+                        "name":col,
+                        "id":col,
+                        "type":"numeric",
+                        "format":{"specifier":".2f"}
+                    }
+
+                    for col in ratio_columns
+
+                ],
                     filter_action="native",
                     sort_action="native",
                     fixed_columns={"headers": True, "data": 1},
@@ -1747,8 +1902,7 @@ def actualizar_tab(
         ])
 
     # CRONOLÓGICO
-    else:
-
+    if tab=="cronologico": 
         cronologico=pd.melt(
 
             dff,
@@ -1763,8 +1917,7 @@ def actualizar_tab(
             var_name="Métrica",
 
             value_name="Valor"
-        )
-
+        ) 
         fig=px.scatter(
             cronologico,
             x="Date",
@@ -2171,12 +2324,12 @@ def descargar_tabla(
     elif tab == "actividad_comparativa":
         fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
-        metricas_actividad = [m for m in metricas if m in dff.columns]
+        metricas_base = [m for m in metricas if m in dff.columns]
         resumen_fecha = (
-            dff_fecha.groupby("Player Name")[metricas_actividad].mean().reset_index()
+            dff_fecha.groupby("Player Name")[metricas_base].mean().reset_index()
         )
         promedio_jugador = (
-            dff.groupby("Player Name")[metricas_actividad].mean().reset_index()
+            dff.groupby("Player Name")[metricas_base].mean().reset_index()
         )
         df_export = resumen_fecha.merge(
             promedio_jugador,

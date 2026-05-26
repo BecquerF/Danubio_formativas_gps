@@ -235,7 +235,7 @@ app.layout = html.Div([
                             )
                         ],
                         style={
-                            "flex": "0 0 155px",
+                            "flex": "0 0 140px",
                             "display": "flex",
                             "alignItems": "center"
                         }

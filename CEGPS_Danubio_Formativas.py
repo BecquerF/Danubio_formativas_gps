@@ -508,7 +508,8 @@ app.layout = html.Div([
                 "padding":"12px 12px",
                 "background":"linear-gradient(180deg,#000c0f,#011c24)",
                 "borderRadius":"12px",
-                "border":"1px solid rgba(137,188,239,.18)"
+                "border":"1px solid rgba(137,188,239,.18)",
+                "minHeight":"calc(100vh - 180px)"
             })
 
         ],
@@ -681,7 +682,7 @@ app.layout = html.Div([
                         className="filter-card",
                         style={
                             "display": "none",
-                            "padding":"12px 12px",
+                            "padding":"8px 8px",
                             "marginBottom":"2px"
                         }
                     ),
@@ -896,7 +897,7 @@ app.layout = html.Div([
                     "boxShadow": "0 18px 48px rgba(0,0,0,0.35)",
                     "position": "sticky",
                     "top": "28px",
-                    "height": "calc(100vh - 56px)",
+                    "minHeight": "calc(100vh - 56px)",
                     "overflowY": "auto"
                 }
             )

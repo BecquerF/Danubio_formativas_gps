@@ -228,6 +228,7 @@ app.layout = html.Div([
                                     "width": "180px",
                                     "height": "auto",
                                     "objectFit": "contain",
+                                    "marginLeft": "5px",
                                     "padding": "12px 12px"
                                 }
                             )
@@ -279,7 +280,7 @@ app.layout = html.Div([
                     "display": "flex",
                     "alignItems": "center",
                     "justifyContent": "flex-start",
-                    "gap": "18px",
+                    "gap": "18 px 18px",
                     "boxSizing": "border-box"
                 }
             )
@@ -899,6 +900,7 @@ app.layout = html.Div([
                 ],
                 className="sidebar-panel sidebar-right-panel",
                 style={
+                    "flex": "0 0 auto",
                     "width": "220px",
                     "minWidth": "220px",
                     "padding": "24px",

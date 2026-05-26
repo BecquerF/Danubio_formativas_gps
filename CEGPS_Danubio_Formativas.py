@@ -1310,14 +1310,39 @@ def actualizar_tab(
             "name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}
         })
 
-    estilos_condicionales = []
-    for m in metricas_base:
-        prom_col = f"{m} Prom"
-        estilos_condicionales.append({
-            "if": {"filter_query": f"{{{m}}} > {{{prom_col}}}", "column_id": m},
-            "backgroundColor": "#017351",
-            "color": "white"
-        })
+        estilos_condicionales = []
+        for m in metricas_base:
+            prom_col = f"{m} Prom"
+
+    # Verde: superior al promedio +30%
+    estilos_condicionales.append({
+        "if": {
+            "filter_query": f"{{{m}}} > 1.3 * {{{prom_col}}}",
+            "column_id": m
+        },
+        "backgroundColor": "#017351",  # verde
+        "color": "white"
+    })
+
+    # Amarillo: dentro del rango 0.8 a 1.3 del promedio
+    estilos_condicionales.append({
+        "if": {
+            "filter_query": f"{{{m}}} >= 0.8 * {{{prom_col}}} && {{{m}}} <= 1.3 * {{{prom_col}}}",
+            "column_id": m
+        },
+        "backgroundColor": "#e6c200",  # amarillo
+        "color": "black"
+    })
+
+    # Rojo: por debajo del promedio -20%
+    estilos_condicionales.append({
+        "if": {
+            "filter_query": f"{{{m}}} < 0.8 * {{{prom_col}}}",
+            "column_id": m
+        },
+        "backgroundColor": "#b22222",  # rojo
+        "color": "white"
+    })
     return html.Div([
     html.H4(
         "Comparativo actual vs promedio",

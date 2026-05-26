@@ -1300,8 +1300,7 @@ def actualizar_tab(
                               "fontWeight": "bold", "position": "sticky", "top": 0},
                 style_cell={"backgroundColor": "#1a1a1a", "color": "white",
                             "fontSize": "11px", "textAlign": "center",
-                            "minWidth": "100px", "whiteSpace": "normal"},
-                style_data_conditional=estilos_condicionales
+                            "minWidth": "100px", "whiteSpace": "normal"}
                 )
                 )       
             ],          

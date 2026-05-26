@@ -1120,134 +1120,63 @@ def actualizar_tab(
 
 
         # ACTIVIDAD POR JUGADOR
-    elif tab=="actividad":
-
+    elif tab == "actividad":
             fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
             dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
             columnas_requeridas = [
-            "Player Name",
-            "Accel + Decel Efforts",
-            "Accel + Decel Efforts Per Minute",
-            "Distance",
-            "Player Load",
-            "Max Velocity",
-            "Meterage Per Minute",
-            "Player Load Per Minute",
-            "Sprint Distance",
-            "Sprint Efforts",
-            "Sprint Dist Per Min",
-            "High Speed Distance",
-            "High Speed Efforts",
-            "High Speed Distance Per Minute",
-            "Impacts"
+                "Player Name","Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
+                "Distance","Player Load","Max Velocity","Meterage Per Minute",
+                "Player Load Per Minute","Sprint Distance","Sprint Efforts","Sprint Dist Per Min",
+                "High Speed Distance","High Speed Efforts","High Speed Distance Per Minute","Impacts"
             ]
 
-            columnas_presentes = [
-            c for c in columnas_requeridas
-            if c in dff_fecha.columns
-            ]
+            columnas_presentes = [c for c in columnas_requeridas if c in dff_fecha.columns]
+            columnas_actividad = [{"name": c, "id": c} for c in columnas_presentes]
 
-            columnas_actividad = [
-            {"name": c, "id": c}
-            for c in columnas_presentes
-            ]
-
-            # Calcular min/max para colores semáforo
             estilos_condicionales = []
-        
             for col in columnas_presentes:
-                if col != "Player Name" and dff_fecha[col].dtype in ['float64', 'int64']:
+                if col != "Player Name" and dff_fecha[col].dtype in ['float64','int64']:
                     max_val = dff_fecha[col].max()
                     min_val = dff_fecha[col].min()
                     rango = max_val - min_val if max_val != min_val else 1
-                    
-                    # Verde para máximos
-                estilos_condicionales.append({
-                    "if": {
-                        "filter_query": f"{{{col}}} >= {max_val * 0.8}",
-                        "column_id": col
-                    },
-                    "backgroundColor": "#017351",
-                    "color": "white"
-                })
-                
-                # Amarillo para intermedios-altos
-                estilos_condicionales.append({
-                    "if": {
-                        "filter_query": f"{{{col}}} >= {min_val + rango * 0.5} && {{{col}}} < {max_val * 0.8}",
-                        "column_id": col
-                    },
-                    "backgroundColor": "#F4C95D",
-                    "color": "black"
-                })
-                
-                # Rojo para mínimos
-                estilos_condicionales.append({
-                    "if": {
-                        "filter_query": f"{{{col}}} < {min_val + rango * 0.5}",
-                        "column_id": col
-                    },
-                    "backgroundColor": "#A40A1C",
-                    "color": "white"
-                })
 
-            
+                    estilos_condicionales.append({
+                        "if": {"filter_query": f"{{{col}}} >= {max_val * 0.8}", "column_id": col},
+                        "backgroundColor": "#017351","color": "white"
+                    })
+                    estilos_condicionales.append({
+                        "if": {"filter_query": f"{{{col}}} >= {min_val + rango * 0.5} && {{{col}}} < {max_val * 0.8}", "column_id": col},
+                        "backgroundColor": "#F4C95D","color": "black"
+                    })
+                    estilos_condicionales.append({
+                        "if": {"filter_query": f"{{{col}}} < {min_val + rango * 0.5}", "column_id": col},
+                        "backgroundColor": "#A40A1C","color": "white"
+                    })
+
             return html.Div([
-                html.H3(
-                    "Actividad por Jugador",
-                    style={
-                        "color": "white",
-                        "textAlign": "center",
-                        "marginBottom": "20px",
-                        "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
-                        "fontWeight": "600"
-                    }
-                ),
-                html.H4(
-                    f"{fecha_dt.strftime('%d/%m/%Y')}",
-                    style={
-                        "color": "#a3e3d0",
-                        "textAlign": "center",
-                        "marginBottom": "15px",
-                        "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
-                        "fontWeight": "600"
-                    }
-                ),
+                html.H3("Actividad por Jugador", style={"color":"white","textAlign":"center","marginBottom":"20px",
+                                                        "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
+                html.H4(fecha_dt.strftime("%d/%m/%Y"), style={"color":"#a3e3d0","textAlign":"center","marginBottom":"15px",
+                                                            "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
                 dcc.Loading(
                     dash_table.DataTable(
-                        data=tabla_comparativa.to_dict("records"),
-                        columns=columnas_comparativa,
+                        data=dff_fecha[columnas_presentes].to_dict("records") if columnas_presentes else [],
+                        columns=columnas_actividad,
                         filter_action="native",
                         sort_action="native",
                         fixed_columns={"headers": True, "data": 1},
                         page_size=20,
-                        style_table={
-                            "overflowX": "auto",
-                            "minWidth": "100%",
-                            "border": "1px solid rgba(137,188,239,0.18)",
-                            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
-                        },
-                        style_header={
-                            "backgroundColor": "#000000",
-                            "color": "white",
-                            "fontWeight": "bold",
-                            "position": "sticky",
-                            "top": 0
-                        },
-                        style_cell={
-                            "backgroundColor": "#1a1a1a",
-                            "color": "white",
-                            "fontSize": "11px",
-                            "textAlign": "center",
-                            "minWidth": "100px",
-                            "whiteSpace": "normal"
-                        },
+                        style_table={"overflowX":"auto","minWidth":"100%","border":"1px solid rgba(137,188,239,0.18)",
+                                    "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"},
+                        style_header={"backgroundColor":"#000000","color":"white","fontWeight":"bold","position":"sticky","top":0},
+                        style_cell={"backgroundColor":"#1a1a1a","color":"white","fontSize":"11px","textAlign":"center",
+                                    "minWidth":"100px","whiteSpace":"normal"},
                         style_data_conditional=estilos_condicionales
                     )
                 )
             ])
-                
+                        
 
 
 

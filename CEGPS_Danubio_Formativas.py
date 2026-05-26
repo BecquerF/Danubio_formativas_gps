@@ -1315,7 +1315,7 @@ def actualizar_tab(
             prom_col = f"{m} Prom"
 
     # Verde: superior al promedio +30%
-    estilos_condicionales.append({
+        estilos_condicionales.append({
         "if": {
             "filter_query": f"{{{m}}} > 1.3 * {{{prom_col}}}",
             "column_id": m
@@ -1325,7 +1325,7 @@ def actualizar_tab(
     })
 
     # Amarillo: dentro del rango 0.8 a 1.3 del promedio
-    estilos_condicionales.append({
+        estilos_condicionales.append({
         "if": {
             "filter_query": f"{{{m}}} >= 0.8 * {{{prom_col}}} && {{{m}}} <= 1.3 * {{{prom_col}}}",
             "column_id": m
@@ -1335,7 +1335,7 @@ def actualizar_tab(
     })
 
     # Rojo: por debajo del promedio -20%
-    estilos_condicionales.append({
+        estilos_condicionales.append({
         "if": {
             "filter_query": f"{{{m}}} < 0.8 * {{{prom_col}}}",
             "column_id": m

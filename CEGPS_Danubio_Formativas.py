@@ -1261,7 +1261,7 @@ def actualizar_tab(
         "Max Velocity","Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
         "High Speed Distance","High Speed Distance Per Minute","High Speed Efforts",
         "Sprint Distance","Sprint Dist Per Min","Sprint Efforts","Impacts"
-    ]
+        ]
 
         resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].sum().reset_index()
         dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
@@ -1281,7 +1281,7 @@ def actualizar_tab(
                 columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
                 columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
 
-    # Estilos condicionales
+          # Estilos condicionales
         estilos_condicionales = []
         for m in metricas_base:
             prom_col = f"{m} Prom"
@@ -1305,11 +1305,11 @@ def actualizar_tab(
         })
 
         return html.Div([
-        html.H4("Comparativo actual vs promedio",
+                html.H4("Comparativo actual vs promedio",
                 style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
                        "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
-        dcc.Loading(
-            dash_table.DataTable(
+                dcc.Loading(
+                dash_table.DataTable(
                 data=tabla_comparativa.to_dict("records"),
                 columns=columnas_comparativa,
                 filter_action="native",
@@ -1325,11 +1325,13 @@ def actualizar_tab(
                             "fontSize": "11px", "textAlign": "center",
                             "minWidth": "100px", "whiteSpace": "normal"},
                 style_data_conditional=estilos_condicionales
-            )
-        )
-    ],  style={"padding": "22px", "background": "#0b0c0e",
-              "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
-              "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
+                )
+                )       
+            ],          
+                        
+                        style={"padding": "22px", "background": "#0b0c0e",
+                "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
+                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
 
 
 

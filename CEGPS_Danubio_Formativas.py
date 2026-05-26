@@ -229,8 +229,9 @@ app.layout = html.Div([
                                     "width": "180px",
                                     "height": "auto",
                                     "objectFit": "contain",
-                                    "gap": "0px 4px",
-                                    "padding": "0px 12px"
+                                    "gap": "1px 4px",
+                                    "position": "absolute",
+                                    "left": "0px"
                                 }
                             )
                         ],

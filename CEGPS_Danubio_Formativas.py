@@ -1121,10 +1121,10 @@ def actualizar_tab(
     # ACTIVIDAD POR JUGADOR
     elif tab=="actividad":
 
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
-        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+            fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+            dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
-        columnas_requeridas = [
+            columnas_requeridas = [
             "Player Name",
             "Accel + Decel Efforts",
             "Accel + Decel Efforts Per Minute",
@@ -1140,28 +1140,28 @@ def actualizar_tab(
             "High Speed Efforts",
             "High Speed Distance Per Minute",
             "Impacts"
-        ]
+            ]
 
-        columnas_presentes = [
+            columnas_presentes = [
             c for c in columnas_requeridas
             if c in dff_fecha.columns
-        ]
+            ]
 
-        columnas_actividad = [
+            columnas_actividad = [
             {"name": c, "id": c}
             for c in columnas_presentes
-        ]
+            ]
 
-        # Calcular min/max para colores semáforo
-        estilos_condicionales = []
+            # Calcular min/max para colores semáforo
+            estilos_condicionales = []
         
-        for col in columnas_presentes:
-            if col != "Player Name" and dff_fecha[col].dtype in ['float64', 'int64']:
-                max_val = dff_fecha[col].max()
-                min_val = dff_fecha[col].min()
-                rango = max_val - min_val if max_val != min_val else 1
-                
-                # Verde para máximos
+            for col in columnas_presentes:
+                if col != "Player Name" and dff_fecha[col].dtype in ['float64', 'int64']:
+                    max_val = dff_fecha[col].max()
+                    min_val = dff_fecha[col].min()
+                    rango = max_val - min_val if max_val != min_val else 1
+                    
+                    # Verde para máximos
                 estilos_condicionales.append({
                     "if": {
                         "filter_query": f"{{{col}}} >= {max_val * 0.8}",
@@ -1191,79 +1191,79 @@ def actualizar_tab(
                     "color": "white"
                 })
 
-        # Construir reglas de estilo condicional
-        style_rules = []
-        for m in metricas_base:
-            prom_col = f"{m} Prom"
+            # Construir reglas de estilo condicional
+            style_rules = []
+            for m in metricas_base:
+                prom_col = f"{m} Prom"
 
-            # Verde si el valor actual es mayor al promedio
-            style_rules.append({
-                "if": {"filter_query": f"{{{m}}} > {{{prom_col}}}", "column_id": m},
-                "backgroundColor": "#017351",
-                "color": "white"
-            })
+                # Verde si el valor actual es mayor al promedio
+                style_rules.append({
+                    "if": {"filter_query": f"{{{m}}} > {{{prom_col}}}", "column_id": m},
+                    "backgroundColor": "#017351",
+                    "color": "white"
+                })
 
-            # Rojo si el valor actual es menor al promedio
-            style_rules.append({
-                "if": {"filter_query": f"{{{m}}} < {{{prom_col}}}", "column_id": m},
-                "backgroundColor": "#A40A1C",
-                "color": "white"
-            })
+                # Rojo si el valor actual es menor al promedio
+                style_rules.append({
+                    "if": {"filter_query": f"{{{m}}} < {{{prom_col}}}", "column_id": m},
+                    "backgroundColor": "#A40A1C",
+                    "color": "white"
+                })
 
-        return html.Div([
-            html.H3(
-                "Actividad por Jugador",
-                style={
-                    "color": "white",
-                    "textAlign": "center",
-                    "marginBottom": "20px",
-                    "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
-                    "fontWeight": "600"
-                }
-            ),
-            html.H4(
-                f"{fecha_dt.strftime('%d/%m/%Y')}",
-                style={
-                    "color": "#a3e3d0",
-                    "textAlign": "center",
-                    "marginBottom": "15px",
-                    "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
-                    "fontWeight": "600"
-                }
-            ),
-            dcc.Loading(
-                dash_table.DataTable(
-                    data=tabla_comparativa.to_dict("records"),
-                    columns=columnas_comparativa,
-                    filter_action="native",
-                    sort_action="native",
-                    fixed_columns={"headers": True, "data": 1},
-                    page_size=20,
-                    style_table={
-                        "overflowX": "auto",
-                        "minWidth": "100%",
-                        "border": "1px solid rgba(137,188,239,0.18)",
-                        "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
-                    },
-                    style_header={
-                        "backgroundColor": "#000000",
+            return html.Div([
+                html.H3(
+                    "Actividad por Jugador",
+                    style={
                         "color": "white",
-                        "fontWeight": "bold",
-                        "position": "sticky",
-                        "top": 0
-                    },
-                    style_cell={
-                        "backgroundColor": "#1a1a1a",
-                        "color": "white",
-                        "fontSize": "11px",
                         "textAlign": "center",
-                        "minWidth": "100px",
-                        "whiteSpace": "normal"
-                    },
-                    style_data_conditional=style_rules
+                        "marginBottom": "20px",
+                        "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
+                        "fontWeight": "600"
+                    }
+                ),
+                html.H4(
+                    f"{fecha_dt.strftime('%d/%m/%Y')}",
+                    style={
+                        "color": "#a3e3d0",
+                        "textAlign": "center",
+                        "marginBottom": "15px",
+                        "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
+                        "fontWeight": "600"
+                    }
+                ),
+                dcc.Loading(
+                    dash_table.DataTable(
+                        data=tabla_comparativa.to_dict("records"),
+                        columns=columnas_comparativa,
+                        filter_action="native",
+                        sort_action="native",
+                        fixed_columns={"headers": True, "data": 1},
+                        page_size=20,
+                        style_table={
+                            "overflowX": "auto",
+                            "minWidth": "100%",
+                            "border": "1px solid rgba(137,188,239,0.18)",
+                            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                        },
+                        style_header={
+                            "backgroundColor": "#000000",
+                            "color": "white",
+                            "fontWeight": "bold",
+                            "position": "sticky",
+                            "top": 0
+                        },
+                        style_cell={
+                            "backgroundColor": "#1a1a1a",
+                            "color": "white",
+                            "fontSize": "11px",
+                            "textAlign": "center",
+                            "minWidth": "100px",
+                            "whiteSpace": "normal"
+                        },
+                        style_data_conditional=style_rules
+                    )
                 )
-            )
-        ])
+            ])
 
 
 

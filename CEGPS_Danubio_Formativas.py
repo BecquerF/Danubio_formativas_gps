@@ -230,8 +230,8 @@ app.layout = html.Div([
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "gap": "1px 4px",
-                                    "position": "absolute",
-                                    "left": "0px"
+                                    "position": "relative",
+                                    "left": "5px"
                                 }
                             )
                         ],

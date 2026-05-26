@@ -229,8 +229,8 @@ app.layout = html.Div([
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "marginLeft": "5px",
-                                    "gap": "4px 4px",
-                                    "padding": "12px 12px"
+                                    "gap": "0px 4px",
+                                    "padding": "0px 12px"
                                 }
                             )
                         ],
@@ -724,12 +724,12 @@ app.layout = html.Div([
                                 style={
                                     "display": "grid",
                                     "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
-                                    "gap": "10px"
+                                    "gap": "5px"
                                 },
                                 labelStyle={
                                     "color":"white",
                                     "fontSize":"10px",
-                                    "marginBottom":"6px"
+                                    "marginBottom":"2px"
                                 }
                             )
                         ],
@@ -765,7 +765,7 @@ app.layout = html.Div([
                                 labelStyle={
                                     "color":"white",
                                     "fontSize":"10px",
-                                    "marginBottom":"8px"
+                                    "marginBottom":"2px"
                                 }
                             )
                         ],
@@ -913,7 +913,7 @@ app.layout = html.Div([
                     "boxShadow": "0 18px 48px rgba(0,0,0,0.35)",
                     "position": "sticky",
                     "top": "28px",
-                    "minHeight": "calc(100vh - 56px)",
+                    "maxHeight": "calc(100vh - 56px)",
                     "overflowY": "auto"
                 }
             )
@@ -923,7 +923,7 @@ app.layout = html.Div([
             "alignItems": "flex-start",
             "gap": "18px",
             "width": "100%",
-            "minHeight": "calc(100vh - 180px)"
+            "maxHeight": "calc(100vh - 100px)"
         }
     )
 ],
@@ -932,7 +932,8 @@ style={
     "padding": "28px 24px 36px",
     "fontFamily": "'Clash Display Semibold', 'Segoe UI', sans-serif",
     "margin": "0",
-    "minHeight": "calc(100vh - 220px)"
+    "maxHeight": "calc(100vh - 100px)",
+    "overflow": "auto"
 }
 )
 

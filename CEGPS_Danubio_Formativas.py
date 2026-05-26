@@ -1205,20 +1205,18 @@ def actualizar_tab(
 
             tabla_comparativa = resumen_fecha.merge(promedio_jugador, on="Player Name", how="left")
 
+            columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
+            estilos_condicionales = []  # siempre existe
+
             if tabla_comparativa.empty:
                 tabla_comparativa = pd.DataFrame(columns=["Player Name"] + metricas_base + [f"{m} Prom" for m in metricas_base])
-                columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
             else:
                 tabla_comparativa = tabla_comparativa.fillna(0)
 
-                columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
                 for m in metricas_base:
                     columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
                     columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
 
-                # Construir reglas de estilo condicional
-                estilos_condicionales = []
-                for m in metricas_base:
                     prom_col = f"{m} Prom"
 
                     # Verde: superior al promedio +30%
@@ -1259,12 +1257,13 @@ def actualizar_tab(
                         style_cell={"backgroundColor": "#1a1a1a", "color": "white",
                                     "fontSize": "11px", "textAlign": "center",
                                     "minWidth": "100px", "whiteSpace": "normal"},
-                        style_data_conditional=estilos_condicionales if not tabla_comparativa.empty else []
+                        style_data_conditional=estilos_condicionales
                     )
                 )
             ], style={"padding": "22px", "background": "#0b0c0e",
                     "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
+
 
 
     # ACWR

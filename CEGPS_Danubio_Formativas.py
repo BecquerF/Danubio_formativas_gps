@@ -1244,13 +1244,12 @@ def actualizar_tab(
         ])
 
 
-  # ACTIVIDAD COMPARATIVA INDIVIDUAL
+  
+# ACTIVIDAD COMPARATIVA INDIVIDUAL
     elif tab == "actividad_comparativa":
-
-        if fecha_actividad:
-            fecha_dt = pd.to_datetime(fecha_actividad).normalize()
-        else:
-            fecha_dt = dff["Date"].max().normalize()
+            if fecha_actividad:
+                fecha_dt = pd.to_datetime(fecha_actividad).normalize()
+            else:fecha_dt = dff["Date"].max().normalize()
 
     dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
@@ -1311,7 +1310,6 @@ def actualizar_tab(
             "name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}
         })
 
-    # Estilos condicionales
     estilos_condicionales = []
     for m in metricas_base:
         prom_col = f"{m} Prom"
@@ -1320,9 +1318,6 @@ def actualizar_tab(
             "backgroundColor": "#017351",
             "color": "white"
         })
-
-    # Columnas para la tabla de promedios
-    columnas_presentes = [{"name": c, "id": c} for c in promedio_jugador.columns]
 
     return html.Div([
         html.H3(
@@ -1339,32 +1334,37 @@ def actualizar_tab(
                 "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'", "fontWeight": "600"
             }
         ),
-        html.Div([
-            html.Div([
-                html.H4("Promedios de la actividad",
-                        style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
-                               "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
-                dcc.Loading(
-                    dash_table.DataTable(
-                        data=promedio_jugador.to_dict("records"),
-                        columns=columnas_presentes,
-                        filter_action="native",
-                        sort_action="native",
-                        fixed_columns={"headers": True, "data": 1},
-                        page_size=20,
-                        style_table={"overflowX": "auto", "minWidth": "100%",
-                                     "border": "1px solid rgba(137,188,239,0.18)",
-                                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
-                        style_header={"backgroundColor": "#000000", "color": "white",
-                                      "fontWeight": "bold", "position": "sticky", "top": 0},
-                        style_cell={"backgroundColor": "#1a1a1a", "color": "white",
-                                    "fontSize": "11px", "textAlign": "center",
-                                    "minWidth": "100px", "whiteSpace": "normal"}
-                    )
-                )
-            ], style={"padding": "18px", "background": "#071016",
-                      "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "20px"}),
-            html.Div([
+        dcc.Loading(
+            dash_table.DataTable(
+                data=tabla_comparativa.to_dict("records"),
+                columns=columnas_comparativa,
+                filter_action="native",
+                sort_action="native",
+                fixed_columns={"headers": True, "data": 1},
+                page_size=20,
+                style_table={
+                    "overflowX": "auto", "minWidth": "100%",
+                    "border": "1px solid rgba(137,188,239,0.18)",
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                },
+                style_header={
+                    "backgroundColor": "#000000", "color": "white",
+                    "fontWeight": "bold", "position": "sticky", "top": 0
+                },
+                style_cell={
+                    "backgroundColor": "#1a1a1a", "color": "white",
+                    "fontSize": "11px", "textAlign": "center",
+                    "minWidth": "100px", "whiteSpace": "normal"
+                },
+                style_data_conditional=estilos_condicionales
+            )
+        )
+    ], style={
+        "padding": "22px", "background": "#0b0c0e",
+        "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
+        "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+    })
+    html.Div([
                 html.H4("Comparativo actual vs promedio",
                         style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
                                "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
@@ -1389,8 +1389,10 @@ def actualizar_tab(
                 )
             ], style={"padding": "18px", "background": "#071016",
                       "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "20px"})
-        ], style={"display": "grid", "gap": "24px"})
-    ], style={"padding": "22px", "background": "#0b0c0e",
+        ], 
+                style={"display": "grid", "gap": "24px"})
+    ], 
+                style={"padding": "22px", "background": "#0b0c0e",
               "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
               "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
 

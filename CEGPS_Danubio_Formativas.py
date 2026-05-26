@@ -1249,40 +1249,40 @@ def actualizar_tab(
     elif tab == "actividad_comparativa":
         if fecha_actividad:
             fecha_dt = pd.to_datetime(fecha_actividad).normalize()
-    else:
-        fecha_dt = dff["Date"].max().normalize()
+        else:
+            fecha_dt = dff["Date"].max().normalize()
 
-    dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
-    metricas_base = [
+        metricas_base = [
         "Distance","Meterage Per Minute","Player Load","Player Load Per Minute",
         "Max Velocity","Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
         "High Speed Distance","High Speed Distance Per Minute","High Speed Efforts",
         "Sprint Distance","Sprint Dist Per Min","Sprint Efforts","Impacts"
     ]
 
-    resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].sum().reset_index()
-    dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
+        resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].sum().reset_index()
+        dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
 
-    promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
-    promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
+        promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
+        promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
 
-    tabla_comparativa = resumen_fecha.merge(promedio_jugador, on="Player Name", how="left")
+        tabla_comparativa = resumen_fecha.merge(promedio_jugador, on="Player Name", how="left")
 
-    if tabla_comparativa.empty:
-        tabla_comparativa = pd.DataFrame(columns=["Player Name"] + metricas_base + [f"{m} Prom" for m in metricas_base])
-    else:
-        tabla_comparativa = tabla_comparativa.fillna(0)
+        if tabla_comparativa.empty:
+            tabla_comparativa = pd.DataFrame(columns=["Player Name"] + metricas_base + [f"{m} Prom" for m in metricas_base])
+        else:
+            tabla_comparativa = tabla_comparativa.fillna(0)
 
-    columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
-    for m in metricas_base:
-        columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
-        columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
+            columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
+            for m in metricas_base:
+                columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
+                columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
 
     # Estilos condicionales
-    estilos_condicionales = []
-    for m in metricas_base:
-        prom_col = f"{m} Prom"
+        estilos_condicionales = []
+        for m in metricas_base:
+            prom_col = f"{m} Prom"
 
         # Verde: superior al promedio +30%
         estilos_condicionales.append({
@@ -1302,7 +1302,7 @@ def actualizar_tab(
             "backgroundColor": "#b22222", "color": "white"
         })
 
-    return html.Div([
+        return html.Div([
         html.H4("Comparativo actual vs promedio",
                 style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
                        "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
@@ -1325,7 +1325,7 @@ def actualizar_tab(
                 style_data_conditional=estilos_condicionales
             )
         )
-    ], style={"padding": "22px", "background": "#0b0c0e",
+    ],  style={"padding": "22px", "background": "#0b0c0e",
               "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
               "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
 
@@ -1333,8 +1333,7 @@ def actualizar_tab(
 
     # ACWR
     
-    if tab=="acwr":
-    
+    elif tab=="acwr":
         metricas_acwr = list(dict.fromkeys([
 
             "Distance",

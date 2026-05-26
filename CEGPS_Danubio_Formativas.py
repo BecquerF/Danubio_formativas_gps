@@ -1183,93 +1183,79 @@ def actualizar_tab(
   
 # ACTIVIDAD COMPARATIVA INDIVIDUAL
     elif tab == "actividad_comparativa":
-        if fecha_actividad:
-                fecha_dt = pd.to_datetime(fecha_actividad).normalize()
-        else:
-                fecha_dt = dff["Date"].max().normalize()
-
+            # Fecha seleccionada o última disponible
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
         metricas_base = [
-                "Distance","Meterage Per Minute","Player Load","Player Load Per Minute",
-                "Max Velocity","Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
-                "High Speed Distance","High Speed Distance Per Minute","High Speed Efforts",
-                "Sprint Distance","Sprint Dist Per Min","Sprint Efforts","Impacts"
+            "Distance","Meterage Per Minute","Player Load","Player Load Per Minute",
+            "Max Velocity","Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
+            "High Speed Distance","High Speed Distance Per Minute","High Speed Efforts",
+            "Sprint Distance","Sprint Dist Per Min","Sprint Efforts","Impacts"
         ]
 
+        # Actual y promedio
         resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].sum().reset_index()
         dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
-
         promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
         promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
 
-        tabla_comparativa = resumen_fecha.merge(promedio_jugador, on="Player Name", how="left")
+        tabla_comparativa = resumen_fecha.merge(promedio_jugador, on="Player Name", how="left").fillna(0)
 
+        # Columnas
         columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
-        estilos_condicionales = []  # siempre existe
+        for m in metricas_base:
+            columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
+            columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
 
-        if tabla_comparativa.empty:
-            tabla_comparativa = pd.DataFrame(columns=["Player Name"] + metricas_base + [f"{m} Prom" for m in metricas_base])
-        else:
-            tabla_comparativa = tabla_comparativa.fillna(0)
-
-            for m in metricas_base:
-                columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
-                columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
-
-                prom_col = f"{m} Prom"
-
-                    # Verde: superior al promedio +30%
-                estilos_condicionales.append({
-                    "if": {"filter_query": f"{{{m}}} > 1.3 * {{{prom_col}}}", "column_id": m},
-                    "backgroundColor": "#017351", "color": "white"
-                })
-
-                    # Amarillo: dentro del rango 0.8 a 1.3 del promedio
-                estilos_condicionales.append({
-                    "if": {"filter_query": f"{{{m}}} >= 0.8 * {{{prom_col}}} && {{{m}}} <= 1.3 * {{{prom_col}}}", "column_id": m},
-                    "backgroundColor": "#e6c200", "color": "black"
-                })
-
-                    # Rojo: por debajo del promedio -20%
-                estilos_condicionales.append({
-                    "if": {"filter_query": f"{{{m}}} < 0.8 * {{{prom_col}}}", "column_id": m},
-                     "backgroundColor": "#b22222", "color": "white"
-                })
-                     # Estilo neutro para la columna Prom
-                estilos_condicionales.append({
-                    "if": {"column_id": prom_col},
-                    "backgroundColor": "#2f2f2f",  # gris oscuro
-                    "color": "#d0d0d0",            # texto gris claro
-                    "fontWeight": "bold"
-                })
+        # Estilos condicionales
+        estilos_condicionales = []
+        for m in metricas_base:
+            prom_col = f"{m} Prom"
+            estilos_condicionales.append({
+                "if": {"filter_query": f"{{{m}}} > 1.3 * {{{prom_col}}}", "column_id": m},
+                "backgroundColor": "#017351", "color": "white"
+            })
+            estilos_condicionales.append({
+                "if": {"filter_query": f"{{{m}}} >= 0.8 * {{{prom_col}}} && {{{m}}} <= 1.3 * {{{prom_col}}}", "column_id": m},
+                "backgroundColor": "#e6c200", "color": "black"
+            })
+            estilos_condicionales.append({
+                "if": {"filter_query": f"{{{m}}} < 0.8 * {{{prom_col}}}", "column_id": m},
+                "backgroundColor": "#b22222", "color": "white"
+            })
+            # Diferenciar columna Prom
+            estilos_condicionales.append({
+                "if": {"column_id": prom_col},
+                "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold"
+            })
 
         return html.Div([
-                     html.H4("Comparativo actual vs promedio",
-                            style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
-                                "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
-                     dcc.Loading(
-                         dash_table.DataTable(
-                             data=tabla_comparativa.to_dict("records"),
-                             columns=columnas_comparativa,
-                             filter_action="native",
-                             sort_action="native",
-                             fixed_columns={"headers": True, "data": 1},
-                             page_size=20,
-                             style_table={"overflowX": "auto", "minWidth": "100%",
-                                         "border": "1px solid rgba(137,188,239,0.18)",
-                                         "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
-                             style_header={"backgroundColor": "#000000", "color": "white",
-                                         "fontWeight": "bold", "position": "sticky", "top": 0},
-                             style_cell={"backgroundColor": "#1a1a1a", "color": "white",
-                                         "fontSize": "11px", "textAlign": "center",
-                                         "minWidth": "100px", "whiteSpace": "normal"},
-                             style_data_conditional=estilos_condicionales
-                         )
-                     )
-                 ], style={"padding": "22px", "background": "#0b0c0e",
-                         "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
-                         "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
+            html.H4("Comparativo actual vs promedio",
+                    style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
+                        "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
+            dcc.Loading(
+                dash_table.DataTable(
+                    data=tabla_comparativa.to_dict("records"),
+                    columns=columnas_comparativa,
+                    filter_action="native",
+                    sort_action="native",
+                    fixed_columns={"headers": True, "data": 1},
+                    page_size=20,
+                    style_table={"overflowX": "auto", "minWidth": "100%",
+                                "border": "1px solid rgba(137,188,239,0.18)",
+                                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
+                    style_header={"backgroundColor": "#000000", "color": "white",
+                                "fontWeight": "bold", "position": "sticky", "top": 0},
+                    style_cell={"backgroundColor": "#1a1a1a", "color": "white",
+                                "fontSize": "11px", "textAlign": "center",
+                                "minWidth": "100px", "whiteSpace": "normal"},
+                    style_data_conditional=estilos_condicionales
+                )
+            )
+        ], style={"padding": "22px", "background": "#0b0c0e",
+                "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
+                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
 
 
 

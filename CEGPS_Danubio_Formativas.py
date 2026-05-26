@@ -225,7 +225,6 @@ app.layout = html.Div([
                             html.Img(
                                 src="/assets/logo_dataload_2.png",
                                 style={
-                                    "flex": "1",
                                     "width": "180px",
                                     "height": "auto",
                                     "objectFit": "contain",
@@ -236,7 +235,7 @@ app.layout = html.Div([
                             )
                         ],
                         style={
-                            "flex": "0 0 auto",
+                            "flex": "0 0 180px",
                             "display": "flex",
                             "alignItems": "center"
                         }
@@ -271,7 +270,7 @@ app.layout = html.Div([
                             )
                         ],
                         style={
-                            "flex": "1 1 auto",
+                            "flex": "1",
                             "minWidth": "0"
                         }
                     )
@@ -279,11 +278,11 @@ app.layout = html.Div([
                 style={
                     "flex":"1",
                     "width": "100%",
-                    "padding": "18px 18px",
+                    "padding": "18px",
                     "display": "flex",
                     "alignItems": "center",
                     "justifyContent": "flex-start",
-                    "gap": "18px 18px",
+                    "gap": "18px",
                     "boxSizing": "border-box"
                 }
             )
@@ -519,13 +518,11 @@ app.layout = html.Div([
             ],
 
             style={
-                "padding":"12px 12px",
+                "padding":"12px",
                 "width":"160px",
                 "background":"linear-gradient(180deg,#000c0f,#011c24)",
                 "borderRadius":"12px",
-                "border":"1px solid rgba(137,188,239,.18)",
-                "minHeight":"calc(100vh - 180px)",
-                "top":"10px"
+                "border":"1px solid rgba(137,188,239,.18)"
                 })
             ],
 
@@ -553,7 +550,10 @@ app.layout = html.Div([
 
             html.Div(    id="contenido-tab",
     style={
-        "flex":"0",
+        "displey":"flex",
+        "flex":"1",
+        "padding":"24px",
+        "gap":"18px",
         "width":"100%",
         "maxWidth":"1000px",
         "minWidth":"1000px",

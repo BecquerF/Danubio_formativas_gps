@@ -83,52 +83,38 @@ metricas = [
 metricas_base = metricas.copy()
 
 # Promedios por jugador
-df_Actividad_Comparativa_Individual = (
-
+df_promedios = (
     df.groupby("Player Name")[metricas_base]
       .mean()
       .reset_index()
-
 )
 
-# Renombrar promedio
-df_Actividad_Comparativa_Individual.rename(
-    columns={
-        col: f"{col} Prom"
-        for col in metricas_base
-    },
+# Renombrar columnas de promedio
+df_promedios.rename(
+    columns={col: f"{col} Prom" for col in metricas_base},
     inplace=True
 )
 
-# Agregar acumulados
-for metrica in metricas_base:
+# Acumulados por jugador
+df_acumulados = (
+    df.groupby("Player Name")[metricas_base]
+      .sum()
+      .reset_index()
+)
 
-    acumulado = (
-
-        df.groupby("Player Name")[metrica]
-          .sum()
-          .reset_index()
-
-    )
-
-    df_Actividad_Comparativa_Individual = (
-
-        df_Actividad_Comparativa_Individual.merge(
-            acumulado,
-            on="Player Name"
-        )
-
-    )
+# Unir ambos DataFrames
+df_Actividad_Comparativa_Individual = pd.merge(
+    df_acumulados,
+    df_promedios,
+    on="Player Name"
+)
 
 # Ordenar columnas
 orden = ["Player Name"]
-
 for m in metricas_base:
     orden.extend([m, f"{m} Prom"])
 
-df_Actividad_Comparativa_Individual = (
-    df_Actividad_Comparativa_Individual[orden]
-)
+df_Actividad_Comparativa_Individual = df_Actividad_Comparativa_Individual[orden]
 
 # ======================================================
 
@@ -1258,22 +1244,17 @@ def actualizar_tab(
         ])
 
 
-    # ACTIVIDAD COMPARATIVA INDIVIDUAL
-    elif tab=="actividad_comparativa":
-    
+  # ACTIVIDAD COMPARATIVA INDIVIDUAL
+    elif tab == "actividad_comparativa":
+
         if fecha_actividad:
-            fecha_dt = pd.to_datetime(
-            fecha_actividad
-        ).normalize()
+            fecha_dt = pd.to_datetime(fecha_actividad).normalize()
         else:
             fecha_dt = dff["Date"].max().normalize()
 
-    dff_fecha = dff[
-        dff["Date"].dt.normalize() == fecha_dt
-    ]
+    dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
-    metricas_base=[
-
+    metricas_base = [
         "Distance",
         "Meterage Per Minute",
         "Player Load",
@@ -1288,260 +1269,130 @@ def actualizar_tab(
         "Sprint Dist Per Min",
         "Sprint Efforts",
         "Impacts"
-
     ]
 
-    resumen_fecha=(
-
-        dff_fecha
-        .groupby("Player Name")[metricas_base]
+    resumen_fecha = (
+        dff_fecha.groupby("Player Name")[metricas_base]
         .sum()
         .reset_index()
-
     )
 
-    dff_acumulado=dff[
-        dff["Date"].dt.normalize()<=fecha_dt
-    ]
+    dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
 
-    promedio_jugador=(
-
-        dff_acumulado
-        .groupby("Player Name")[metricas_base]
+    promedio_jugador = (
+        dff_acumulado.groupby("Player Name")[metricas_base]
         .mean()
         .reset_index()
-
     )
 
-    promedio_jugador=promedio_jugador.rename(
-
-        columns={
-
-            m:f"{m} Prom"
-
-            for m in metricas_base
-        }
-
+    promedio_jugador = promedio_jugador.rename(
+        columns={m: f"{m} Prom" for m in metricas_base}
     )
 
-    tabla_comparativa=(
-
-        resumen_fecha.merge(
-
-            promedio_jugador,
-            on="Player Name",
-            how="left"
-
-        )
-
+    tabla_comparativa = resumen_fecha.merge(
+        promedio_jugador,
+        on="Player Name",
+        how="left"
     )
-
 
     if tabla_comparativa.empty:
-
-        tabla_comparativa=pd.DataFrame(
-
-            columns=["Player Name"] +
-            metricas_base +
-            [f"{m} Prom" for m in metricas_base]
-
+        tabla_comparativa = pd.DataFrame(
+            columns=["Player Name"] + metricas_base + [f"{m} Prom" for m in metricas_base]
         )
-
     else:
+        tabla_comparativa = tabla_comparativa.fillna(0)
 
-        tabla_comparativa=tabla_comparativa.fillna(0)
-
-
-    columnas_comparativa=[
-
-        {
-            "name":"Player Name",
-            "id":"Player Name"
-        }
-
-    ]
-
+    columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
     for m in metricas_base:
-
         columnas_comparativa.append({
-
-            "name":m,
-            "id":m,
-            "type":"numeric",
-            "format":{"specifier":".2f"}
-
+            "name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}
+        })
+        columnas_comparativa.append({
+            "name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}
         })
 
-        columnas_comparativa.append({
-
-            "name":f"{m} Prom",
-            "id":f"{m} Prom",
-            "type":"numeric",
-            "format":{"specifier":".2f"}
-
-        })
-
-
-    style_data_condicional=[]
-
+    # Estilos condicionales
+    estilos_condicionales = []
     for m in metricas_base:
-
-        prom_col=f"{m} Prom"
-
-        style_data_condicional.append({
-
-            "if":{
-                "filter_query":
-                f"{{{m}}}>{{{prom_col}}}",
-                "column_id":m
-            },
-
-            "backgroundColor":"#017351",
-            "color":"white"
-
+        prom_col = f"{m} Prom"
+        estilos_condicionales.append({
+            "if": {"filter_query": f"{{{m}}} > {{{prom_col}}}", "column_id": m},
+            "backgroundColor": "#017351",
+            "color": "white"
         })
-        
-        return html.Div([
-            html.H3(
-                "Actividad Comparativa Individual",
-                style={
-                    "color": "white",
-                    "textAlign": "center",
-                    "marginBottom": "20px",
-                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
-                    "fontWeight":"600"
-                }
-            ),
-            html.H4(
-                f"{fecha_dt.strftime('%d/%m/%Y')}",
-                style={
-                    "color": "#a3e3d0",
-                    "textAlign": "center",
-                    "marginBottom": "18px",
-                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
-                    "fontWeight":"600"
-                }
-            ),
-            html.Div(
-                [
-                    html.Div(
-                        [
-                            html.H4(
-                                "Promedios de la actividad",
-                                style={
-                                    "color": "#edf1f2",
-                                    "fontSize": "14px",
-                                    "fontWeight": "600",
-                                    "marginBottom": "12px",
-                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'"
-                                }
-                            ),
-                            dcc.Loading(
-                                dash_table.DataTable(
-                                    data=promedio_jugador.to_dict("records"),
-                                    columns=columnas_presentes,
-                                    filter_action="native",
-                                    sort_action="native",
-                                    fixed_columns={"headers": True, "data": 1},
-                                    page_size=20,
-                                    style_table={
-                                        "overflowX": "auto",
-                                        "minWidth": "100%",
-                                        "border":"1px solid rgba(137,188,239,0.18)",
-                                        "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
-                                    },
-                                    style_header={
-                                        "backgroundColor": "#000000",
-                                        "color": "white",
-                                        "fontWeight": "bold",
-                                        "position": "sticky",
-                                        "top": 0
-                                    },
-                                    style_cell={
-                                        "backgroundColor": "#1a1a1a",
-                                        "color": "white",
-                                        "fontSize": "11px",
-                                        "textAlign": "center",
-                                        "minWidth": "100px",
-                                        "whiteSpace": "normal"
-                                    }
-                                )
-                            )
-                        ],
-                        style={
-                            "padding": "18px",
-                            "background": "#071016",
-                            "border": "1px solid rgba(137,188,239,0.18)",
-                            "borderRadius": "20px"
-                        }
-                    ),
-                    html.Div(
-                        [
-                            html.H4(
-                                "Comparativo actual vs promedio",
-                                style={
-                                    "color": "#edf1f2",
-                                    "fontSize": "14px",
-                                    "fontWeight": "600",
-                                    "marginBottom": "12px",
-                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'"
-                                }
-                            ),
-                            dcc.Loading(
-                                dash_table.DataTable(
-                                    data=tabla_comparativa.to_dict("records"),
-                                    columns=columnas_comparativa,
-                                    filter_action="native",
-                                    sort_action="native",
-                                    fixed_columns={"headers": True, "data": 1},
-                                    page_size=20,
-                                    style_table={
-                                        "overflowX": "auto",
-                                        "minWidth": "100%",
-                                        "border":"1px solid rgba(137,188,239,0.18)",
-                                        "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
-                                    },
-                                    style_header={
-                                        "backgroundColor": "#000000",
-                                        "color": "white",
-                                        "fontWeight": "bold",
-                                        "position": "sticky",
-                                        "top": 0
-                                    },
-                                    style_cell={
-                                        "backgroundColor": "#1a1a1a",
-                                        "color": "white",
-                                        "fontSize": "11px",
-                                        "textAlign": "center",
-                                        "minWidth": "100px",
-                                        "whiteSpace": "normal"
-                                    },
-                                    style_data_conditional= estilos_condicionales
-                                )
-                            )
-                        ],
-                        style={
-                            "padding": "18px",
-                            "background": "#071016",
-                            "border": "1px solid rgba(137,188,239,0.18)",
-                            "borderRadius": "20px"
-                        }
+
+    # Columnas para la tabla de promedios
+    columnas_presentes = [{"name": c, "id": c} for c in promedio_jugador.columns]
+
+    return html.Div([
+        html.H3(
+            "Actividad Comparativa Individual",
+            style={
+                "color": "white", "textAlign": "center", "marginBottom": "20px",
+                "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'", "fontWeight": "600"
+            }
+        ),
+        html.H4(
+            f"{fecha_dt.strftime('%d/%m/%Y')}",
+            style={
+                "color": "#a3e3d0", "textAlign": "center", "marginBottom": "18px",
+                "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'", "fontWeight": "600"
+            }
+        ),
+        html.Div([
+            html.Div([
+                html.H4("Promedios de la actividad",
+                        style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
+                               "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
+                dcc.Loading(
+                    dash_table.DataTable(
+                        data=promedio_jugador.to_dict("records"),
+                        columns=columnas_presentes,
+                        filter_action="native",
+                        sort_action="native",
+                        fixed_columns={"headers": True, "data": 1},
+                        page_size=20,
+                        style_table={"overflowX": "auto", "minWidth": "100%",
+                                     "border": "1px solid rgba(137,188,239,0.18)",
+                                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
+                        style_header={"backgroundColor": "#000000", "color": "white",
+                                      "fontWeight": "bold", "position": "sticky", "top": 0},
+                        style_cell={"backgroundColor": "#1a1a1a", "color": "white",
+                                    "fontSize": "11px", "textAlign": "center",
+                                    "minWidth": "100px", "whiteSpace": "normal"}
                     )
-                ],
-                style={
-                    "display": "grid",
-                    "gap": "24px"
-                }
-            )
-        ],
-        style={
-            "padding": "22px",
-            "background": "#0b0c0e",
-            "border": "1px solid rgba(137,188,239,0.18)",
-            "borderRadius": "24px",
-            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
-        }
-        )
+                )
+            ], style={"padding": "18px", "background": "#071016",
+                      "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "20px"}),
+            html.Div([
+                html.H4("Comparativo actual vs promedio",
+                        style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
+                               "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
+                dcc.Loading(
+                    dash_table.DataTable(
+                        data=tabla_comparativa.to_dict("records"),
+                        columns=columnas_comparativa,
+                        filter_action="native",
+                        sort_action="native",
+                        fixed_columns={"headers": True, "data": 1},
+                        page_size=20,
+                        style_table={"overflowX": "auto", "minWidth": "100%",
+                                     "border": "1px solid rgba(137,188,239,0.18)",
+                                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
+                        style_header={"backgroundColor": "#000000", "color": "white",
+                                      "fontWeight": "bold", "position": "sticky", "top": 0},
+                        style_cell={"backgroundColor": "#1a1a1a", "color": "white",
+                                    "fontSize": "11px", "textAlign": "center",
+                                    "minWidth": "100px", "whiteSpace": "normal"},
+                        style_data_conditional=estilos_condicionales
+                    )
+                )
+            ], style={"padding": "18px", "background": "#071016",
+                      "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "20px"})
+        ], style={"display": "grid", "gap": "24px"})
+    ], style={"padding": "22px", "background": "#0b0c0e",
+              "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
+              "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
 
 
     # ACWR

@@ -261,3 +261,28 @@ h4,
     border-color: rgba(137, 188, 239, 0.28);
     opacity: 1 !important;
 }
+.dash-table-container {
+    background-color: #011c24;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+}
+
+.dash-table {
+    color: #edf1f2 !important;
+    font-size: 12px;
+    border: none !important;
+}
+
+.dash-table th {
+    background-color: #031b28 !important;
+    color: #48f788 !important;
+    font-weight: 600;
+    text-align: center;
+}
+
+.dash-table td {
+    background-color: #05181f !important;
+    text-align: center;
+    padding: 6px;
+}

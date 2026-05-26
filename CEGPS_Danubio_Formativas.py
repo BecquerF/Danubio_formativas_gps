@@ -1183,7 +1183,6 @@ def actualizar_tab(
   
 # ACTIVIDAD COMPARATIVA INDIVIDUAL
     elif tab == "actividad_comparativa":
-            # Fecha seleccionada o última disponible
         fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
@@ -1194,7 +1193,6 @@ def actualizar_tab(
             "Sprint Distance","Sprint Dist Per Min","Sprint Efforts","Impacts"
         ]
 
-        # Actual y promedio
         resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].sum().reset_index()
         dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
         promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
@@ -1202,31 +1200,36 @@ def actualizar_tab(
 
         tabla_comparativa = resumen_fecha.merge(promedio_jugador, on="Player Name", how="left").fillna(0)
 
-        # Columnas
         columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
+        estilos_condicionales = []
+
         for m in metricas_base:
             columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
             columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
 
-        # Estilos condicionales
-        estilos_condicionales = []
-        for m in metricas_base:
-            prom_col = f"{m} Prom"
-            estilos_condicionales.append({
-                "if": {"filter_query": f"{{{m}}} > 1.3 * {{{prom_col}}}", "column_id": m},
-                "backgroundColor": "#017351", "color": "white"
-            })
-            estilos_condicionales.append({
-                "if": {"filter_query": f"{{{m}}} >= 0.8 * {{{prom_col}}} && {{{m}}} <= 1.3 * {{{prom_col}}}", "column_id": m},
-                "backgroundColor": "#e6c200", "color": "black"
-            })
-            estilos_condicionales.append({
-                "if": {"filter_query": f"{{{m}}} < 0.8 * {{{prom_col}}}", "column_id": m},
-                "backgroundColor": "#b22222", "color": "white"
-            })
+            # Calcular umbrales en Python
+            for _, row in tabla_comparativa.iterrows():
+                prom_val = row[f"{m} Prom"]
+                if prom_val > 0:
+                    umbral_alto = 1.3 * prom_val
+                    umbral_bajo = 0.8 * prom_val
+
+                    estilos_condicionales.append({
+                        "if": {"filter_query": f"{{{m}}} > {umbral_alto}", "column_id": m},
+                        "backgroundColor": "#017351", "color": "white"
+                    })
+                    estilos_condicionales.append({
+                        "if": {"filter_query": f"{{{m}}} >= {umbral_bajo} && {{{m}}} <= {umbral_alto}", "column_id": m},
+                        "backgroundColor": "#e6c200", "color": "black"
+                    })
+                    estilos_condicionales.append({
+                        "if": {"filter_query": f"{{{m}}} < {umbral_bajo}", "column_id": m},
+                        "backgroundColor": "#b22222", "color": "white"
+                    })
+
             # Diferenciar columna Prom
             estilos_condicionales.append({
-                "if": {"column_id": prom_col},
+                "if": {"column_id": f"{m} Prom"},
                 "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold"
             })
 

@@ -225,9 +225,10 @@ app.layout = html.Div([
                             html.Img(
                                 src="/assets/logo_dataload_2.png",
                                 style={
-                                    "width": "120px",
+                                    "width": "150px",
                                     "height": "auto",
-                                    "objectFit": "contain"
+                                    "objectFit": "contain",
+                                    "padding": "12px 12px"
                                 }
                             )
                         ],
@@ -243,7 +244,7 @@ app.layout = html.Div([
                                 "CARGA EXTERNA - DANUBIO FORMATIVAS 2026",
                                 style={
                                     "color": "#ffffff",
-                                    "textAlign": "left",
+                                    "textAlign": "center",
                                     "fontSize": "32px",
                                     "fontWeight": "700",
                                     "fontFamily": "'Clash Display Semibold'",
@@ -260,6 +261,7 @@ app.layout = html.Div([
                                     "color": "#d0f0d9",
                                     "margin": "10px 0 0",
                                     "fontSize": "15px",
+                                    "textAlign": "center",
                                     "fontFamily": "'Manrope Light', sans-serif",
                                     "lineHeight": "1.4"
                                 }

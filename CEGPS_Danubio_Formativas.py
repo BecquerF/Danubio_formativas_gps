@@ -274,7 +274,7 @@ app.layout = html.Div([
                     )
                 ],
                 style={
-                    "width": "180px",
+                    "width": "100%",
                     "padding": "18px 18px",
                     "display": "flex",
                     "alignItems": "center",
@@ -516,6 +516,7 @@ app.layout = html.Div([
 
             style={
                 "padding":"12px 12px",
+                "width":"180px",
                 "background":"linear-gradient(180deg,#000c0f,#011c24)",
                 "borderRadius":"12px",
                 "border":"1px solid rgba(137,188,239,.18)",
@@ -531,7 +532,7 @@ app.layout = html.Div([
             "minWidth":"180px",
             "gap":"4px 4px",
             "position":"relative",
-            "top":"18px",
+            "top":"10px",
             "alignSelf":"flex-start"
         }),
 

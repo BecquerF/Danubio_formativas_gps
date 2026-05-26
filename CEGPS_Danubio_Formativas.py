@@ -1324,25 +1324,6 @@ def actualizar_tab(
         "color": "white"
     })
 
-    # Amarillo: dentro del rango 0.8 a 1.3 del promedio
-        estilos_condicionales.append({
-        "if": {
-            "filter_query": f"{{{m}}} >= 0.8 * {{{prom_col}}} && {{{m}}} <= 1.3 * {{{prom_col}}}",
-            "column_id": m
-        },
-        "backgroundColor": "#e6c200",  # amarillo
-        "color": "black"
-    })
-
-    # Rojo: por debajo del promedio -20%
-        estilos_condicionales.append({
-        "if": {
-            "filter_query": f"{{{m}}} < 0.8 * {{{prom_col}}}",
-            "column_id": m
-        },
-        "backgroundColor": "#b22222",  # rojo
-        "color": "white"
-    })
     return html.Div([
     html.H4(
         "Comparativo actual vs promedio",

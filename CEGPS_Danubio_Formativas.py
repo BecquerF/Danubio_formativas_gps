@@ -337,20 +337,20 @@ app.layout = html.Div([
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
-                "textAlign":"center",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
                 "borderRight":"none",
                 "borderBottom":"none",
                 "padding":"12px 12px",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             },
 
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
-                "textAlign":"center",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
@@ -358,7 +358,7 @@ app.layout = html.Div([
                 "borderBottom":"none",
                 "padding":"12px 12px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             }
         ),
 
@@ -369,21 +369,21 @@ app.layout = html.Div([
             selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
-                "fontSize":"12px",
-                "textAlign":"center",
+                "fontSize":"11px",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
                 "borderRight":"none",
                 "borderBottom":"none",
                 "padding":"12px 12px",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             },
 
             selected_style={
                 "color":"#a3e3d0",
-                "fontSize":"12px",
-                "textAlign":"center",
+                "fontSize":"11px",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
@@ -391,7 +391,7 @@ app.layout = html.Div([
                 "borderBottom":"none",
                 "padding":"12px 12px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             }
         ),
 
@@ -403,24 +403,24 @@ app.layout = html.Div([
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
-                "textAlign":"center",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
                 "borderRight":"none",
                 "borderBottom":"none",
                 "padding":"12px 12px",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             },
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
-                "textAlign":"center",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "padding":"12px 12px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             }
         ),
 
@@ -432,19 +432,19 @@ app.layout = html.Div([
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
-                "textAlign":"center",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
                 "borderRight":"none",
                 "borderBottom":"none",
                 "padding":"12px 12px",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             },
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
-                "textAlign":"center",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
@@ -452,7 +452,7 @@ app.layout = html.Div([
                 "borderBottom":"none",
                 "padding":"12px 12px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             }
         ),
 
@@ -464,19 +464,19 @@ app.layout = html.Div([
             style={
                 "color":"#edf1f2",
                 "fontSize":"12px",
-                "textAlign":"center",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
                 "borderLeft":"none",
                 "borderRight":"none",
                 "borderBottom":"none",
                 "padding":"12px 12px",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             },
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
-                "textAlign":"center",
+                "textAlign":"center center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
                 "borderLeft":"none",
@@ -484,7 +484,7 @@ app.layout = html.Div([
                 "borderBottom":"none",
                 "padding":"12px 12px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"12px"
+                "marginBottom":"8px"
             }
         )
 
@@ -516,8 +516,8 @@ app.layout = html.Div([
         style={
             "display":"flex",
             "flexDirection":"column",
-            "width":"210px",
-            "minWidth":"210px",
+            "width":"180px",
+            "minWidth":"180px",
             "gap":"6px",
             "position":"relative",
             "top":"20px",
@@ -681,7 +681,7 @@ app.layout = html.Div([
                         className="filter-card",
                         style={
                             "display": "none",
-                            "padding":"14px"
+                            "padding":"12px 12px"
                         }
                     ),
                     html.Div(
@@ -1191,6 +1191,25 @@ def actualizar_tab(
                     "color": "white"
                 })
 
+        # Construir reglas de estilo condicional
+        style_rules = []
+        for m in metricas_base:
+            prom_col = f"{m} Prom"
+
+            # Verde si el valor actual es mayor al promedio
+            style_rules.append({
+                "if": {"filter_query": f"{{{m}}} > {{{prom_col}}}", "column_id": m},
+                "backgroundColor": "#017351",
+                "color": "white"
+            })
+
+            # Rojo si el valor actual es menor al promedio
+            style_rules.append({
+                "if": {"filter_query": f"{{{m}}} < {{{prom_col}}}", "column_id": m},
+                "backgroundColor": "#A40A1C",
+                "color": "white"
+            })
+
         return html.Div([
             html.H3(
                 "Actividad por Jugador",
@@ -1198,8 +1217,8 @@ def actualizar_tab(
                     "color": "white",
                     "textAlign": "center",
                     "marginBottom": "20px",
-                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
-                    "fontWeight":"600"
+                    "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
+                    "fontWeight": "600"
                 }
             ),
             html.H4(
@@ -1208,14 +1227,14 @@ def actualizar_tab(
                     "color": "#a3e3d0",
                     "textAlign": "center",
                     "marginBottom": "15px",
-                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
-                    "fontWeight":"600"
+                    "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
+                    "fontWeight": "600"
                 }
             ),
             dcc.Loading(
                 dash_table.DataTable(
-                    data=dff_fecha[columnas_presentes].to_dict("records") if columnas_presentes else [],
-                    columns=columnas_actividad,
+                    data=tabla_comparativa.to_dict("records"),
+                    columns=columnas_comparativa,
                     filter_action="native",
                     sort_action="native",
                     fixed_columns={"headers": True, "data": 1},
@@ -1223,7 +1242,8 @@ def actualizar_tab(
                     style_table={
                         "overflowX": "auto",
                         "minWidth": "100%",
-                        "border":"1px solid rgba(137,188,239,0.18)", "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
+                        "border": "1px solid rgba(137,188,239,0.18)",
+                        "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
                     },
                     style_header={
                         "backgroundColor": "#000000",
@@ -1240,10 +1260,12 @@ def actualizar_tab(
                         "minWidth": "100px",
                         "whiteSpace": "normal"
                     },
-                    style_data_conditional= estilos_condicionales
+                    style_data_conditional=style_rules
                 )
             )
         ])
+
+
 
 
   

@@ -1215,34 +1215,55 @@ def actualizar_tab(
                 columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
                 columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
         
-        return html.Div([
-                html.H4("Comparativo actual vs promedio",
-                style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
-                       "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
-                dcc.Loading(
-                dash_table.DataTable(
-                data=tabla_comparativa.to_dict("records"),
-                columns=columnas_comparativa,
-                filter_action="native",
-                sort_action="native",
-                fixed_columns={"headers": True, "data": 1},
-                page_size=20,
-                style_table={"overflowX": "auto", "minWidth": "100%",
-                             "border": "1px solid rgba(137,188,239,0.18)",
-                             "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
-                style_header={"backgroundColor": "#000000", "color": "white",
-                              "fontWeight": "bold", "position": "sticky", "top": 0},
-                style_cell={"backgroundColor": "#1a1a1a", "color": "white",
-                            "fontSize": "11px", "textAlign": "center",
-                            "minWidth": "100px", "whiteSpace": "normal"}
-                )
-                )       
-            ],          
-                        
-                        style={"padding": "22px", "background": "#0b0c0e",
-                "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
-                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
+                    # Construir reglas de estilo condicional
+            estilos_condicionales = []
+            for m in metricas_base:
+                prom_col = f"{m} Prom"
 
+                # Verde: superior al promedio +30%
+                estilos_condicionales.append({
+                    "if": {"filter_query": f"{{{m}}} > 1.3 * {{{prom_col}}}", "column_id": m},
+                    "backgroundColor": "#017351", "color": "white"
+                })
+
+                # Amarillo: dentro del rango 0.8 a 1.3 del promedio
+                estilos_condicionales.append({
+                    "if": {"filter_query": f"{{{m}}} >= 0.8 * {{{prom_col}}} && {{{m}}} <= 1.3 * {{{prom_col}}}", "column_id": m},
+                    "backgroundColor": "#e6c200", "color": "black"
+                })
+
+                # Rojo: por debajo del promedio -20%
+                estilos_condicionales.append({
+                    "if": {"filter_query": f"{{{m}}} < 0.8 * {{{prom_col}}}", "column_id": m},
+                    "backgroundColor": "#b22222", "color": "white"
+                })
+
+            return html.Div([
+                html.H4("Comparativo actual vs promedio",
+                        style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
+                            "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
+                dcc.Loading(
+                    dash_table.DataTable(
+                        data=tabla_comparativa.to_dict("records"),
+                        columns=columnas_comparativa,
+                        filter_action="native",
+                        sort_action="native",
+                        fixed_columns={"headers": True, "data": 1},
+                        page_size=20,
+                        style_table={"overflowX": "auto", "minWidth": "100%",
+                                    "border": "1px solid rgba(137,188,239,0.18)",
+                                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
+                        style_header={"backgroundColor": "#000000", "color": "white",
+                                    "fontWeight": "bold", "position": "sticky", "top": 0},
+                        style_cell={"backgroundColor": "#1a1a1a", "color": "white",
+                                    "fontSize": "11px", "textAlign": "center",
+                                    "minWidth": "100px", "whiteSpace": "normal"},
+                        style_data_conditional=estilos_condicionales
+                    )
+                )
+            ], style={"padding": "22px", "background": "#0b0c0e",
+                    "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
 
 
     # ACWR

@@ -1985,13 +1985,13 @@ def descargar_grafico(
             # Filtros adicionales
             html.Div([
                 dcc.Dropdown(
-                    id="game_tag",
+                    id="game_tags",
                     options=[{"label": g, "value": g} for g in dff["Game Tag"].unique()],
                     placeholder="Filtrar por Game Tag",
                     style={"width":"45%","display":"inline-block","marginRight":"10px"}
                 ),
                 dcc.Dropdown(
-                    id="period_tag",
+                    id="period_tags",
                     options=[{"label": p, "value": p} for p in dff["Period Tag"].unique()],
                     placeholder="Filtrar por Period Tag",
                     style={"width":"45%","display":"inline-block"}
@@ -2020,15 +2020,15 @@ def descargar_grafico(
     Output("radar_chart","figure"),
     [Input("jugador_1","value"),
      Input("jugador_2","value"),
-     Input("game_tag","value"),
-     Input("period_tag","value")]
+     Input("game_tags","value"),
+     Input("period_tags","value")]
 )
-def actualizar_radar(jugador_1, jugador_2, game_tag, period_tag):
+def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     dff_filtrado = df.copy()
-    if game_tag:
-        dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"]==game_tag]
-    if period_tag:
-        dff_filtrado = dff_filtrado[dff_filtrado["Period Tag"]==period_tag]
+    if game_tags:
+        dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"].isin(game_tags)]
+    if period_tags:
+        dff_filtrado = dff_filtrado[dff_filtrado["Period Tag"].isin(period_tags)]
 
     if not jugador_1 or not jugador_2 or jugador_1 == jugador_2:
         return go.Figure()

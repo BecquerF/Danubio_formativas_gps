@@ -226,12 +226,11 @@ app.layout = html.Div([
                                 src="/assets/logo_dataload_2.png",
                                 style={
                                     "width": "180px",
-                                    "width": "180px",
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "gap": "1px 4px",
                                     "position": "relative",
-                                    "left": "5px"
+                                    "left": "2.5px"
                                 }
                             )
                         ],
@@ -248,10 +247,10 @@ app.layout = html.Div([
                                 style={
                                     "color": "#ffffff",
                                     "textAlign": "center",
-                                    "fontSize": "32px",
+                                    "fontSize": "36px",
                                     "fontWeight": "700",
                                     "fontFamily": "'Clash Display Semibold'",
-                                    "lineHeight": "1.05",
+                                    "lineHeight": "1.50",
                                     "letterSpacing": "0.02em",
                                     "margin": "0",
                                     "linecolor": "#89bcef",
@@ -259,7 +258,7 @@ app.layout = html.Div([
                                 }
                             ),
                             html.P(
-                                "Plataforma de análisis deportivo para Danubio Formativas 2026",
+                                "Plataforma de análisis deportivo",
                                 style={
                                     "color": "#d0f0d9",
                                     "margin": "10px 0 0",
@@ -278,11 +277,12 @@ app.layout = html.Div([
                 ],
                 style={
                     "flex":"1",
+                    "height":"100hvh",
                     "width": "100%",
                     "padding": "18px",
                     "display": "flex",
                     "alignItems": "center",
-                    "justifyContent": "flex-start",
+                    "justifyContent": "center",
                     "gap": "18px",
                     "boxSizing": "border-box"
                 }

@@ -1917,6 +1917,7 @@ def descargar_grafico(
             tickfont_color="#f5f5f5",
             title_font_color="#c3c6d5"
         )
+        
     elif tab == "cronologico":
         cronologico = pd.melt(
             dff,
@@ -2019,18 +2020,18 @@ def descargar_grafico(
      Input("period_tag","value")]
 )
 def actualizar_radar(j1, j2, game_tag, period_tag):
-    dff_filtrado = df_promedios
+    dff_filtrado = df.copy()
     if game_tag:
-        dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"]==game_tag]
+            dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"]==game_tag]
     if period_tag:
-        dff_filtrado = dff_filtrado[dff_filtrado["Period Tag"]==period_tag]
-
-    jugadores = [j1, j2]
-    dff_jugadores = dff_filtrado[dff_filtrado["Player Name"].isin(jugadores)]
-
-    radar_data = dff_jugadores.groupby("Player Name")[metricas_radar].mean().reset_index()
+            dff_filtrado = dff_filtrado[dff_filtrado["Period Tag"]==period_tag]
+    radar_data = (
+                dff_filtrado.groupby("Player Name")[metricas_radar]
+                .mean()
+                .reset_index())
 
     fig = go.Figure()
+
     for _, row in radar_data.iterrows():
         fig.add_trace(go.Scatterpolar(
             r=row[metricas_radar].values,
@@ -2039,11 +2040,12 @@ def actualizar_radar(j1, j2, game_tag, period_tag):
             name=row["Player Name"]
         ))
 
+    # Ajustes de layout fuera del bucle
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=True)),
         showlegend=True,
         template="plotly_dark"
-    )
+        )
     return fig
 
 @app.callback(

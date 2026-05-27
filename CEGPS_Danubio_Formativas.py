@@ -1655,12 +1655,14 @@ def actualizar_tab(
             dcc.Dropdown(
                 id="jugador_1",
                 options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                value=dff["Player Name"].unique()[0],   # valor inicial
                 placeholder="Seleccionar Jugador 1",
                 style={"width":"45%","display":"inline-block","marginRight":"10px"}
             ),
             dcc.Dropdown(
                 id="jugador_2",
                 options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique()) > 1 else None,   # valor inicial
                 placeholder="Seleccionar Jugador 2",
                 style={"width":"45%","display":"inline-block"}
             )
@@ -2025,6 +2027,8 @@ def actualizar_radar(j1, j2, game_tag, period_tag):
             dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"]==game_tag]
     if period_tag:
             dff_filtrado = dff_filtrado[dff_filtrado["Period Tag"]==period_tag]
+    if not j1 or not j2:
+        return go.Figure()        
     radar_data = (
                 dff_filtrado.groupby("Player Name")[metricas_radar]
                 .mean()

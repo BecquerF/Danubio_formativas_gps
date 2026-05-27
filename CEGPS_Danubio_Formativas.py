@@ -198,7 +198,14 @@ def build_chart_title(tab, categorias, metricas, referencia):
             title += f" - Categoría(s): {categoria_text}"
         return title
 
+    if tab == "plyr_vs_plyr":
+        title = "Comparativa Jugador vs Jugador"
+        if categorias:
+            title += f" - Categoría(s): {categoria_text}"
+        return title
+
     return tab_titles.get(tab, tab)
+
 
 
 def build_download_metadata(tab, categorias, metricas, referencia):
@@ -208,6 +215,10 @@ def build_download_metadata(tab, categorias, metricas, referencia):
     category_text = summarize_items(categorias, max_items=5)
     metric_text = summarize_items(metricas, max_items=5)
     printed_at = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    if tab == "plyr_vs_plyr":
+        item_name = "Comparativa Jugador vs Jugador"
+
     metadata = (
         f"Descargado: {item_name}\n"
         f"Impresión: {printed_at}\n"

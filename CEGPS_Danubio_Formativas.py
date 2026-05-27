@@ -2023,17 +2023,17 @@ def descargar_grafico(
      Input("game_tags","value"),
      Input("period_tags","value")]
 )
-def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
+def actualizar_radar(j1, j2, game_tags, period_tags):
     dff_filtrado = df.copy()
     if game_tags:
-        dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"].isin(game_tags)]
+        dff_filtrado = dff_filtrado[dff_filtrado["Game Tags"] == game_tags]  # plural
     if period_tags:
-        dff_filtrado = dff_filtrado[dff_filtrado["Period Tag"].isin(period_tags)]
+        dff_filtrado = dff_filtrado[dff_filtrado["Period Tags"] == period_tags]  # plural
 
-    if not jugador_1 or not jugador_2 or jugador_1 == jugador_2:
+    if not j1 or not j2:
         return go.Figure()
 
-    jugadores = [jugador_1, jugador_2]
+    jugadores = [j1, j2]
     dff_jugadores = dff_filtrado[dff_filtrado["Player Name"].isin(jugadores)]
 
     if dff_jugadores.empty:
@@ -2046,7 +2046,7 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     )
 
     fig = go.Figure()
-    colores = ["#48f788", "#89bcef"]  # dos colores distintos para cada jugador
+    colores = ["#48f788", "#89bcef"]
 
     for idx, row in radar_data.iterrows():
         fig.add_trace(go.Scatterpolar(

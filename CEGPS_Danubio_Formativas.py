@@ -424,21 +424,21 @@ app.layout = html.Div([
         ),
         
         dcc.Tab(
-    label="PLYR vs PLYR",
-    value="plyr_vs_plyr",
-    className="tab-item",
-    selected_className="tab-item-selected",
-    style={
-        "color":"#edf1f2","fontSize":"12px","textAlign":"center","fontWeight":"600",
-        "borderTop":"1px solid rgba(137,188,239,.18)",
-        "padding":"6px 8px","marginBottom":"2px"
-    },
-    selected_style={
-        "color":"#a3e3d0","fontSize":"12px","textAlign":"center","fontWeight":"600",
-        "borderTop":"1px solid #a3e3d0",
-        "padding":"6px 8px","backgroundColor":"#011c24","marginBottom":"2px"
-    }
-),
+            label="PLYR vs PLYR",
+            value="plyr_vs_plyr",
+            className="tab-item",
+            selected_className="tab-item-selected",
+            style={
+                "color":"#edf1f2","fontSize":"12px","textAlign":"center","fontWeight":"600",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"6px 8px","marginBottom":"2px"
+            },
+            selected_style={
+                "color":"#a3e3d0","fontSize":"12px","textAlign":"center","fontWeight":"600",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"6px 8px","backgroundColor":"#011c24","marginBottom":"2px"
+            }
+        ),
 
         dcc.Tab(
             label="COMPARATIVO",
@@ -1986,13 +1986,13 @@ def descargar_grafico(
             html.Div([
                 dcc.Dropdown(
                     id="game_tags",
-                    options=[{"label": g, "value": g} for g in dff["Game Tag"].unique()],
+                    options=[{"label": g, "value": g} for g in dff["Game Tags"].unique()],
                     placeholder="Filtrar por Game Tag",
                     style={"width":"45%","display":"inline-block","marginRight":"10px"}
                 ),
                 dcc.Dropdown(
                     id="period_tags",
-                    options=[{"label": p, "value": p} for p in dff["Period Tag"].unique()],
+                    options=[{"label": p, "value": p} for p in dff["Period Tags"].unique()],
                     placeholder="Filtrar por Period Tag",
                     style={"width":"45%","display":"inline-block"}
                 )
@@ -2023,17 +2023,17 @@ def descargar_grafico(
      Input("game_tags","value"),
      Input("period_tags","value")]
 )
-def actualizar_radar(j1, j2, game_tags, period_tags):
+def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     dff_filtrado = df.copy()
     if game_tags:
         dff_filtrado = dff_filtrado[dff_filtrado["Game Tags"] == game_tags]  # plural
     if period_tags:
         dff_filtrado = dff_filtrado[dff_filtrado["Period Tags"] == period_tags]  # plural
 
-    if not j1 or not j2:
+    if not jugador_1 or not jugador_2:
         return go.Figure()
 
-    jugadores = [j1, j2]
+    jugadores = [jugador_1, jugador_2]
     dff_jugadores = dff_filtrado[dff_filtrado["Player Name"].isin(jugadores)]
 
     if dff_jugadores.empty:

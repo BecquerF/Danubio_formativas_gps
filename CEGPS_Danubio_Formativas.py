@@ -230,7 +230,8 @@ app.layout = html.Div([
                                     "objectFit": "contain",
                                     "gap": "1px 4px",
                                     "position": "relative",
-                                    "left": "2.5px"
+                                    "left": "1px",
+                                    "borderRadius": "1px"
                                 }
                             )
                         ],
@@ -913,8 +914,8 @@ app.layout = html.Div([
                     "border": "1px solid rgba(137, 188, 239, 0.16)",
                     "boxShadow": "0 18px 48px rgba(0,0,0,0.35)",
                     "position": "sticky",
-                    "top": "28px",
-                    "maxHeight": "calc(100vh - 56px)",
+                    "top": "10px",
+                    "maxHeight": "100vh",
                     "overflowY": "auto"
                 }
             )

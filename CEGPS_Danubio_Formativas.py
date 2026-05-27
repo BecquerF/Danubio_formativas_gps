@@ -494,7 +494,7 @@ app.layout = html.Div([
             "flexDirection":"column",
             "width":"160px",
             "minWidth":"160px",
-            "minHeight":"100vh",
+            "minHeight":"80vh",
             "gap":"4px 4px",
             "position":"sticky",
             "top":"10px",

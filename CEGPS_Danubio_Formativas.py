@@ -225,7 +225,7 @@ app.layout = html.Div([
                             html.Img(
                                 src="/assets/logo_dataload_2.png",
                                 style={
-                                    "width": "180px",
+                                    "width": "170px",
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "marginBottom": "8px",
@@ -235,7 +235,7 @@ app.layout = html.Div([
                             )
                         ],
                         style={
-                            "flex": "0 0 180px",
+                            "flex": "0 0 170px",
                             "display": "flex",
                             "alignItems": "center",
                             "justifyContent": "center"
@@ -1728,11 +1728,9 @@ def actualizar_tab(
             figure=fig,
             style={"width": "100%", "height": "100%"}
         ),
-            style={
-                "color":"white","textAlign":"center","marginBottom":"10px",
-                "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"
-        }
-    )
+            style={"padding": "22px", "background": "#0b0c0e",
+                "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
+                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
     
 @app.callback(
     Output("download-graph","data"),

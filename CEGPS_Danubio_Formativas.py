@@ -2019,7 +2019,7 @@ def descargar_grafico(
      Input("period_tag","value")]
 )
 def actualizar_radar(j1, j2, game_tag, period_tag):
-    dff_filtrado = dff
+    dff_filtrado = df_promedios
     if game_tag:
         dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"]==game_tag]
     if period_tag:

@@ -1175,7 +1175,7 @@ def actualizar_tab(
                     })
 
             return html.Div([
-                html.H3("Actividad por Jugador", style={"color":"white","textAlign":"center","marginBottom":"20px",
+                html.H3("Actividad por Jugador", style={"color":"white","textAlign":"center","marginBottom":"10px",
                                                         "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
                 html.H4(fecha_dt.strftime("%d/%m/%Y"), style={"color":"#a3e3d0","textAlign":"center","marginBottom":"15px",
                                                             "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
@@ -1263,8 +1263,8 @@ def actualizar_tab(
             })
 
         return html.Div([
-            html.H4("Comparativo actual vs promedio",
-                    style={"color":"white","textAlign":"center","marginBottom":"20px",
+            html.H4("Comparativo última ACTIVIDAD vs PROMEDIO",
+                    style={"color":"white","textAlign":"center","marginBottom":"10px",
                                                         "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
             dcc.Loading(
                 dash_table.DataTable(
@@ -1391,7 +1391,7 @@ def actualizar_tab(
                 "ACWR - Últimos 7 días vs 21 días",
 
                 style={
-                "color":"white","textAlign":"center","marginBottom":"20px",
+                "color":"white","textAlign":"center","marginBottom":"10px",
                 "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"
             }),
 
@@ -1728,13 +1728,9 @@ def actualizar_tab(
             figure=fig,
             style={"width": "100%", "height": "100%"}
         ),
-        style={
-            "border": "1px solid rgba(137,188,239,0.18)",
-            "borderRadius": "18px",
-            "overflow": "hidden",
-            "background": "#0b0c0e",
-            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
-            "padding": "10px"
+            style={
+                "color":"white","textAlign":"center","marginBottom":"10px",
+                "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"
         }
     )
     

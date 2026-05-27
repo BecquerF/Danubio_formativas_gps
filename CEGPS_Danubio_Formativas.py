@@ -1193,12 +1193,21 @@ def actualizar_tab(
                         style_table={"overflowX":"auto","minWidth":"100%","border":"1px solid rgba(137,188,239,0.18)",
                                     "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"},
                         style_header={"backgroundColor":"#000000","color":"white","fontWeight":"bold","position":"sticky","top":0},
-                        style_cell={"backgroundColor":"#1a1a1a","color":"white","fontSize":"11px","textAlign":"center",
-                                    "minWidth":"100px","whiteSpace":"normal"},
+                        style_cell={
+                                    "backgroundColor":"#1a1a1a","color":"white",
+                                    "fontSize":"11px","textAlign":"center",
+                                    "minWidth":"100px","whiteSpace":"normal"
+                                    },
                         style_data_conditional=estilos_condicionales
                     )
                 )
-            ])
+            ], style={
+    "padding": "22px",
+    "background": "#0b0c0e",
+    "border": "1px solid rgba(137,188,239,0.18)",
+    "borderRadius": "24px",
+    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+})
                         
 
 
@@ -1258,8 +1267,8 @@ def actualizar_tab(
 
         return html.Div([
             html.H4("Comparativo actual vs promedio",
-                    style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600",
-                        "marginBottom": "12px", "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'"}),
+                    style={"color":"white","textAlign":"center","marginBottom":"20px",
+                                                        "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
             dcc.Loading(
                 dash_table.DataTable(
                     data=tabla_comparativa.to_dict("records"),

@@ -534,7 +534,7 @@ app.layout = html.Div([
             "width":"160px",
             "minWidth":"160px",
             "gap":"4px 4px",
-            "position":"fixed",
+            "position":"sticky",
             "top":"10px",
             "alignSelf":"flex-start"
         }),
@@ -913,7 +913,7 @@ app.layout = html.Div([
                     "borderRadius": "24px",
                     "border": "1px solid rgba(137, 188, 239, 0.16)",
                     "boxShadow": "0 18px 48px rgba(0,0,0,0.35)",
-                    "position": "fixed",
+                    "position": "relative",
                     "top": "10px",
                     "maxHeight": "100vh",
                     "overflowY": "auto"

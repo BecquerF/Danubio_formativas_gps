@@ -228,11 +228,7 @@ app.layout = html.Div([
                                     "width": "180px",
                                     "height": "auto",
                                     "objectFit": "contain",
-                                    "gap": "4px",
-                                    "position": "relative",
-                                    "left": "1px",
-                                    "top": "10px",
-                                    "marginBottom": "4px",
+                                    "marginBottom": "8px",
                                     "border": "1px solid ##011c24",
                                     "borderRadius": "12px"
                                 }
@@ -241,7 +237,8 @@ app.layout = html.Div([
                         style={
                             "flex": "0 0 180px",
                             "display": "flex",
-                            "alignItems": "center"
+                            "alignItems": "center",
+                            "justifyContent": "center"
                         }
                     ),
                     html.Div(
@@ -1394,14 +1391,9 @@ def actualizar_tab(
                 "ACWR - Últimos 7 días vs 21 días",
 
                 style={
-
-                    "color":"white",
-                    "textAlign":"center",
-                    "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
-
-                }
-
-            ),
+                "color":"white","textAlign":"center","marginBottom":"20px",
+                "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"
+            }),
 
             dcc.Loading(
 
@@ -1442,14 +1434,9 @@ def actualizar_tab(
                             "borderBottom": "1px solid rgba(137,188,239,0.2)"
                         },
                         style_cell={
-                            "backgroundColor": "#1a1a1a",
-                            "color": "white",
-                            "fontSize": "11px",
-                            "textAlign": "center",
-                            "minWidth": "100px",
-                            "width": "100px",
-                            "maxWidth": "100px",
-                            "whiteSpace": "normal"
+                            "backgroundColor":"#1a1a1a","color":"white",
+                            "fontSize":"11px","textAlign":"center",
+                            "minWidth":"100px","whiteSpace":"normal"
                         },
                         style_data_conditional=[
                             {
@@ -1648,7 +1635,13 @@ def actualizar_tab(
                         page_size=20
                     )
                 )
-            ])
+            ],style={
+    "padding": "22px",
+    "background": "#0b0c0e",
+    "border": "1px solid rgba(137,188,239,0.18)",
+    "borderRadius": "24px",
+    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+})
 
     # CRONOLÓGICO
     elif tab == "cronologico": 

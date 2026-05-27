@@ -259,7 +259,7 @@ app.layout = html.Div([
                                 }
                             ),
                             html.P(
-                                "Plataforma de análisis deportivo",
+                                "Plataforma de Análisis Deportivo",
                                 style={
                                     "color": "#d0f0d9",
                                     "margin": "10px 0 0",
@@ -411,6 +411,23 @@ app.layout = html.Div([
                 "marginBottom":"2px"
             }
         ),
+        
+        dcc.Tab(
+    label="PLYR vs PLYR",
+    value="plyr_vs_plyr",
+    className="tab-item",
+    selected_className="tab-item-selected",
+    style={
+        "color":"#edf1f2","fontSize":"12px","textAlign":"center","fontWeight":"600",
+        "borderTop":"1px solid rgba(137,188,239,.18)",
+        "padding":"6px 8px","marginBottom":"2px"
+    },
+    selected_style={
+        "color":"#a3e3d0","fontSize":"12px","textAlign":"center","fontWeight":"600",
+        "borderTop":"1px solid #a3e3d0",
+        "padding":"6px 8px","backgroundColor":"#011c24","marginBottom":"2px"
+    }
+),
 
         dcc.Tab(
             label="COMPARATIVO",
@@ -1605,6 +1622,62 @@ def actualizar_tab(
     "borderRadius": "24px",
     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
 })
+        
+        #PLYR vs PLYR
+    elif tab == "plyr_vs_plyr":
+        metricas_radar = [
+        "Meterage Per Minute",
+        "Accel + Decel Efforts Per Minute",
+        "High Speed Distance Per Minute",
+        "Sprint Dist Per Min",
+        "High Speed Efforts",
+        "Sprint Efforts"
+        ]
+
+        return html.Div([
+            html.H3("Comparativa Jugador vs Jugador", 
+                style={"color":"white","textAlign":"center","marginBottom":"20px",
+                       "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
+
+        # Dropdowns para elegir jugadores
+            html.Div([
+                dcc.Dropdown(
+                id="jugador_1",
+                options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                placeholder="Seleccionar Jugador 1",
+                style={"width":"45%","display":"inline-block","marginRight":"10px"}
+            ),
+            dcc.Dropdown(
+                id="jugador_2",
+                options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                placeholder="Seleccionar Jugador 2",
+                style={"width":"45%","display":"inline-block"}
+            )
+        ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
+
+        # Filtros adicionales
+        html.Div([
+            dcc.Dropdown(
+                id="game_tag",
+                options=[{"label": g, "value": g} for g in dff["Game Tag"].unique()],
+                placeholder="Filtrar por Game Tag",
+                style={"width":"45%","display":"inline-block","marginRight":"10px"}
+            ),
+            dcc.Dropdown(
+                id="period_tag",
+                options=[{"label": p, "value": p} for p in dff["Period Tag"].unique()],
+                placeholder="Filtrar por Period Tag",
+                style={"width":"45%","display":"inline-block"}
+            )
+        ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
+
+            dcc.Graph(id="radar_chart")
+            ],      style={
+            "padding":"22px","background":"#0b0c0e",
+            "border":"1px solid rgba(137,188,239,0.18)","borderRadius":"24px",
+            "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
+        })
+
 
     # CRONOLÓGICO
     elif tab == "cronologico": 
@@ -1614,7 +1687,7 @@ def actualizar_tab(
         value_vars=metricas,
         var_name="Métrica",
         value_name="Valor"
-    ) 
+        ) 
         fig = px.scatter(
             cronologico,
         x="Date",

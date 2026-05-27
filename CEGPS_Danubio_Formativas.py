@@ -1636,15 +1636,7 @@ def actualizar_tab(
         
         #PLYR vs PLYR
     elif tab == "plyr_vs_plyr":
-        metricas_radar = [
-        "Meterage Per Minute",
-        "Accel + Decel Efforts Per Minute",
-        "High Speed Distance Per Minute",
-        "Sprint Dist Per Min",
-        "High Speed Efforts",
-        "Sprint Efforts"
-    ]
-
+        
         return html.Div([
             html.H3("Comparativa Jugador vs Jugador", 
                     style={"color":"white","textAlign":"center","marginBottom":"20px",

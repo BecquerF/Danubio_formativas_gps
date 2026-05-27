@@ -341,7 +341,7 @@ app.layout = html.Div([
             selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
@@ -350,7 +350,7 @@ app.layout = html.Div([
             },
             selected_style={
                 "color":"#a3e3d0",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
@@ -367,7 +367,7 @@ app.layout = html.Div([
             selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
@@ -376,7 +376,7 @@ app.layout = html.Div([
             },
             selected_style={
                 "color":"#a3e3d0",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
@@ -393,7 +393,7 @@ app.layout = html.Div([
             selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
@@ -402,7 +402,7 @@ app.layout = html.Div([
             },
             selected_style={
                 "color":"#a3e3d0",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
@@ -419,7 +419,7 @@ app.layout = html.Div([
             selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
@@ -428,7 +428,7 @@ app.layout = html.Div([
             },
             selected_style={
                 "color":"#a3e3d0",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
@@ -445,7 +445,7 @@ app.layout = html.Div([
             selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
@@ -454,7 +454,7 @@ app.layout = html.Div([
             },
             selected_style={
                 "color":"#a3e3d0",
-                "fontSize":"12px",
+                "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
@@ -482,7 +482,7 @@ app.layout = html.Div([
 
             style={
                 "padding":"12px",
-                "width":"140px",
+                "width":"160px",
                 "background":"linear-gradient(180deg,#000c0f,#011c24)",
                 "borderRadius":"12px",
                 "border":"1px solid rgba(137,188,239,.18)"
@@ -492,8 +492,9 @@ app.layout = html.Div([
         style={
             "display":"flex",
             "flexDirection":"column",
-            "width":"140px",
-            "minWidth":"140px",
+            "width":"160px",
+            "minWidth":"160px",
+            "minHeight":"100vh",
             "gap":"4px 4px",
             "position":"sticky",
             "top":"10px",

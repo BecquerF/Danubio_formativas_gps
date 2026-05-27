@@ -345,27 +345,18 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "borderLeft":"none",
-                "borderRight":"none",
-                "borderBottom":"none",
-                "gap":"4px",
-                "padding":"12px 12px",
-                "marginBottom":"8px"
+                "padding":"6px 8px",       # más compacto
+                "marginBottom":"2px"       # menos espacio entre pestañas
             },
-
             selected_style={
                 "color":"#a3e3d0",
                 "fontSize":"12px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "borderLeft":"none",
-                "borderRight":"none",
-                "borderBottom":"none",
-                "gap":"4px",
-                "padding":"12px 12px",
+                "padding":"6px 8px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"8px"
+                "marginBottom":"2px"
             }
         ),
 
@@ -376,31 +367,22 @@ app.layout = html.Div([
             selected_className="tab-item-selected",
             style={
                 "color":"#edf1f2",
-                "fontSize":"11px",
+                "fontSize":"12px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "borderLeft":"none",
-                "borderRight":"none",
-                "borderBottom":"none",
-                "gap":"4px",
-                "padding":"12px 12px",
-                "marginBottom":"8px"
+                "padding":"6px 8px",       # más compacto
+                "marginBottom":"2px"       # menos espacio entre pestañas
             },
-
             selected_style={
                 "color":"#a3e3d0",
-                "fontSize":"11px",
+                "fontSize":"12px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "borderLeft":"none",
-                "borderRight":"none",
-                "borderBottom":"none",
-                "gap":"4px",
-                "padding":"12px 12px",
+                "padding":"6px 8px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"8px"
+                "marginBottom":"2px"
             }
         ),
 
@@ -415,12 +397,8 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "borderLeft":"none",
-                "borderRight":"none",
-                "borderBottom":"none",
-                "gap":"4px",
-                "padding":"12px 12px",
-                "marginBottom":"8px"
+                "padding":"6px 8px",       # más compacto
+                "marginBottom":"2px"       # menos espacio entre pestañas
             },
             selected_style={
                 "color":"#a3e3d0",
@@ -428,10 +406,9 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "gap":"4px",
-                "padding":"12px 12px",
+                "padding":"6px 8px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"8px"
+                "marginBottom":"2px"
             }
         ),
 
@@ -446,12 +423,8 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "borderLeft":"none",
-                "borderRight":"none",
-                "borderBottom":"none",
-                "gap":"4px",
-                "padding":"12px 12px",
-                "marginBottom":"8px"
+                "padding":"6px 8px",       # más compacto
+                "marginBottom":"2px"       # menos espacio entre pestañas
             },
             selected_style={
                 "color":"#a3e3d0",
@@ -459,13 +432,9 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "borderLeft":"none",
-                "borderRight":"none",
-                "borderBottom":"none",
-                "gap":"4px",
-                "padding":"12px 12px",
+                "padding":"6px 8px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"8px"
+                "marginBottom":"2px"
             }
         ),
 
@@ -480,12 +449,8 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "borderLeft":"none",
-                "borderRight":"none",
-                "borderBottom":"none",
-                "gap":"4px",
-                "padding":"12px 12px",
-                "marginBottom":"8px"
+                "padding":"6px 8px",       # más compacto
+                "marginBottom":"2px"       # menos espacio entre pestañas
             },
             selected_style={
                 "color":"#a3e3d0",
@@ -493,13 +458,9 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "borderLeft":"none",
-                "borderRight":"none",
-                "borderBottom":"none",
-                "gap":"4px",
-                "padding":"12px 12px",
+                "padding":"6px 8px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"8px"
+                "marginBottom":"2px"
             }
         )
 
@@ -536,7 +497,8 @@ app.layout = html.Div([
             "gap":"4px 4px",
             "position":"sticky",
             "top":"10px",
-            "alignSelf":"flex-start"
+            "alignSelf":"flex-start",
+            "alignItems":"center"
         }),
 
         # ==================================================

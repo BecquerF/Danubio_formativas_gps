@@ -230,7 +230,7 @@ app.layout = html.Div([
                                     "objectFit": "contain",
                                     "gap": "4px",
                                     "position": "sticky",
-                                    "left": "10px",
+                                    "left": "9px",
                                     "top": "10px",
                                     "marginBottom": "4px",
                                     "border": "1px solid ##011c24",

@@ -2023,17 +2023,17 @@ def descargar_grafico(
      Input("game_tag","value"),
      Input("period_tag","value")]
 )
-def actualizar_radar(j1, j2, game_tag, period_tag):
+def actualizar_radar(jugador_1, jugador_2, game_tag, period_tag):
     dff_filtrado = df.copy()
     if game_tag:
         dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"]==game_tag]
     if period_tag:
         dff_filtrado = dff_filtrado[dff_filtrado["Period Tag"]==period_tag]
 
-    if not j1 or not j2:
+    if not jugador_1 or not jugador_2 or jugador_1 == jugador_2:
         return go.Figure()
 
-    jugadores = [j1, j2]
+    jugadores = [jugador_1, jugador_2]
     dff_jugadores = dff_filtrado[dff_filtrado["Player Name"].isin(jugadores)]
 
     if dff_jugadores.empty:
@@ -2063,6 +2063,7 @@ def actualizar_radar(j1, j2, game_tag, period_tag):
         template="plotly_dark"
     )
     return fig
+
 @app.callback(
     Output("download-table","data"),
     Input("download-table-csv","n_clicks"),

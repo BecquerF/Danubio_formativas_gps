@@ -1633,56 +1633,6 @@ def actualizar_tab(
             "borderRadius": "24px",
             "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
 })
-        
-        #PLYR vs PLYR
-    elif tab == "plyr_vs_plyr":
-        
-        return html.Div([
-            html.H3("Comparativa Jugador vs Jugador", 
-                    style={"color":"white","textAlign":"center","marginBottom":"20px",
-                        "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
-
-        # Dropdowns para elegir jugadores
-        html.Div([
-            dcc.Dropdown(
-                id="jugador_1",
-                options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
-                value=dff["Player Name"].unique()[0],   # valor inicial
-                placeholder="Seleccionar Jugador 1",
-                style={"width":"45%","display":"inline-block","marginRight":"10px"}
-            ),
-            dcc.Dropdown(
-                id="jugador_2",
-                options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
-                value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique()) > 1 else None,   # valor inicial
-                placeholder="Seleccionar Jugador 2",
-                style={"width":"45%","display":"inline-block"}
-            )
-        ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
-
-        # Filtros adicionales
-        html.Div([
-            dcc.Dropdown(
-                id="game_tag",
-                options=[{"label": g, "value": g} for g in dff["Game Tag"].unique()],
-                placeholder="Filtrar por Game Tag",
-                style={"width":"45%","display":"inline-block","marginRight":"10px"}
-            ),
-            dcc.Dropdown(
-                id="period_tag",
-                options=[{"label": p, "value": p} for p in dff["Period Tag"].unique()],
-                placeholder="Filtrar por Period Tag",
-                style={"width":"45%","display":"inline-block"}
-            )
-        ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
-
-        dcc.Graph(id="radar_chart")
-        ], style={
-            "padding":"22px","background":"#0b0c0e",
-            "border":"1px solid rgba(137,188,239,0.18)","borderRadius":"24px",
-            "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
-        })
-
 
         # CRONOLÓGICO
     elif tab == "cronologico": 
@@ -1996,8 +1946,69 @@ def descargar_grafico(
             tickfont_color="#f5f5f5",
             title_font_color="#c3c6d5"
         )
+    
+    # ======================================================
+# PLYR vs PLYR
+# ======================================================
+
+    elif tab == "plyr_vs_plyr":
+        return html.Div([
+            html.H3(
+                "Comparativa Jugador vs Jugador", 
+                style={
+                    "color":"white",
+                    "textAlign":"center",
+                    "marginBottom":"20px",
+                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                    "fontWeight":"600"
+                }
+            ),
+
+            # Dropdowns para elegir jugadores
+            html.Div([
+                dcc.Dropdown(
+                    id="jugador_1",
+                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                    value=dff["Player Name"].unique()[0],   # valor inicial
+                    placeholder="Seleccionar Jugador 1",
+                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
+                ),
+                dcc.Dropdown(
+                    id="jugador_2",
+                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                    value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
+                    placeholder="Seleccionar Jugador 2",
+                    style={"width":"45%","display":"inline-block"}
+                )
+            ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
+
+            # Filtros adicionales
+            html.Div([
+                dcc.Dropdown(
+                    id="game_tag",
+                    options=[{"label": g, "value": g} for g in dff["Game Tag"].unique()],
+                    placeholder="Filtrar por Game Tag",
+                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
+                ),
+                dcc.Dropdown(
+                    id="period_tag",
+                    options=[{"label": p, "value": p} for p in dff["Period Tag"].unique()],
+                    placeholder="Filtrar por Period Tag",
+                    style={"width":"45%","display":"inline-block"}
+                )
+            ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
+
+            dcc.Graph(id="radar_chart")
+        ], style={
+            "padding":"22px",
+            "background":"#0b0c0e",
+            "border":"1px solid rgba(137,188,239,0.18)",
+            "borderRadius":"24px",
+            "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
+        })
     else:
         return no_update
+    
 
     fmt = "png" if trigger_id == "download-graph-png" else "pdf"
     tab_name = tab_titles.get(tab, tab)
@@ -2005,7 +2016,6 @@ def descargar_grafico(
     image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
     return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
 
-# Callback al final del archivo
 @app.callback(
     Output("radar_chart","figure"),
     [Input("jugador_1","value"),
@@ -2016,34 +2026,43 @@ def descargar_grafico(
 def actualizar_radar(j1, j2, game_tag, period_tag):
     dff_filtrado = df.copy()
     if game_tag:
-            dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"]==game_tag]
+        dff_filtrado = dff_filtrado[dff_filtrado["Game Tag"]==game_tag]
     if period_tag:
-            dff_filtrado = dff_filtrado[dff_filtrado["Period Tag"]==period_tag]
+        dff_filtrado = dff_filtrado[dff_filtrado["Period Tag"]==period_tag]
+
     if not j1 or not j2:
-        return go.Figure()        
+        return go.Figure()
+
+    jugadores = [j1, j2]
+    dff_jugadores = dff_filtrado[dff_filtrado["Player Name"].isin(jugadores)]
+
+    if dff_jugadores.empty:
+        return go.Figure()
+
     radar_data = (
-                dff_filtrado.groupby("Player Name")[metricas_radar]
-                .mean()
-                .reset_index())
+        dff_jugadores.groupby("Player Name")[metricas_radar]
+        .mean()
+        .reset_index()
+    )
 
     fig = go.Figure()
+    colores = ["#48f788", "#89bcef"]  # dos colores distintos para cada jugador
 
-    for _, row in radar_data.iterrows():
+    for idx, row in radar_data.iterrows():
         fig.add_trace(go.Scatterpolar(
             r=row[metricas_radar].values,
             theta=metricas_radar,
             fill="toself",
-            name=row["Player Name"]
+            name=row["Player Name"],
+            line=dict(color=colores[idx % len(colores)])
         ))
 
-    # Ajustes de layout fuera del bucle
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=True)),
         showlegend=True,
         template="plotly_dark"
-        )
+    )
     return fig
-
 @app.callback(
     Output("download-table","data"),
     Input("download-table-csv","n_clicks"),

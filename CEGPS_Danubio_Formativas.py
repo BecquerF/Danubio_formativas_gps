@@ -482,7 +482,7 @@ app.layout = html.Div([
 
             style={
                 "padding":"12px",
-                "width":"160px",
+                "width":"140px",
                 "background":"linear-gradient(180deg,#000c0f,#011c24)",
                 "borderRadius":"12px",
                 "border":"1px solid rgba(137,188,239,.18)"
@@ -492,8 +492,8 @@ app.layout = html.Div([
         style={
             "display":"flex",
             "flexDirection":"column",
-            "width":"160px",
-            "minWidth":"160px",
+            "width":"140px",
+            "minWidth":"140px",
             "gap":"4px 4px",
             "position":"sticky",
             "top":"10px",

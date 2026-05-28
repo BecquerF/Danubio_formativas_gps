@@ -1886,8 +1886,11 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
             theta=metricas_radar,
             fill="toself",
             name=row["Player Name"],
+            mode="markers+lines",
+            marker=dict(size=6, color=colores[idx % len(colores)]),
             line=dict(color=colores[idx % len(colores)], width=2),
-            text=[f"{val:.2f}" for val in row[metricas_radar].values.flatten().tolist()],  # 👈 valores
+             fillcolor=f"rgba{tuple(int(colores[idx % len(colores)][1+i:3+i],16) for i in (0,2,4)) + (0.25,)}",
+            text=[f"{val:.2f}" for val in row[metricas_radar].values.flatten().tolist()], 
         textposition="top center",
         textfont=dict(size=10, color="#edf1f2")
         ))
@@ -1910,7 +1913,7 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
         showlegend=True,
         template="plotly_dark",
         title=dict(
-            text=f"{jugador_1} vs {jugador_2}",   # 👈 título dinámico
+            text=f"{jugador_1}  //  {jugador_2}",  
         font=dict(size=20, color="#a3e3d0", family="Manrope Light"),
         x=0.5
         ),

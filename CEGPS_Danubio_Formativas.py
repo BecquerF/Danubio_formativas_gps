@@ -2075,16 +2075,7 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
 
     # Crear figura
     fig = go.Figure()
-    colores = ["#48f788", "#89bcef"]
-
-    for idx, row in radar_data.iterrows():
-        fig.add_trace(go.Scatterpolar(
-            r=row[metricas_radar].values,
-            theta=metricas_radar,
-            fill="toself",
-            name=row["Player Name"],
-            line=dict(color=colores[idx % len(colores)], width=2)
-        ))
+        
 
     return fig
 

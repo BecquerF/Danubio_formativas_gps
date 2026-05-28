@@ -1,4 +1,3 @@
-from fileinput import filename
 import io
 import base64
 from pathlib import Path
@@ -9,6 +8,8 @@ import dash
 import dash_auth
 from dash import Dash, dcc, html, dash_table, Input, Output, no_update, ctx
 from openpyxl.drawing.image import Image as ExcelImage
+from fileinput import filename
+from datetime import datetime
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")

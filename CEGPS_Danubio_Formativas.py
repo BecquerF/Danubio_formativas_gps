@@ -1757,14 +1757,16 @@ def actualizar_tab(
                     options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
                     value=dff["Player Name"].unique()[0],
                     placeholder="Seleccionar Jugador 1",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
+                    style={"width":"45%","display":"inline-block","marginRight":"10px", "color":"#0d1620"},
+                    style_selected={"backgroundColor":"#0d1620","color":"#a3e3d0","fontWeight":"600"}
                 ),
                 dcc.Dropdown(
                     id="jugador_2",
                     options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
                     value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
                     placeholder="Seleccionar Jugador 2",
-                    style={"width":"45%","display":"inline-block"}
+                    style={"width":"45%","display":"inline-block","color":"#0d1620"},
+                    style_selected={"backgroundColor":"#0d1620","color":"#a3e3d0","fontWeight":"600"}
                 )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
@@ -1774,13 +1776,15 @@ def actualizar_tab(
                     id="game_tags",
                     options=[{"label": g, "value": g} for g in dff["Game Tags"].unique()],
                     placeholder="Filtrar por Game Tag",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
+                    style={"width":"45%","display":"inline-block","marginRight":"10px"},
+                    style_selected={"backgroundColor":"#0d1620","color":"#a3e3d0","fontWeight":"600"}
                 ),
                 dcc.Dropdown(
                     id="period_tags",
                     options=[{"label": p, "value": p} for p in dff["Period Tags"].unique()],
                     placeholder="Filtrar por Period Tag",
-                    style={"width":"45%","display":"inline-block"}
+                    style={"width":"45%","display":"inline-block"},
+                    style_selected={"backgroundColor":"#0d1620","color":"#a3e3d0","fontWeight":"600"}
                 )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
@@ -1830,11 +1834,18 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
         .mean()
         .reset_index()
     )
+    
+    # Normalización por columna (0 a 1)
+    radar_data_norm = radar_data.copy()
+    for m in metricas_radar:
+        max_val = radar_data[m].max()
+        if max_val > 0:
+            radar_data_norm[m] = radar_data[m] / max_val
 
     fig = go.Figure()
     colores = ["#48f788", "#89bcef"]
 
-    for idx, row in radar_data.iterrows():
+    for idx, row in radar_data_norm.iterrows():
         fig.add_trace(go.Scatterpolar(
             r=row[metricas_radar].values.flatten().tolist(),
             theta=metricas_radar,
@@ -1842,7 +1853,6 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
             name=row["Player Name"],
             line=dict(color=colores[idx % len(colores)], width=2)
         ))
-
     fig.update_layout(
         polar=dict(
             radialaxis=dict(

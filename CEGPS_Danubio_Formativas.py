@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import dash
 import dash_auth
+from plotly.graph_onjects import scatter
 from dash import Dash, dcc, html, dash_table, Input, Output, no_update, ctx
 from openpyxl.drawing.image import Image as ExcelImage
 from fileinput import filename
@@ -1753,23 +1754,20 @@ def actualizar_tab(
             # Dropdowns para elegir jugadores
             html.Div([
                 dcc.Dropdown(
-                            id="jugador_1",
-                            options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
-                            value=dff["Player Name"].unique()[0],   # valor inicial
-                            placeholder="Seleccionar Jugador 1",
-                            style={"width":"45%","display":"inline-block","marginRight":"10px"},
-                            style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
-                        ),
+                    id="jugador_1",
+                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                    value=dff["Player Name"].unique()[0],
+                    placeholder="Seleccionar Jugador 1",
+                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
+                ),
                 dcc.Dropdown(
-                            id="jugador_2",
-                            options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
-                            value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
-                            placeholder="Seleccionar Jugador 2",
-                            style={"width":"45%","display":"inline-block"},
-                            style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
-                        )
-             ], 
-                style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
+                    id="jugador_2",
+                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                    value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
+                    placeholder="Seleccionar Jugador 2",
+                    style={"width":"45%","display":"inline-block"}
+                )
+            ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
             # Filtros adicionales
             html.Div([
@@ -1787,17 +1785,17 @@ def actualizar_tab(
                 )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
-                dcc.Graph(id="radar_chart", style={"height":"600px"})
-            ], 
-                style={
-                "padding":"28px",
-                "background":"linear-gradient(145deg, #0b0c0e, #1a1c1f)",
-                "border":"1px solid rgba(137,188,239,0.25)",
-                "borderRadius":"28px",
-                "boxShadow":"0 12px 30px rgba(0,0,0,0.35)",
-                "margin":"20px auto",
-                "maxWidth":"900px"
-    })        
+            # Gráfico
+            dcc.Graph(id="radar_chart", style={"height":"600px"})
+        ], style={
+            "padding":"28px",
+            "background":"linear-gradient(145deg, #0b0c0e, #1a1c1f)",
+            "border":"1px solid rgba(137,188,239,0.25)",
+            "borderRadius":"28px",
+            "boxShadow":"0 12px 30px rgba(0,0,0,0.35)",
+            "margin":"20px auto",
+            "maxWidth":"900px"
+        })
 
     else:
         return no_update

@@ -1202,12 +1202,12 @@ def actualizar_tab(
                     )
                 )
             ], style={
-    "padding": "22px",
-    "background": "#0b0c0e",
-    "border": "1px solid rgba(137,188,239,0.18)",
-    "borderRadius": "24px",
-    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
-})
+                    "padding": "22px",
+                    "background": "#0b0c0e",
+                    "border": "1px solid rgba(137,188,239,0.18)",
+                    "borderRadius": "24px",
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                })
                         
   
 # ACTIVIDAD COMPARATIVA INDIVIDUAL

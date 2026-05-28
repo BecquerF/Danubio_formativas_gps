@@ -1,3 +1,4 @@
+from fileinput import filename
 import io
 import base64
 from pathlib import Path
@@ -6,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import dash
 import dash_auth
-from dash import Dash, dcc, html, dash_table, Input, Output, no_update
+from dash import Dash, dcc, html, dash_table, Input, Output, no_update, ctx
 from openpyxl.drawing.image import Image as ExcelImage
 
 # Leer datos
@@ -1799,15 +1800,9 @@ def actualizar_tab(
 
     else:
         return no_update
-    
-          
-        fmt = "png" if trigger_id == "download-graph-png" else "pdf"
-        tab_name = tab_titles.get(tab, tab)
-        filename = f"grafico_{tab_name}.{fmt}"
-        image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
-        return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
-    
-    
+                    
+
+                    
 @app.callback(
     Output("download-graph","data"),
     Input("download-graph-png","n_clicks"),
@@ -2031,6 +2026,12 @@ def descargar_grafico(
             tickfont_color="#f5f5f5",
             title_font_color="#c3c6d5"
         )
+        trigger_id = ctx.triggered_id  # asegúrate de tener esto definido antes
+        fmt = "png" if trigger_id == "download-graph-png" else "pdf"
+        tab_name = tab_titles.get(tab, tab)
+        filename = f"grafico_{tab_name}.{fmt}"
+        image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
+        return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)        
     
 
 @app.callback(

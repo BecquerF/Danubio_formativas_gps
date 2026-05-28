@@ -1797,6 +1797,40 @@ def actualizar_tab(
                         "margin":"20px auto",
                         "maxWidth":"900px"
                     })
+        fig.update_layout(
+                polar=dict(
+                                    radialaxis=dict(
+                                        visible=True,
+                                        showline=True,
+                                        linewidth=1,
+                                        gridcolor="rgba(200,200,200,0.25)",
+                                        gridwidth=0.8,
+                                        tickfont=dict(size=12, color="#edf1f2")
+                                    ),
+                                    angularaxis=dict(
+                                        tickfont=dict(size=12, color="#edf1f2")
+                                    )
+                                ),
+                                showlegend=True,
+                                template="plotly_dark",
+                                title=dict(
+                                    text="Comparativa Jugador vs Jugador",
+                                    font=dict(size=20, color="#a3e3d0", family="Arial Black"),
+                                    x=0.5
+                                ),
+                                legend=dict(
+                                    font=dict(size=13, color="#edf1f2"),
+                                    orientation="h",
+                                    yanchor="bottom",
+                                    y=-0.25,
+                                    xanchor="center",
+                                    x=0.5,
+                                    bgcolor="rgba(0,0,0,0.4)",
+                                    bordercolor="rgba(137,188,239,0.25)",
+                                    borderwidth=1
+                                )
+                            )
+                    
 
     else:
         return no_update
@@ -2074,40 +2108,6 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
             name=row["Player Name"],
             line=dict(color=colores[idx % len(colores)])
         ))
-
-    fig.update_layout(
-    polar=dict(
-        radialaxis=dict(
-            visible=True,
-            showline=True,
-            linewidth=1,
-            gridcolor="rgba(200,200,200,0.25)",
-            gridwidth=0.8,
-            tickfont=dict(size=12, color="#edf1f2")
-        ),
-        angularaxis=dict(
-            tickfont=dict(size=12, color="#edf1f2")
-        )
-    ),
-    showlegend=True,
-    template="plotly_dark",
-    title=dict(
-        text="Comparativa Jugador vs Jugador",
-        font=dict(size=20, color="#a3e3d0", family="Arial Black"),
-        x=0.5
-    ),
-    legend=dict(
-        font=dict(size=13, color="#edf1f2"),
-        orientation="h",
-        yanchor="bottom",
-        y=-0.25,
-        xanchor="center",
-        x=0.5,
-        bgcolor="rgba(0,0,0,0.4)",
-        bordercolor="rgba(137,188,239,0.25)",
-        borderwidth=1
-    )
-)
 
     return fig
 

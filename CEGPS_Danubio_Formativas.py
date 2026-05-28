@@ -249,7 +249,7 @@ app.layout = html.Div([
                             html.Img(
                                 src="/assets/logo_dataload_2.png",
                                 style={
-                                    "width": "90%",
+                                    "width": "95%",
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "marginBottom": "10px",
@@ -283,7 +283,7 @@ app.layout = html.Div([
                                 }
                             ),
                             html.P(
-                                "Plataforma de Análisis Deportivo",
+                                "DATA LOAD - Plataforma de Análisis Deportivo",
                                 style={
                                     "color": "#d0f0d9",
                                     "margin": "10px 0 0",
@@ -372,7 +372,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"4px 6px",       
+                "padding":"2px 6px",       
                 "marginBottom":"1px"       
             },
             selected_style={
@@ -384,7 +384,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"4px 6px",
+                "padding":"2px 6px",
                 "backgroundColor":"#011c24",
                 "marginBottom":"1px"
             }
@@ -404,7 +404,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"4px 6px",       
+                "padding":"2px 6px",       
                 "marginBottom":"1px"       
             },
             selected_style={
@@ -416,7 +416,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"4px 6px",
+                "padding":"2px 6px",
                 "backgroundColor":"#011c24",
                 "marginBottom":"1px"
             }
@@ -436,7 +436,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"4px 6px",       
+                "padding":"2px 6px",       
                 "marginBottom":"1px"       
             },
             selected_style={
@@ -448,7 +448,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"4px 6px",
+                "padding":"2px 6px",
                 "backgroundColor":"#011c24",
                 "marginBottom":"1px"
             }
@@ -465,7 +465,7 @@ app.layout = html.Div([
                 "textOverflow": "ellipsis",
                 "color":"#edf1f2","fontSize":"12px","textAlign":"center","fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"4px 6px","marginBottom":"1px"
+                "padding":"2px 6px","marginBottom":"1px"
             },
             selected_style={
                 "whiteSpace": "normal",
@@ -473,7 +473,7 @@ app.layout = html.Div([
                 "textOverflow": "ellipsis",
                 "color":"#a3e3d0","fontSize":"12px","textAlign":"center","fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"4px 6px","backgroundColor":"#011c24","marginBottom":"1px"
+                "padding":"2px 6px","backgroundColor":"#011c24","marginBottom":"1px"
             }
         ),
 
@@ -491,7 +491,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"4px 6px",       
+                "padding":"2px 6px",       
                 "marginBottom":"1px"       
             },
             selected_style={
@@ -503,7 +503,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"4px 6px",
+                "padding":"2px 6px",
                 "backgroundColor":"#011c24",
                 "marginBottom":"1px"
             }
@@ -523,7 +523,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"4px 6px",       
+                "padding":"2px 6px",       
                 "marginBottom":"1px"       
             },
             selected_style={
@@ -535,7 +535,7 @@ app.layout = html.Div([
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"4px 6px",
+                "padding":"2px 6px",
                 "backgroundColor":"#011c24",
                 "marginBottom":"1px"
             }

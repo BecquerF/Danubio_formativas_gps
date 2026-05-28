@@ -1802,6 +1802,85 @@ def actualizar_tab(
     else:
         return no_update
                     
+@app.callback(
+    Output("radar_chart", "figure"),
+    [
+        Input("jugador_1", "value"),
+        Input("jugador_2", "value"),
+        Input("game_tags", "value"),
+        Input("period_tags", "value")
+    ]
+)
+def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
+    dff_filtrado = df.copy()
+
+    if game_tags:
+        dff_filtrado = dff_filtrado[dff_filtrado["Game Tags"] == game_tags]
+    if period_tags:
+        dff_filtrado = dff_filtrado[dff_filtrado["Period Tags"] == period_tags]
+
+    if not jugador_1 or not jugador_2:
+        return go.Figure()
+
+    jugadores = [jugador_1, jugador_2]
+    dff_jugadores = dff_filtrado[dff_filtrado["Player Name"].isin(jugadores)]
+
+    if dff_jugadores.empty:
+        return go.Figure()
+
+    radar_data = (
+        dff_jugadores.groupby("Player Name")[metricas_radar]
+        .mean()
+        .reset_index()
+    )
+
+    fig = go.Figure()
+    colores = ["#48f788", "#89bcef"]
+
+    for idx, row in radar_data.iterrows():
+        fig.add_trace(go.Scatterpolar(
+            r=row[metricas_radar].values.flatten().tolist(),
+            theta=metricas_radar,
+            fill="toself",
+            name=row["Player Name"],
+            line=dict(color=colores[idx % len(colores)], width=2)
+        ))
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                showline=True,
+                linewidth=1,
+                gridcolor="rgba(200,200,200,0.25)",
+                gridwidth=0.8,
+                tickfont=dict(size=12, color="#edf1f2")
+            ),
+            angularaxis=dict(
+                tickfont=dict(size=12, color="#edf1f2")
+            )
+        ),
+        showlegend=True,
+        template="plotly_dark",
+        title=dict(
+            text="Comparativa Jugador vs Jugador",
+            font=dict(size=20, color="#a3e3d0", family="Arial Black"),
+            x=0.5
+        ),
+        legend=dict(
+            font=dict(size=13, color="#edf1f2"),
+            orientation="h",
+            yanchor="bottom",
+            y=-0.25,
+            xanchor="center",
+            x=0.5,
+            bgcolor="rgba(0,0,0,0.4)",
+            bordercolor="rgba(137,188,239,0.25)",
+            borderwidth=1
+        )
+    )
+
+    return fig
 
                     
 @app.callback(
@@ -2035,85 +2114,6 @@ def descargar_grafico(
         return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)        
     
 
-@app.callback(
-    Output("radar_chart", "figure"),
-    [
-        Input("jugador_1", "value"),
-        Input("jugador_2", "value"),
-        Input("game_tags", "value"),
-        Input("period_tags", "value")
-    ]
-)
-def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
-    dff_filtrado = df.copy()
-
-    if game_tags:
-        dff_filtrado = dff_filtrado[dff_filtrado["Game Tags"] == game_tags]
-    if period_tags:
-        dff_filtrado = dff_filtrado[dff_filtrado["Period Tags"] == period_tags]
-
-    if not jugador_1 or not jugador_2:
-        return go.Figure()
-
-    jugadores = [jugador_1, jugador_2]
-    dff_jugadores = dff_filtrado[dff_filtrado["Player Name"].isin(jugadores)]
-
-    if dff_jugadores.empty:
-        return go.Figure()
-
-    radar_data = (
-        dff_jugadores.groupby("Player Name")[metricas_radar]
-        .mean()
-        .reset_index()
-    )
-
-    fig = go.Figure()
-    colores = ["#48f788", "#89bcef"]
-
-    for idx, row in radar_data.iterrows():
-        fig.add_trace(go.Scatterpolar(
-            r=row[metricas_radar].values.flatten().tolist(),
-            theta=metricas_radar,
-            fill="toself",
-            name=row["Player Name"],
-            line=dict(color=colores[idx % len(colores)], width=2)
-        ))
-
-    fig.update_layout(
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                showline=True,
-                linewidth=1,
-                gridcolor="rgba(200,200,200,0.25)",
-                gridwidth=0.8,
-                tickfont=dict(size=12, color="#edf1f2")
-            ),
-            angularaxis=dict(
-                tickfont=dict(size=12, color="#edf1f2")
-            )
-        ),
-        showlegend=True,
-        template="plotly_dark",
-        title=dict(
-            text="Comparativa Jugador vs Jugador",
-            font=dict(size=20, color="#a3e3d0", family="Arial Black"),
-            x=0.5
-        ),
-        legend=dict(
-            font=dict(size=13, color="#edf1f2"),
-            orientation="h",
-            yanchor="bottom",
-            y=-0.25,
-            xanchor="center",
-            x=0.5,
-            bgcolor="rgba(0,0,0,0.4)",
-            bordercolor="rgba(137,188,239,0.25)",
-            borderwidth=1
-        )
-    )
-
-    return fig
 
 @app.callback(
     Output("download-table","data"),

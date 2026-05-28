@@ -259,7 +259,7 @@ app.layout = html.Div([
                             )
                         ],
                         style={
-                            "flex": "0 0 150px",
+                            "flex": "0 0 160px",
                             "display": "flex",
                             "alignItems": "center",
                             "justifyContent": "center"
@@ -1047,66 +1047,57 @@ def actualizar_tab(
     title_text = build_chart_title(tab, categorias, metricas, referencia)
 
     # COMPARATIVAS
-    if tab=="comparativas":
-
-        promedio=(
-
-            dff
-            .groupby(referencia)[metricas]
+    if tab == "comparativas":
+        promedio = (
+            dff.groupby(referencia)[metricas]
             .mean()
             .reset_index()
         )
 
-        promedio=pd.melt(
-
+        promedio = pd.melt(
             promedio,
             id_vars=[referencia],
-
             value_vars=metricas,
-
             var_name="Métrica",
             value_name="Valor"
         )
-        
-        fig=px.bar(
 
-            promedio,
+        # Crear figura con go.Bar
+        fig = go.Figure()
 
-            x="Valor",
-            y=referencia,
+        # Paleta de colores base
+        colores_base = [
+            "#edf1f2",
+            "#f0c1f7",
+            "#a3e3d0",
+            "#89bcef",
+            "#48f788",
+            "#72d2e4"
+        ]
 
-            color="Métrica",
+        # Agregar cada métrica como una traza con degradé
+        for i, m in enumerate(metricas):
+            df_m = promedio[promedio["Métrica"] == m]
+            fig.add_trace(go.Bar(
+                x=df_m["Valor"],
+                y=df_m[referencia],
+                orientation="h",
+                name=m,
+                marker=dict(
+                    color=df_m["Valor"],  # usa valores para aplicar escala
+                    colorscale=[
+                        [0, f"rgba{tuple(int(colores_base[i][1+j:3+j],16) for j in (0,2,4)) + (0.3,)}"],  # inicio transparente
+                        [1, colores_base[i]]  # final sólido
+                    ],
+                    line=dict(width=1, color="#ffffff")
+                ),
+                opacity=1
+            ))
 
-            orientation="h",
-            
-            barmode="group",
-
-
-            color_discrete_sequence=[
-                "#edf1f2",
-                "#f0c1f7",
-                "#a3e3d0",
-                "#89bcef",
-                "#48f788",
-                "#72d2e4"
-            ],
-            template="plotly_dark"
-            
-        )
-
-        fig.update_traces(
-            marker=dict(
-                line=dict(width=1, color="#ffffff")
-            ),
-            opacity=0.95,
-            hoverlabel=dict(
-                bgcolor="#0c0d0f",
-                font_size=12,
-                font_color="#f5f5f5"
-            )
-        )
-
+        # Estilo general
         fig.update_layout(
+            barmode="group",
+            template="plotly_dark",
             paper_bgcolor="#0b0c0e",
             plot_bgcolor="#0b0c0e",
             title={

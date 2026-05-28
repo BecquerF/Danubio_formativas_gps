@@ -302,7 +302,7 @@ app.layout = html.Div([
                 ],
                 style={
                     "flex":"1",
-                    "height":"100hvh",
+                    "height":"100vh",
                     "width": "100%",
                     "padding": "18px",
                     "display": "flex",
@@ -570,7 +570,7 @@ app.layout = html.Div([
             "display":"flex",
             "flexDirection":"column",
             "width":"160px",
-            "minWidth":"160vh",
+            "minWidth":"160px",
             "minHeight":"60vh",
             "gap":"2px 4px",
             "position":"sticky",

@@ -1751,19 +1751,21 @@ def actualizar_tab(
             # Dropdowns para elegir jugadores
             html.Div([
                 dcc.Dropdown(
-                    id="jugador_1",
-                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
-                    value=dff["Player Name"].unique()[0],   # valor inicial
-                    placeholder="Seleccionar Jugador 1",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
-                ),
-                dcc.Dropdown(
-                    id="jugador_2",
-                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
-                    value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
-                    placeholder="Seleccionar Jugador 2",
-                    style={"width":"45%","display":"inline-block"}
-                )
+                            id="jugador_1",
+                            options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                            value=dff["Player Name"].unique()[0],   # valor inicial
+                            placeholder="Seleccionar Jugador 1",
+                            style={"width":"45%","display":"inline-block","marginRight":"10px"},
+                            style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
+                        ),
+                        dcc.Dropdown(
+                            id="jugador_2",
+                            options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                            value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
+                            placeholder="Seleccionar Jugador 2",
+                            style={"width":"45%","display":"inline-block"},
+                            style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
+                        )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
             # Filtros adicionales
@@ -1772,24 +1774,29 @@ def actualizar_tab(
                     id="game_tags",
                     options=[{"label": g, "value": g} for g in dff["Game Tags"].unique()],
                     placeholder="Filtrar por Game Tag",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
+                    style={"width":"45%","display":"inline-block","marginRight":"10px"},
+                    style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
                 ),
                 dcc.Dropdown(
                     id="period_tags",
                     options=[{"label": p, "value": p} for p in dff["Period Tags"].unique()],
                     placeholder="Filtrar por Period Tag",
-                    style={"width":"45%","display":"inline-block"}
+                    style={"width":"45%","display":"inline-block"},
+                    style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
                 )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
-            dcc.Graph(id="radar_chart")
-        ], style={
-            "padding":"22px",
-            "background":"#0b0c0e",
-            "border":"1px solid rgba(137,188,239,0.18)",
-            "borderRadius":"24px",
-            "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
-        })
+            dcc.Graph(id="radar_chart", style={"height":"600px"}),
+                    ], style={
+                        "padding":"28px",
+                        "background":"linear-gradient(145deg, #0b0c0e, #1a1c1f)",
+                        "border":"1px solid rgba(137,188,239,0.25)",
+                        "borderRadius":"28px",
+                        "boxShadow":"0 12px 30px rgba(0,0,0,0.35)",
+                        "margin":"20px auto",
+                        "maxWidth":"900px"
+                    })
+
     else:
         return no_update
     
@@ -2068,10 +2075,39 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
         ))
 
     fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True)),
-        showlegend=True,
-        template="plotly_dark"
+    polar=dict(
+        radialaxis=dict(
+            visible=True,
+            showline=True,
+            linewidth=1,
+            gridcolor="rgba(200,200,200,0.25)",
+            gridwidth=0.8,
+            tickfont=dict(size=12, color="#edf1f2")
+        ),
+        angularaxis=dict(
+            tickfont=dict(size=12, color="#edf1f2")
+        )
+    ),
+    showlegend=True,
+    template="plotly_dark",
+    title=dict(
+        text="Comparativa Jugador vs Jugador",
+        font=dict(size=20, color="#a3e3d0", family="Arial Black"),
+        x=0.5
+    ),
+    legend=dict(
+        font=dict(size=13, color="#edf1f2"),
+        orientation="h",
+        yanchor="bottom",
+        y=-0.25,
+        xanchor="center",
+        x=0.5,
+        bgcolor="rgba(0,0,0,0.4)",
+        bordercolor="rgba(137,188,239,0.25)",
+        borderwidth=1
     )
+)
+
     return fig
 
 @app.callback(

@@ -1208,9 +1208,6 @@ def actualizar_tab(
     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
 })
                         
-
-
-
   
 # ACTIVIDAD COMPARATIVA INDIVIDUAL
     elif tab == "actividad_comparativa":
@@ -1664,75 +1661,145 @@ def actualizar_tab(
         template="plotly_dark"
     )
 
-    fig.update_traces(
-        marker=dict(size=10, line=dict(width=1, color="#ffffff")),
-        selector=dict(mode="markers"),
-        hoverlabel=dict(bgcolor="#011c24", font_size=12, font_color="#f5f5f5")
-    )
-
-    fig.update_layout(
-        title={
-            "text": title_text,
-            "font": {
-                "color": "#f5f5f5",
-                "family": "'Clash Display Semibold', 'Helvetica Neue'",
-                "size": 22
-            }
-        },
-        paper_bgcolor="#0b0c0e",
-        plot_bgcolor="#0b0c0e",
-        font={"color": "#f5f5f5"},
-        legend=dict(
-            bgcolor="rgba(11,12,14,0.75)",
-            bordercolor="#89bcef",
-            borderwidth=1
+        fig.update_traces(
+            marker=dict(size=10, line=dict(width=1, color="#ffffff")),
+            selector=dict(mode="markers"),
+            hoverlabel=dict(bgcolor="#011c24", font_size=12, font_color="#f5f5f5")
         )
-    )
 
-    if LOGO_BASE64:
-        fig.add_layout_image(
-            dict(
-                source="data:image/png;base64," + LOGO_BASE64,
-                xref="paper",
-                yref="paper",
-                x=0.99,
-                y=0.01,
-                xanchor="right",
-                yanchor="bottom",
-                sizex=0.12,
-                sizey=0.10,
-                opacity=0.7,
-                layer="above"
+        fig.update_layout(
+            title={
+                "text": title_text,
+                "font": {
+                    "color": "#f5f5f5",
+                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
+                    "size": 22
+                }
+            },
+            paper_bgcolor="#0b0c0e",
+            plot_bgcolor="#0b0c0e",
+            font={"color": "#f5f5f5"},
+            legend=dict(
+                bgcolor="rgba(11,12,14,0.75)",
+                bordercolor="#89bcef",
+                borderwidth=1
             )
         )
 
-    fig.update_xaxes(
-        tickformat="%d/%m/%Y",
-        showgrid=True,
-        gridcolor="rgba(137,188,239,0.18)",
-        zerolinecolor="rgba(255,255,255,0.08)",
-        linecolor="#89bcef",
-        tickfont_color="#f5f5f5",
-        title_font_color="#a3e3d0"
-    )
+        if LOGO_BASE64:
+            fig.add_layout_image(
+                dict(
+                    source="data:image/png;base64," + LOGO_BASE64,
+                    xref="paper",
+                    yref="paper",
+                    x=0.99,
+                    y=0.01,
+                    xanchor="right",
+                    yanchor="bottom",
+                    sizex=0.12,
+                    sizey=0.10,
+                    opacity=0.7,
+                    layer="above"
+                )
+            )
 
-    fig.update_yaxes(
-        showgrid=True,
-        gridcolor="rgba(137,188,239,0.18)",
-        zerolinecolor="rgba(255,255,255,0.08)",
-        linecolor="#89bcef",
-        tickfont_color="#f5f5f5",
-        title_font_color="#a3e3d0"
-    )
+        fig.update_xaxes(
+            tickformat="%d/%m/%Y",
+            showgrid=True,
+            gridcolor="rgba(137,188,239,0.18)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#89bcef",
+            tickfont_color="#f5f5f5",
+            title_font_color="#a3e3d0"
+        )
 
-    return html.Div(
-        dcc.Graph(
-            figure=fig,
-            style={"width": "100%", "height": "100%"}
-        ),
-            style={"padding": "22px", "background": "#0b0c0e",
-                "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
-                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor="rgba(137,188,239,0.18)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#89bcef",
+            tickfont_color="#f5f5f5",
+            title_font_color="#a3e3d0"
+        )
+
+        return html.Div(
+            dcc.Graph(
+                figure=fig,
+                style={"width": "100%", "height": "100%"}
+            ),
+                style={"padding": "22px", "background": "#0b0c0e",
+                    "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
+
+    # ======================================================
+# PLYR vs PLYR
+# ======================================================
+
+    elif tab == "plyr_vs_plyr":
+        return html.Div([
+            html.H3(
+                "Comparativa Jugador vs Jugador", 
+                style={
+                    "color":"white",
+                    "textAlign":"center",
+                    "marginBottom":"20px",
+                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                    "fontWeight":"600"
+                }
+            ),
+
+            # Dropdowns para elegir jugadores
+            html.Div([
+                dcc.Dropdown(
+                    id="jugador_1",
+                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                    value=dff["Player Name"].unique()[0],   # valor inicial
+                    placeholder="Seleccionar Jugador 1",
+                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
+                ),
+                dcc.Dropdown(
+                    id="jugador_2",
+                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
+                    value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
+                    placeholder="Seleccionar Jugador 2",
+                    style={"width":"45%","display":"inline-block"}
+                )
+            ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
+
+            # Filtros adicionales
+            html.Div([
+                dcc.Dropdown(
+                    id="game_tags",
+                    options=[{"label": g, "value": g} for g in dff["Game Tags"].unique()],
+                    placeholder="Filtrar por Game Tag",
+                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
+                ),
+                dcc.Dropdown(
+                    id="period_tags",
+                    options=[{"label": p, "value": p} for p in dff["Period Tags"].unique()],
+                    placeholder="Filtrar por Period Tag",
+                    style={"width":"45%","display":"inline-block"}
+                )
+            ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
+
+            dcc.Graph(id="radar_chart")
+        ], style={
+            "padding":"22px",
+            "background":"#0b0c0e",
+            "border":"1px solid rgba(137,188,239,0.18)",
+            "borderRadius":"24px",
+            "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
+        })
+    else:
+        return no_update
+    
+          
+        fmt = "png" if trigger_id == "download-graph-png" else "pdf"
+        tab_name = tab_titles.get(tab, tab)
+        filename = f"grafico_{tab_name}.{fmt}"
+        image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
+        return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
+    
     
 @app.callback(
     Output("download-graph","data"),
@@ -1958,74 +2025,6 @@ def descargar_grafico(
             title_font_color="#c3c6d5"
         )
     
-    # ======================================================
-# PLYR vs PLYR
-# ======================================================
-
-    elif tab == "plyr_vs_plyr":
-        return html.Div([
-            html.H3(
-                "Comparativa Jugador vs Jugador", 
-                style={
-                    "color":"white",
-                    "textAlign":"center",
-                    "marginBottom":"20px",
-                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
-                    "fontWeight":"600"
-                }
-            ),
-
-            # Dropdowns para elegir jugadores
-            html.Div([
-                dcc.Dropdown(
-                    id="jugador_1",
-                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
-                    value=dff["Player Name"].unique()[0],   # valor inicial
-                    placeholder="Seleccionar Jugador 1",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
-                ),
-                dcc.Dropdown(
-                    id="jugador_2",
-                    options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
-                    value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
-                    placeholder="Seleccionar Jugador 2",
-                    style={"width":"45%","display":"inline-block"}
-                )
-            ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
-
-            # Filtros adicionales
-            html.Div([
-                dcc.Dropdown(
-                    id="game_tags",
-                    options=[{"label": g, "value": g} for g in dff["Game Tags"].unique()],
-                    placeholder="Filtrar por Game Tag",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
-                ),
-                dcc.Dropdown(
-                    id="period_tags",
-                    options=[{"label": p, "value": p} for p in dff["Period Tags"].unique()],
-                    placeholder="Filtrar por Period Tag",
-                    style={"width":"45%","display":"inline-block"}
-                )
-            ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
-
-            dcc.Graph(id="radar_chart")
-        ], style={
-            "padding":"22px",
-            "background":"#0b0c0e",
-            "border":"1px solid rgba(137,188,239,0.18)",
-            "borderRadius":"24px",
-            "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"
-        })
-    else:
-        return no_update
-    
-
-    fmt = "png" if trigger_id == "download-graph-png" else "pdf"
-    tab_name = tab_titles.get(tab, tab)
-    filename = f"grafico_{tab_name}.{fmt}"
-    image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
-    return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
 
 @app.callback(
     Output("radar_chart","figure"),

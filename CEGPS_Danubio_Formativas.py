@@ -558,7 +558,7 @@ app.layout = html.Div([
             ],
 
             style={
-                "padding":"12px",
+                "padding":"6px",
                 "width":"160px",
                 "background":"linear-gradient(180deg,#000c0f,#011c24)",
                 "borderRadius":"12px",

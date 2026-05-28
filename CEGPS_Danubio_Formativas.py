@@ -6,7 +6,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import dash
 import dash_auth
-from plotly.graph_onjects import scatter
 from dash import Dash, dcc, html, dash_table, Input, Output, no_update, ctx
 from openpyxl.drawing.image import Image as ExcelImage
 from fileinput import filename

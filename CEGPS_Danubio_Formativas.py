@@ -249,7 +249,7 @@ app.layout = html.Div([
                             html.Img(
                                 src="/assets/logo_dataload_2.png",
                                 style={
-                                    "width": "100%",
+                                    "width": "110%",
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "marginBottom": "8px",
@@ -1913,7 +1913,7 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
         showlegend=True,
         template="plotly_dark",
         title=dict(
-            text=f"{jugador_1}  //  {jugador_2}",  
+            text=f"{jugador_1}  ||  {jugador_2}",  
         font=dict(size=20, color="#a3e3d0", family="Manrope Light"),
         x=0.5
         ),

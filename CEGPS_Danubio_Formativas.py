@@ -2109,7 +2109,7 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
             line=dict(color=colores[idx % len(colores)])
         ))
 
-    return fig
+        return fig
 
 @app.callback(
     Output("download-table","data"),

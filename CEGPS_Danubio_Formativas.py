@@ -1850,7 +1850,10 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
             theta=metricas_radar,
             fill="toself",
             name=row["Player Name"],
-            line=dict(color=colores[idx % len(colores)], width=2)
+            line=dict(color=colores[idx % len(colores)], width=2),
+            text=[f"{val:.2f}" for val in row[metricas_radar].values.flatten().tolist()],  # 👈 valores
+        textposition="top center",
+        textfont=dict(size=10, color="#edf1f2")
         ))
 
     # Estilo

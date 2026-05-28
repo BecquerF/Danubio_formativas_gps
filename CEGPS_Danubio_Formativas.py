@@ -1767,7 +1767,7 @@ def actualizar_tab(
                             style={"width":"45%","display":"inline-block"},
                             style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
                         )
-            ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
+                    ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
             # Filtros adicionales
             html.Div([

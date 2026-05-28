@@ -1777,15 +1777,13 @@ def actualizar_tab(
                     id="game_tags",
                     options=[{"label": g, "value": g} for g in dff["Game Tags"].unique()],
                     placeholder="Filtrar por Game Tag",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px"},
-                    style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
+                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
                 ),
                 dcc.Dropdown(
                     id="period_tags",
                     options=[{"label": p, "value": p} for p in dff["Period Tags"].unique()],
                     placeholder="Filtrar por Period Tag",
-                    style={"width":"45%","display":"inline-block"},
-                    style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
+                    style={"width":"45%","display":"inline-block"}
                 )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 

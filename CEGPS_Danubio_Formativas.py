@@ -53,7 +53,7 @@ app = Dash(__name__)
 app.config.suppress_callback_exceptions = True
 server = app.server
 VALID_USERNAME_PASSWORD_PAIRS = {
-    "Danubioformativas": "danubio2026"
+    "Danubioformativas": "formativas2026"
 }
 
 auth = dash_auth.BasicAuth(

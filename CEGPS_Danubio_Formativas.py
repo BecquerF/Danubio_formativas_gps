@@ -249,7 +249,7 @@ app.layout = html.Div([
                             html.Img(
                                 src="/assets/logo_dataload_2.png",
                                 style={
-                                    "width": "120%",
+                                    "width": "110%",
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "marginBottom": "8px",

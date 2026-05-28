@@ -303,7 +303,7 @@ app.layout = html.Div([
                 style={
                     "flex":"1",
                     "height":"100px",
-                    "width": "100px",
+                    "width": "150px",
                     "padding": "18px",
                     "display": "flex",
                     "alignItems": "center",

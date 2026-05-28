@@ -249,7 +249,7 @@ app.layout = html.Div([
                             html.Img(
                                 src="/assets/logo_dataload_2.png",
                                 style={
-                                    "width": "170px",
+                                    "width": "100%",
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "marginBottom": "8px",
@@ -259,7 +259,7 @@ app.layout = html.Div([
                             )
                         ],
                         style={
-                            "flex": "0 0 170px",
+                            "flex": "0 0 160px",
                             "display": "flex",
                             "alignItems": "center",
                             "justifyContent": "center"
@@ -364,23 +364,29 @@ app.layout = html.Div([
             className="tab-item",
             selected_className="tab-item-selected",
             style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#edf1f2",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"6px 8px",       # más compacto
-                "marginBottom":"2px"       # menos espacio entre pestañas
+                "padding":"4px 6px",       
+                "marginBottom":"1px"       
             },
             selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#a3e3d0",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"6px 8px",
+                "padding":"4px 6px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"2px"
+                "marginBottom":"1px"
             }
         ),
 
@@ -390,23 +396,29 @@ app.layout = html.Div([
             className="tab-item",
             selected_className="tab-item-selected",
             style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#edf1f2",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"6px 8px",       # más compacto
-                "marginBottom":"2px"       # menos espacio entre pestañas
+                "padding":"4px 6px",       
+                "marginBottom":"1px"       
             },
             selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#a3e3d0",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"6px 8px",
+                "padding":"4px 6px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"2px"
+                "marginBottom":"1px"
             }
         ),
 
@@ -416,23 +428,29 @@ app.layout = html.Div([
             className="tab-item",
             selected_className="tab-item-selected",
             style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#edf1f2",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"6px 8px",       # más compacto
-                "marginBottom":"2px"       # menos espacio entre pestañas
+                "padding":"4px 6px",       
+                "marginBottom":"1px"       
             },
             selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#a3e3d0",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"6px 8px",
+                "padding":"4px 6px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"2px"
+                "marginBottom":"1px"
             }
         ),
         
@@ -442,14 +460,20 @@ app.layout = html.Div([
             className="tab-item",
             selected_className="tab-item-selected",
             style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#edf1f2","fontSize":"12px","textAlign":"center","fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"6px 8px","marginBottom":"2px"
+                "padding":"4px 6px","marginBottom":"1px"
             },
             selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#a3e3d0","fontSize":"12px","textAlign":"center","fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"6px 8px","backgroundColor":"#011c24","marginBottom":"2px"
+                "padding":"4px 6px","backgroundColor":"#011c24","marginBottom":"1px"
             }
         ),
 
@@ -459,23 +483,29 @@ app.layout = html.Div([
             className="tab-item",
             selected_className="tab-item-selected",
             style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",      
                 "color":"#edf1f2",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"6px 8px",       # más compacto
-                "marginBottom":"2px"       # menos espacio entre pestañas
+                "padding":"4px 6px",       
+                "marginBottom":"1px"       
             },
             selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#a3e3d0",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"6px 8px",
+                "padding":"4px 6px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"2px"
+                "marginBottom":"1px"
             }
         ),
 
@@ -485,23 +515,29 @@ app.layout = html.Div([
             className="tab-item",
             selected_className="tab-item-selected",
             style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",      
                 "color":"#edf1f2",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid rgba(137,188,239,.18)",
-                "padding":"6px 8px",       # más compacto
-                "marginBottom":"2px"       # menos espacio entre pestañas
+                "padding":"4px 6px",       
+                "marginBottom":"1px"       
             },
             selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
                 "color":"#a3e3d0",
                 "fontSize":"11px",
                 "textAlign":"center",
                 "fontWeight":"600",
                 "borderTop":"1px solid #a3e3d0",
-                "padding":"6px 8px",
+                "padding":"4px 6px",
                 "backgroundColor":"#011c24",
-                "marginBottom":"2px"
+                "marginBottom":"1px"
             }
         )
 

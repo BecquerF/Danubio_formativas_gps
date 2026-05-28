@@ -2075,8 +2075,16 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
 
     # Crear figura
     fig = go.Figure()
-        
-
+    for jugador in jugadores:
+        jugador_data = radar_data[radar_data["Player Name"] == jugador]
+        if not jugador_data.empty:
+            fig.add_trace(go.Scatterpolar(
+                r=jugador_data[metricas_radar].values.flatten().tolist(),
+                theta=metricas_radar,
+                fill="toself",
+                name=jugador
+            ))
+            
     return fig
 
 @app.callback(

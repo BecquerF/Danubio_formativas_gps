@@ -2048,7 +2048,7 @@ def descargar_grafico(
 )
 def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     # Copia del dataframe original
-    dff_filtrado = df
+    dff_filtrado = df.copy()
 
     # Aplicar filtros si corresponden
     if game_tags:

@@ -1760,7 +1760,7 @@ def actualizar_tab(
                             style={"width":"45%","display":"inline-block","marginRight":"10px"},
                             style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
                         ),
-                        dcc.Dropdown(
+                dcc.Dropdown(
                             id="jugador_2",
                             options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
                             value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
@@ -1768,7 +1768,8 @@ def actualizar_tab(
                             style={"width":"45%","display":"inline-block"},
                             style_selected={"backgroundColor":"#011c24","color":"#a3e3d0","fontWeight":"600"}
                         )
-                    ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
+             ], 
+                style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
             # Filtros adicionales
             html.Div([
@@ -1788,15 +1789,16 @@ def actualizar_tab(
                 )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
-             dcc.Graph(id="radar_chart", style={"height":"600px"})
-    ], style={
-        "padding":"28px",
-        "background":"linear-gradient(145deg, #0b0c0e, #1a1c1f)",
-        "border":"1px solid rgba(137,188,239,0.25)",
-        "borderRadius":"28px",
-        "boxShadow":"0 12px 30px rgba(0,0,0,0.35)",
-        "margin":"20px auto",
-        "maxWidth":"900px"
+                dcc.Graph(id="radar_chart", style={"height":"600px"})
+            ], 
+                style={
+                "padding":"28px",
+                "background":"linear-gradient(145deg, #0b0c0e, #1a1c1f)",
+                "border":"1px solid rgba(137,188,239,0.25)",
+                "borderRadius":"28px",
+                "boxShadow":"0 12px 30px rgba(0,0,0,0.35)",
+                "margin":"20px auto",
+                "maxWidth":"900px"
     })        
 
     else:
@@ -2046,7 +2048,7 @@ def descargar_grafico(
 )
 def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     # Copia del dataframe original
-    dff_filtrado = df.copy()
+    dff_filtrado = df
 
     # Aplicar filtros si corresponden
     if game_tags:

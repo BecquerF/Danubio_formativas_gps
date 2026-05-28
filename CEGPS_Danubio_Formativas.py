@@ -1774,13 +1774,13 @@ def actualizar_tab(
                     id="game_tags",
                     options=[{"label": g, "value": g} for g in dff["Game Tags"].unique()],
                     placeholder="Filtrar por Game Tag",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px"}
+                    style={"width":"45%","display":"inline-block","marginRight":"10px","color":"#0d1620"}
                 ),
                 dcc.Dropdown(
                     id="period_tags",
                     options=[{"label": p, "value": p} for p in dff["Period Tags"].unique()],
                     placeholder="Filtrar por Period Tag",
-                    style={"width":"45%","display":"inline-block"}
+                    style={"width":"45%","display":"inline-block", "color":"#0d1620"}
                 )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
@@ -1871,9 +1871,9 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
         showlegend=True,
         template="plotly_dark",
         title=dict(
-            text="Comparativa Jugador vs Jugador",
-            font=dict(size=20, color="#a3e3d0", family="Arial Black"),
-            x=0.5
+            text=f"{jugador_1} vs {jugador_2}",   # 👈 título dinámico
+        font=dict(size=20, color="#a3e3d0", family="Manrope Light"),
+        x=0.5
         ),
         legend=dict(
             font=dict(size=13, color="#edf1f2"),

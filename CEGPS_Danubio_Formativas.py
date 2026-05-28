@@ -1829,19 +1829,22 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     if dff_jugadores.empty:
         return go.Figure()
 
+    # Agrupar métricas
     radar_data = (
         dff_jugadores.groupby("Player Name")[metricas_radar]
         .mean()
         .reset_index()
     )
-    
-    # Normalización por columna (0 a 1)
+
+    # Normalización por columna (min-max a 0–1)
     radar_data_norm = radar_data.copy()
     for m in metricas_radar:
-        max_val = radar_data[m].max()
-        if max_val > 0:
-            radar_data_norm[m] = radar_data[m] / max_val
+        col_min = radar_data[m].min()
+        col_max = radar_data[m].max()
+        if col_max > col_min:  # evita división por cero
+            radar_data_norm[m] = (radar_data[m] - col_min) / (col_max - col_min)
 
+    # Crear figura
     fig = go.Figure()
     colores = ["#48f788", "#89bcef"]
 
@@ -1853,6 +1856,8 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
             name=row["Player Name"],
             line=dict(color=colores[idx % len(colores)], width=2)
         ))
+
+    # Estilo
     fig.update_layout(
         polar=dict(
             radialaxis=dict(

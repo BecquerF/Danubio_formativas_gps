@@ -1,5 +1,6 @@
 import io
 import base64
+import textwrap
 import altair as alt
 from pathlib import Path
 import pandas as pd
@@ -12,10 +13,14 @@ try:
     import kaleido
 except ImportError:
     kaleido = None
-from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx
+from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
 from openpyxl.drawing.image import Image as ExcelImage
 from fileinput import filename
 from datetime import datetime
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.lib.utils import ImageReader
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
@@ -154,8 +159,19 @@ tab_titles = {
     "actividad_comparativa": "Actividad_Comparativa_Individual",
     "actividad_promedios": "Actividad_Promedios",
     "acwr": "ACWR_Zona_Segura",
-    "plyr_vs_plyr": "PLYR_vs_PLYR"
+    "plyr_vs_plyr": "PLYR_vs_PLYR",
+    "informe": "Informe"
 }
+
+informe_sections = [
+    {"label": "Actividad", "value": "actividad"},
+    {"label": "Actividad Comparativa Individual", "value": "actividad_comparativa"},
+    {"label": "Actividad/Promedios", "value": "actividad_promedios"},
+    {"label": "ACWR", "value": "acwr"},
+    {"label": "PLYR vs PLYR", "value": "plyr_vs_plyr"},
+    {"label": "Comparativo", "value": "comparativas"},
+    {"label": "Cronológico", "value": "cronologico"}
+]
 
 LOGO_PATH = Path("assets/logo_dataload_2.png")
 LOGO_BASE64 = ""
@@ -475,6 +491,273 @@ def build_cronologico(dff, categorias, metricas, referencia):
 
     return fig
 
+
+def truncate_to_n_words(text, n=500):
+    words = text.split()
+    return " ".join(words[:n])
+
+
+def build_auto_report_title(categorias, fecha_actividad):
+    fecha_text = (
+        pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y")
+        if fecha_actividad else datetime.now().strftime("%d/%m/%Y")
+    )
+    if categorias:
+        categorias_text = ", ".join(categorias[:3])
+        if len(categorias) > 3:
+            categorias_text += ", ..."
+    else:
+        categorias_text = "Todas las categorías"
+    return f"Informe {fecha_text} - {categorias_text}"
+
+
+def section_title(section_value):
+    titles = {
+        "actividad": "Actividad",
+        "actividad_comparativa": "Actividad Comparativa Individual",
+        "actividad_promedios": "Actividad/Promedios",
+        "acwr": "ACWR",
+        "plyr_vs_plyr": "PLYR vs PLYR",
+        "comparativas": "Comparativo",
+        "cronologico": "Cronológico"
+    }
+    return titles.get(section_value, section_value)
+
+
+def build_actividad_report_fig(dff, fecha_dt):
+    if "Date" not in dff.columns:
+        return go.Figure()
+    dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+    metrics = [m for m in ["Distance", "Player Load", "Sprint Distance", "High Speed Distance", "Sprint Efforts"] if m in dff_fecha.columns]
+    if dff_fecha.empty or not metrics:
+        return go.Figure()
+
+    resumen = dff_fecha.groupby("Player Name")[metrics].sum().reset_index()
+    resumen = resumen.sort_values(metrics[0], ascending=False).head(6)
+    data = pd.melt(resumen, id_vars=["Player Name"], value_vars=metrics, var_name="Métrica", value_name="Valor")
+
+    fig = px.bar(
+        data,
+        x="Valor",
+        y="Player Name",
+        color="Métrica",
+        orientation="h",
+        barmode="group",
+        template="plotly_dark",
+        color_discrete_sequence=["#edf1f2", "#f1a3fd", "#a3e3d0", "#89bcef", "#48f788", "#f96e83"]
+    )
+    fig.update_layout(
+        title={"text": f"Actividad {fecha_dt.strftime('%d/%m/%Y')}", "font": {"color": "#f5f5f5", "size": 18}},
+        paper_bgcolor="#0b0c0e",
+        plot_bgcolor="#0b0c0e",
+        font={"color": "#f5f5f5"},
+        legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#89bcef", borderwidth=1)
+    )
+    return fig
+
+
+def build_actividad_comparativa_report_fig(dff, fecha_dt):
+    if "Date" not in dff.columns:
+        return go.Figure()
+    metrics = [m for m in ["Distance", "Player Load", "Sprint Distance"] if m in dff.columns]
+    dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+    if dff_fecha.empty or not metrics:
+        return go.Figure()
+
+    resumen = dff_fecha.groupby("Player Name")[metrics].sum().reset_index()
+    dff_acum = dff[dff["Date"].dt.normalize() <= fecha_dt]
+    promedio = dff_acum.groupby("Player Name")[metrics].mean().reset_index()
+    promedio = promedio.rename(columns={m: f"{m} Prom" for m in metrics})
+    tabla = resumen.merge(promedio, on="Player Name", how="left").fillna(0)
+
+    rows = []
+    for _, row in tabla.iterrows():
+        for m in metrics:
+            rows.append({"Player Name": row["Player Name"], "Métrica": m, "Tipo": "Actual", "Valor": row[m]})
+            rows.append({"Player Name": row["Player Name"], "Métrica": m, "Tipo": "Promedio", "Valor": row[f"{m} Prom"]})
+    if not rows:
+        return go.Figure()
+
+    data = pd.DataFrame(rows)
+    fig = px.bar(
+        data,
+        x="Valor",
+        y="Player Name",
+        color="Tipo",
+        facet_col="Métrica",
+        orientation="h",
+        barmode="group",
+        template="plotly_dark",
+        category_orders={"Tipo": ["Actual", "Promedio"]},
+        color_discrete_sequence=["#48f788", "#89bcef"]
+    )
+    fig.update_layout(
+        title={"text": f"Actividad Comparativa Individual {fecha_dt.strftime('%d/%m/%Y')}", "font": {"color": "#f5f5f5", "size": 18}},
+        paper_bgcolor="#0b0c0e",
+        plot_bgcolor="#0b0c0e",
+        font={"color": "#f5f5f5"}
+    )
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split('=')[-1]))
+    return fig
+
+
+def build_actividad_promedios_report_fig(dff, fecha_dt):
+    metrics = [m for m in metricas_promedios if m in dff.columns]
+    dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+    if dff_fecha.empty or not metrics:
+        return go.Figure()
+
+    promedio = dff_fecha[metrics].mean().reset_index()
+    promedio.columns = ["Métrica", "Valor"]
+    fig = px.bar(
+        promedio,
+        x="Valor",
+        y="Métrica",
+        orientation="h",
+        template="plotly_dark",
+        color_discrete_sequence=["#edf1f2"]
+    )
+    fig.update_layout(
+        title={"text": f"Actividad / Promedios {fecha_dt.strftime('%d/%m/%Y')}", "font": {"color": "#f5f5f5", "size": 18}},
+        paper_bgcolor="#0b0c0e",
+        plot_bgcolor="#0b0c0e",
+        font={"color": "#f5f5f5"}
+    )
+    return fig
+
+
+def build_acwr_report_fig(dff):
+    metrics = [m for m in ["Distance", "Player Load", "Sprint Distance", "High Speed Distance", "Sprint Efforts", "High Speed Efforts", "Impacts"] if m in dff.columns]
+    if dff.empty or not metrics:
+        return go.Figure()
+
+    ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
+    ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
+    df21 = dff[dff["Date"] >= ultimos21]
+    df7 = dff[dff["Date"] >= ultimos7]
+    cronica = df21.groupby("Player Name")[metrics].mean().reset_index()
+    aguda = df7.groupby("Player Name")[metrics].mean().reset_index()
+    tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7")).fillna(0)
+    rows = []
+    for _, row in tabla.iterrows():
+        for m in metrics:
+            rows.append({"Player Name": row["Player Name"], "Métrica": m, "Valor": round(row[f"{m}_7"] / row[f"{m}_21"] if row[f"{m}_21"] else 0, 2)})
+    data = pd.DataFrame(rows)
+    fig = px.bar(
+        data,
+        x="Valor",
+        y="Player Name",
+        color="Métrica",
+        orientation="h",
+        template="plotly_dark",
+        color_discrete_sequence=["#edf1f2", "#f1a3fd", "#a3e3d0", "#89bcef", "#48f788", "#f96e83", "#f4c95d"]
+    )
+    fig.update_layout(
+        title={"text": "ACWR - Últimos 7 días vs 21 días", "font": {"color": "#f5f5f5", "size": 18}},
+        paper_bgcolor="#0b0c0e",
+        plot_bgcolor="#0b0c0e",
+        font={"color": "#f5f5f5"}
+    )
+    return fig
+
+
+def build_plyr_vs_plyr_report_fig(dff):
+    nombres = dff.groupby("Player Name")["Distance"].sum().sort_values(ascending=False).head(2).index.tolist()
+    if len(nombres) < 2:
+        return go.Figure()
+    return build_plyr_vs_plyr(dff, nombres[0], nombres[1], None, None)
+
+
+def build_section_report_fig(section, dff, fecha_dt, categorias):
+    if section == "actividad":
+        return build_actividad_report_fig(dff, fecha_dt)
+    if section == "actividad_comparativa":
+        return build_actividad_comparativa_report_fig(dff, fecha_dt)
+    if section == "actividad_promedios":
+        return build_actividad_promedios_report_fig(dff, fecha_dt)
+    if section == "acwr":
+        return build_acwr_report_fig(dff)
+    if section == "plyr_vs_plyr":
+        return build_plyr_vs_plyr_report_fig(dff)
+    if section == "comparativas":
+        return build_comparativas(dff, categorias, ["Distance"], "Category")
+    if section == "cronologico":
+        return build_cronologico(dff, categorias, ["Distance"], "Category")
+    return go.Figure()
+
+
+def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin):
+    text_obj = c.beginText(x, y)
+    text_obj.setFont("Helvetica", 10)
+    for paragraph in text.split("\n"):
+        lines = textwrap.wrap(paragraph, width=100)
+        if not lines:
+            lines = [""]
+        for line in lines:
+            if y < margin + 60:
+                c.drawText(text_obj)
+                c.showPage()
+                text_obj = c.beginText(x, page_height - margin)
+                text_obj.setFont("Helvetica", 10)
+                y = page_height - margin
+            text_obj.textLine(line)
+            y -= leading
+    c.drawText(text_obj)
+    return y
+
+
+def build_report_pdf(title, author, logo_bytes, sections, fecha_text):
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    margin = inch * 0.5
+    y = height - margin
+
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(margin, y, title)
+    c.setFont("Helvetica", 10)
+    c.drawRightString(width - margin, y, f"Creado por {author}")
+    y -= 18
+    c.drawString(margin, y, f"Fecha: {fecha_text}")
+    y -= 20
+
+    if logo_bytes:
+        try:
+            logo = ImageReader(io.BytesIO(logo_bytes))
+            c.drawImage(logo, width - margin - 100, height - margin - 60, width=100, height=60, preserveAspectRatio=True, mask='auto')
+        except Exception:
+            pass
+    y -= 10
+
+    for section in sections:
+        if y < 220:
+            c.showPage()
+            y = height - margin
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(margin, y, section["title"])
+        y -= 20
+
+        if section.get("img") is not None:
+            try:
+                image = ImageReader(io.BytesIO(section["img"]))
+                img_width = width - 2 * margin
+                img_height = 360
+                if y - img_height < margin:
+                    c.showPage()
+                    y = height - margin
+                c.drawImage(image, margin, y - img_height, width=img_width, height=img_height, preserveAspectRatio=True, mask='auto')
+                y -= img_height + 12
+            except Exception:
+                pass
+
+        content = truncate_to_n_words(section.get("text", ""), 500)
+        y = draw_wrapped_text(c, content, margin, y, width - 2 * margin, 14, height, margin)
+        y -= 16
+
+    c.save()
+    buffer.seek(0)
+    return buffer.read()
+
 ultima_actualizacion = (
     datetime.now() - timedelta(hours=3)
 ).strftime(
@@ -494,11 +777,11 @@ app.layout = html.Div([
                             html.Img(
                                 src="/assets/logo_dataload_2.png",
                                 style={
-                                    "width": "95%",
+                                    "width": "100%",
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "marginBottom": "10px",
-                                    "border": "1px solid ##011c24",
+                                    "border": "1px solid #011c24",
                                     "borderRadius": "12px"
                                 }
                             )
@@ -507,7 +790,7 @@ app.layout = html.Div([
                             "flex": "0 0 160px",
                             "display": "flex",
                             "alignItems": "center",
-                            "justifyContent": "center"
+                            "justifyContent": "flex-start"
                         }
                     ),
                     html.Div(
@@ -592,7 +875,7 @@ app.layout = html.Div([
 
                 dcc.Tabs(
     id="tabs",
-    value="actividad",
+    value="actividad_promedios",
     vertical=True,
     className="tab-menu",
     style={
@@ -816,6 +1099,37 @@ app.layout = html.Div([
                 "backgroundColor":"#011c24",
                 "marginBottom":"1px"
             }
+        ),
+        dcc.Tab(
+            label="INFORME",
+            value="informe",
+            className="tab-item",
+            selected_className="tab-item-selected",
+            style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#edf1f2",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"2px 6px",       
+                "marginBottom":"1px"       
+            },
+            selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#a3e3d0",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"2px 6px",
+                "backgroundColor":"#011c24",
+                "marginBottom":"1px"
+            }
         )
 
     ]
@@ -864,6 +1178,7 @@ app.layout = html.Div([
 
             dcc.Download(id="download-graph"),
             dcc.Download(id="download-table"),
+            dcc.Download(id="download-report"),
 
             # GRÁFICO
 
@@ -1503,6 +1818,9 @@ def actualizar_tab(
         gametag_text = summarize_items(gametags, max_items=10, default="Todos")
         periodtag_text = summarize_items(periodtags, max_items=10, default="Todos")
         fecha_text = fecha_dt.strftime("%d/%m/%Y")
+        grafico_titulo = (
+            f"Actividad - {fecha_text} - Game Tags: {gametag_text} - Period Tags: {periodtag_text} - Category: {categoria_text}"
+        )
 
         cards = []
         for m in metricas_promedios_validas:
@@ -1524,7 +1842,7 @@ def actualizar_tab(
 
         return html.Div([
             html.Div([
-                html.H3("Actividad / Promedios", style={"color":"white","textAlign":"center","marginBottom":"20px",
+                html.H3(grafico_titulo, style={"color":"white","textAlign":"center","marginBottom":"20px",
                     "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
                 html.Div([
                     html.Div([html.Div("Fecha de actividad", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
@@ -1550,7 +1868,7 @@ def actualizar_tab(
                     "boxShadow": "0 12px 30px rgba(0,0,0,0.35)", "margin": "20px auto", "maxWidth": "1100px"})
 
 
-    # ACWR
+# ACWR
     
     elif tab=="acwr":
         metricas_acwr = list(dict.fromkeys([
@@ -1991,6 +2309,82 @@ def actualizar_tab(
                     "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
 
+    elif tab == "informe":
+        return html.Div([
+            html.H2("Informe de Actividad", style={"color":"#edf1f2","textAlign":"center","marginBottom":"20px"}),
+            html.Div([
+                html.Div([
+                    html.Label("Título del informe", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.Input(id="report_title", type="text", placeholder="Título personalizado del informe (opcional)", value="", style={"width":"100%","padding":"10px","borderRadius":"12px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"}),
+                    html.Div("Deja el título en blanco para generar uno automático.", style={"color":"#dcdcdc","fontSize":"11px","marginTop":"6px"})
+                ], style={"flex":"1"}),
+                html.Div([
+                    html.Label("Creado por", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.Input(id="report_author", type="text", placeholder="Nombre del creador", value="", style={"width":"100%","padding":"10px","borderRadius":"12px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
+                ], style={"flex":"1","marginLeft":"16px"})
+            ], style={"display":"flex","gap":"16px","marginBottom":"24px","flexWrap":"wrap"}),
+            html.Div([
+                html.Label("Secciones del informe", style={"color":"#a3e3d0","marginBottom":"8px"}),
+                dcc.Checklist(
+                    id="report_sections",
+                    options=[
+                        {"label": section_title(v), "value": v} for v in [
+                            "actividad",
+                            "actividad_comparativa",
+                            "actividad_promedios",
+                            "acwr",
+                            "plyr_vs_plyr",
+                            "comparativas",
+                            "cronologico"
+                        ]
+                    ],
+                    value=["actividad", "actividad_promedios", "acwr"],
+                    labelStyle={"display":"block", "color":"#edf1f2", "marginBottom":"6px"},
+                    inputStyle={"marginRight":"8px"}
+                )
+            ], style={"marginBottom":"28px","padding":"20px","background":"#071016","borderRadius":"18px","border":"1px solid rgba(137,188,239,0.18)"}),
+            html.Div([
+                html.Div([
+                    html.Label("Actividad", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.Textarea(id="report_text_actividad", placeholder="Describe la sección de Actividad. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
+                ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"}),
+                html.Div([
+                    html.Label("Actividad Comparativa Individual", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.Textarea(id="report_text_actividad_comparativa", placeholder="Describe la sección de Actividad Comparativa Individual. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
+                ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
+            ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"16px"}),
+            html.Div([
+                html.Div([
+                    html.Label("Actividad/Promedios", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.Textarea(id="report_text_actividad_promedios", placeholder="Describe la sección de Actividad/Promedios. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
+                ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"}),
+                html.Div([
+                    html.Label("ACWR", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.Textarea(id="report_text_acwr", placeholder="Describe la sección de ACWR. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
+                ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
+            ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"16px"}),
+            html.Div([
+                html.Div([
+                    html.Label("PLYR vs PLYR", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.Textarea(id="report_text_plyr_vs_plyr", placeholder="Describe la sección de PLYR vs PLYR. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
+                ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"}),
+                html.Div([
+                    html.Label("Comparativo", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.Textarea(id="report_text_comparativas", placeholder="Describe la sección de Comparativo. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
+                ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
+            ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"16px"}),
+            html.Div([
+                html.Div([
+                    html.Label("Cronológico", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.Textarea(id="report_text_cronologico", placeholder="Describe la sección Cronológico. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
+                ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
+            ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"24px"}),
+            html.Div([
+                html.Button("Generar PDF", id="generate_report", n_clicks=0, style={"width":"100%","padding":"16px","borderRadius":"18px","border":"none","background":"#89bcef","color":"#0b0c0e","fontWeight":"700","cursor":"pointer"})
+            ], style={"maxWidth":"320px","margin":"0 auto"}),
+            html.Div("Al hacer clic se generará un PDF con secciones seleccionadas, texto y gráficos incrustados.", style={"color":"#dcdcdc","fontSize":"12px","textAlign":"center","marginTop":"12px"})
+        ], style={"padding":"24px","background":"#0b0c0e","border":"1px solid rgba(137,188,239,0.18)","borderRadius":"28px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)","maxWidth":"1180px","margin":"20px auto"})
+
     # ======================================================
 # PLYR vs PLYR
 # ======================================================
@@ -2056,7 +2450,115 @@ def actualizar_tab(
 
     else:
         return no_update
-                    
+
+
+@app.callback(
+    Output("gametag", "options"),
+    Output("gametag", "value"),
+    Output("periodtag", "options"),
+    Output("periodtag", "value"),
+    Input("fecha-actividad", "date"),
+    Input("categoria", "value")
+)
+def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias):
+    dff = df.copy()
+    if fecha_actividad:
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize()
+        dff = dff[dff["Date"].dt.normalize() == fecha_dt]
+    if categorias:
+        dff = dff[dff["Category"].isin(categorias)]
+
+    gametag_vals = sorted(dff["Game Tags"].dropna().unique())
+    periodtag_vals = sorted(dff["Period Tags"].dropna().unique())
+
+    gametag_options = [{"label": x, "value": x} for x in gametag_vals]
+    periodtag_options = [{"label": x, "value": x} for x in periodtag_vals]
+
+    return gametag_options, gametag_vals, periodtag_options, periodtag_vals
+
+
+@app.callback(
+    Output("download-report", "data"),
+    Input("generate_report", "n_clicks"),
+    State("report_title", "value"),
+    State("report_author", "value"),
+    State("report_sections", "value"),
+    State("report_text_actividad", "value"),
+    State("report_text_actividad_comparativa", "value"),
+    State("report_text_actividad_promedios", "value"),
+    State("report_text_acwr", "value"),
+    State("report_text_plyr_vs_plyr", "value"),
+    State("report_text_comparativas", "value"),
+    State("report_text_cronologico", "value"),
+    State("categoria", "value"),
+    State("fecha-actividad", "date")
+)
+def generar_informe(
+    n_clicks,
+    title,
+    author,
+    sections,
+    texto_actividad,
+    texto_actividad_comparativa,
+    texto_actividad_promedios,
+    texto_acwr,
+    texto_plyr_vs_plyr,
+    texto_comparativas,
+    texto_cronologico,
+    categorias,
+    fecha_actividad
+):
+    if not n_clicks:
+        return no_update
+
+    title = title.strip() if title else build_auto_report_title(categorias, fecha_actividad)
+    author = author.strip() if author else "Desconocido"
+    fecha_text = pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y") if fecha_actividad else datetime.now().strftime("%d/%m/%Y")
+
+    dff = df.copy()
+    if categorias:
+        dff = dff[dff["Category"].isin(categorias)]
+
+    fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+
+    section_texts = {
+        "actividad": texto_actividad or "",
+        "actividad_comparativa": texto_actividad_comparativa or "",
+        "actividad_promedios": texto_actividad_promedios or "",
+        "acwr": texto_acwr or "",
+        "plyr_vs_plyr": texto_plyr_vs_plyr or "",
+        "comparativas": texto_comparativas or "",
+        "cronologico": texto_cronologico or ""
+    }
+    selected_sections = sections or ["actividad", "actividad_promedios", "acwr"]
+
+    report_sections = []
+    for section in selected_sections:
+        img_bytes = None
+        if kaleido:
+            try:
+                fig = build_section_report_fig(section, dff, fecha_dt, categorias)
+                if fig and fig.data:
+                    img_bytes = fig.to_image(format="png", width=720, height=600)
+            except Exception:
+                img_bytes = None
+
+        report_sections.append({
+            "title": section_title(section),
+            "text": truncate_to_n_words(section_texts.get(section, ""), 500),
+            "img": img_bytes
+        })
+
+    if not any(item["text"] for item in report_sections):
+        for item in report_sections:
+            item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
+
+    logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
+    pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text)
+    filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.pdf"
+    return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
+
+
 @app.callback(
     Output("radar_chart", "figure"),
     [

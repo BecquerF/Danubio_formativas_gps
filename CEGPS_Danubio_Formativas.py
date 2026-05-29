@@ -1085,7 +1085,7 @@ def actualizar_tab(
                 marker=dict(
                     color=df_m["Valor"],
                     colorscale=[
-                        [0, "rgba(11, 12, 14, 0.5)"],   
+                        [0, "rgba(11, 12, 14, 1)"],   
                         [1, colores_base[i]]         
                     ],
                     line=dict(width=1, color="#ffffff")

@@ -1062,9 +1062,10 @@ def actualizar_tab(
             value_name="Valor"
         )
 
+        # Crear figura con go.Bar
         fig = go.Figure()
 
-        # Colores base para cada métrica
+        # Paleta de colores base
         colores_base = [
             "#edf1f2",
             "#f0c1f7",
@@ -1074,26 +1075,26 @@ def actualizar_tab(
             "#72d2e4"
         ]
 
-        # Agregar cada métrica con degradé gris -> color sólido
+    # Agregar cada métrica como una traza con degradé
         for i, m in enumerate(metricas):
             df_m = promedio[promedio["Métrica"] == m]
-        fig.add_trace(go.Bar(
-            x=df_m["Valor"],
-            y=df_m[referencia],
-            orientation="h",
-            name=m,
-            marker=dict(
-                color=df_m["Valor"],  # usa valores para aplicar escala
-                colorscale=[
-                    [0, f"rgba{tuple(int(colores_base[i][1+j:3+j],16) for j in (0,2,4)) + (0.3,)}"],  # inicio transparente
-                    [1, colores_base[i]]  # final sólido
-                ],
-                line=dict(width=1, color="#ffffff")
-            ),
-            opacity=1
-        ))
+            fig.add_trace(go.Bar(
+                x=df_m["Valor"],
+                y=df_m[referencia],
+                orientation="h",
+                name=m,
+                marker=dict(
+                    color=df_m["Valor"],  # usa valores para aplicar escala
+                    colorscale=[
+                        [0, f"rgba{tuple(int(colores_base[i][1+j:3+j],16) for j in (0,2,4)) + (0.3,)}"],  # inicio transparente
+                        [1, colores_base[i]]  # final sólido
+                    ],
+                    line=dict(width=1, color="#ffffff")
+                ),
+                opacity=1
+            ))
 
-
+        # Estilo general
         fig.update_layout(
             barmode="group",
             template="plotly_dark",
@@ -1113,6 +1114,23 @@ def actualizar_tab(
                 borderwidth=1
             )
         )
+
+        if LOGO_BASE64:
+            fig.add_layout_image(
+                dict(
+                    source="data:image/png;base64," + LOGO_BASE64,
+                    xref="paper",
+                    yref="paper",
+                    x=0.98,
+                    y=0.08,
+                    xanchor="right",
+                    yanchor="bottom",
+                    sizex=0.12,
+                    sizey=0.10,
+                    opacity=0.7,
+                    layer="above"
+                )
+            )
 
         fig.update_xaxes(
             showgrid=True,

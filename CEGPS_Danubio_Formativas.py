@@ -1073,19 +1073,22 @@ def actualizar_tab(
         )
 
         chart = alt.Chart(promedio).mark_bar().encode(
-            y=alt.Y(referencia, sort='-x'),
-            x=alt.X('Valor:Q'),
-            color=gradient,
-            tooltip=['Métrica','Valor']
-        ).properties(
-            width=500,
-            height=300,
-            title="Comparativas con degradé gris → blanco"
-        )
+        y=alt.Y(referencia, sort='-x'),
+        x=alt.X('Valor:Q'),
+        color=gradient,
+        tooltip=['Métrica','Valor']
+    ).properties(
+        width=500,
+        height=300,
+        title="Comparativas con degradé gris → blanco"
+    )
+
+        # Renderizar como HTML
+        chart_html = chart.to_html()
 
         return html.Div([
             html.Iframe(
-                srcDoc=chart.to_html(),   # 👈 renderiza Altair dentro de Dash
+                srcDoc=chart_html,   # 👈 renderiza Altair dentro de Dash
                 style={"border":"none","width":"100%","height":"100%"}
             )
         ], style={

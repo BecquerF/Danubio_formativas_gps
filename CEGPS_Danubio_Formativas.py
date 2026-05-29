@@ -1870,7 +1870,8 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     Input("athlete","value"),
     Input("gametag","value"),
     Input("periodtag","value"),
-    Input("fecha-actividad","date")
+    Input("fecha-actividad","date"),
+    prevent_initial_call=True
 )
 def descargar_grafico(
     n_png,
@@ -1885,14 +1886,15 @@ def descargar_grafico(
     periodtags,
     fecha_actividad
 ):
-    triggered = dash.callback_context.triggered
-    if not triggered:
+    # Detectar qué botón disparó
+    ctx = dash.callback_context
+    if not ctx.triggered:
         return no_update
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
-    trigger_id = triggered[0]["prop_id"].split(".")[0]
-    if trigger_id not in ["download-graph-png", "download-graph-pdf"]:
-        return no_update
+    fmt = "png" if trigger_id == "download-graph-png" else "pdf"
 
+    # Filtrar dataframe
     dff = df.copy()
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
@@ -1909,184 +1911,55 @@ def descargar_grafico(
     referencia = referencia or "Category"
     item_name, metadata, printed_at = build_download_metadata(tab, categorias, metricas, referencia)
 
+    # Construir figura según tab
     if tab == "comparativas":
-        promedio = (
-            dff.groupby(referencia)[metricas].mean().reset_index()
-        )
-        promedio = pd.melt(
-            promedio,
-            id_vars=[referencia],
-            value_vars=metricas,
-            var_name="Métrica",
-            value_name="Valor"
-        )
+        promedio = dff.groupby(referencia)[metricas].mean().reset_index()
+        promedio = pd.melt(promedio, id_vars=[referencia], value_vars=metricas,
+                           var_name="Métrica", value_name="Valor")
         fig = px.bar(
-            promedio,
-            x="Valor",
-            y=referencia,
-            color="Métrica",
-            orientation="h",
-            barmode="group",
-            color_discrete_sequence=["#f5f5f5", "#b7b9c8", "#8c91a8", "#7a84b9", "#c3add9"],
+            promedio, x="Valor", y=referencia, color="Métrica",
+            orientation="h", barmode="group",
+            color_discrete_sequence=["#f5f5f5","#b7b9c8","#8c91a8","#7a84b9","#c3add9"],
             template="plotly_dark"
         )
-        fig.update_traces(
-            marker=dict(line=dict(width=1, color="#c6cad8")),
-            opacity=0.85
-        )
-        fig.update_layout(
-            title={
-                "text": build_chart_title(tab, categorias, metricas, referencia),
-                "font": {
-                    "color": "#f5f5f5",
-                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
-                    "size": 22
-                }
-            },
-            paper_bgcolor="#0b0c0e",
-            plot_bgcolor="#0b0c0e",
-            font={"color": "#f5f5f5"},
-            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#b7b9c8", borderwidth=1)
-        )
-        if LOGO_BASE64:
-            fig.add_layout_image(
-                dict(
-                    source="data:image/png;base64," + LOGO_BASE64,
-                    xref="paper",
-                    yref="paper",
-                    x=0.99,
-                    y=0.01,
-                    xanchor="right",
-                    yanchor="bottom",
-                    sizex=0.12,
-                    sizey=0.10,
-                    opacity=0.7,
-                    layer="above"
-                )
-            )
-        fig.update_layout(
-            annotations=[
-                dict(
-                    text=metadata.replace("\n", " | "),
-                    x=0,
-                    y=-0.12,
-                    xref="paper",
-                    yref="paper",
-                    showarrow=False,
-                    font=dict(color="#f5f5f5", size=10),
-                    xanchor="left",
-                    align="left"
-                )
-            ],
-            margin=dict(b=100)
-        )
-        fig.update_xaxes(
-            showgrid=True,
-            gridcolor="rgba(183,186,204,0.2)",
-            zerolinecolor="rgba(255,255,255,0.06)",
-            linecolor="#8c91a8",
-            tickfont_color="#f5f5f5",
-            title_font_color="#c3c6d5"
-        )
-        fig.update_yaxes(
-            showgrid=True,
-            gridcolor="rgba(183,186,204,0.2)",
-            zerolinecolor="rgba(255,255,255,0.06)",
-            linecolor="#8c91a8",
-            tickfont_color="#f5f5f5",
-            title_font_color="#c3c6d5"
-        )
-        
     elif tab == "cronologico":
-        cronologico = pd.melt(
-            dff,
-            id_vars=["Date", "Category"],
-            value_vars=metricas,
-            var_name="Métrica",
-            value_name="Valor"
-        )
+        cronologico = pd.melt(dff, id_vars=["Date","Category"], value_vars=metricas,
+                              var_name="Métrica", value_name="Valor")
         fig = px.scatter(
-            cronologico,
-            x="Date",
-            y="Valor",
-            color="Category",
-            symbol="Métrica",
-            color_discrete_sequence=["#f5f5f5", "#b7b9c8", "#8c91a8", "#7a84b9", "#c3add9"],
+            cronologico, x="Date", y="Valor", color="Category", symbol="Métrica",
+            color_discrete_sequence=["#f5f5f5","#b7b9c8","#8c91a8","#7a84b9","#c3add9"],
             template="plotly_dark"
         )
-        fig.update_traces(
-            marker=dict(size=8, line=dict(width=1, color="#c6cad8")),
-            selector=dict(mode="markers")
-        )
-        fig.update_layout(
-            title={
-                "text": build_chart_title(tab, categorias, metricas, referencia),
-                "font": {
-                    "color": "#f5f5f5",
-                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
-                    "size": 22
-                }
-            },
-            paper_bgcolor="#0b0c0e",
-            plot_bgcolor="#0b0c0e",
-            font={"color": "#f5f5f5"},
-            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#b7b9c8", borderwidth=1)
-        )
-        if LOGO_BASE64:
-            fig.add_layout_image(
-                dict(
-                    source="data:image/png;base64," + LOGO_BASE64,
-                    xref="paper",
-                    yref="paper",
-                    x=0.99,
-                    y=0.01,
-                    xanchor="right",
-                    yanchor="bottom",
-                    sizex=0.12,
-                    sizey=0.10,
-                    opacity=0.7,
-                    layer="above"
-                )
-            )
-        fig.update_layout(
-            annotations=[
-                dict(
-                    text=metadata.replace("\n", " | "),
-                    x=0,
-                    y=-0.12,
-                    xref="paper",
-                    yref="paper",
-                    showarrow=False,
-                    font=dict(color="#f5f5f5", size=10),
-                    xanchor="left",
-                    align="left"
-                )
-            ],
-            margin=dict(b=100)
-        )
-        fig.update_xaxes(
-            tickformat="%d/%m/%Y",
-            showgrid=True,
-            gridcolor="rgba(183,186,204,0.2)",
-            zerolinecolor="rgba(255,255,255,0.06)",
-            linecolor="#8c91a8",
-            tickfont_color="#f5f5f5",
-            title_font_color="#c3c6d5"
-        )
-        fig.update_yaxes(
-            showgrid=True,
-            gridcolor="rgba(183,186,204,0.2)",
-            zerolinecolor="rgba(255,255,255,0.06)",
-            linecolor="#8c91a8",
-            tickfont_color="#f5f5f5",
-            title_font_color="#c3c6d5"
-        )
-        trigger_id = ctx.triggered_id  # asegúrate de tener esto definido antes
-        fmt = "png" if trigger_id == "download-graph-png" else "pdf"
-        tab_name = tab_titles.get(tab, tab)
-        filename = f"grafico_{tab_name}.{fmt}"
-        image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
-        return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)        
+    elif tab == "plyr_vs_plyr":
+        # ejemplo: radar chart
+        df_filtered = dff[dff["Player Name"].isin(jugadores)]
+        df_grouped = df_filtered.groupby("Player Name")[metricas].mean().reset_index()
+        fig = go.Figure()
+        for _, row in df_grouped.iterrows():
+            fig.add_trace(go.Scatterpolar(
+                r=row[metricas].values,
+                theta=metricas,
+                fill="toself",
+                name=row["Player Name"]
+            ))
+        fig.update_layout(polar=dict(radialaxis=dict(visible=True)))
+
+    # Ajustes comunes
+    fig.update_layout(
+        title=dict(
+            text=build_chart_title(tab, categorias, metricas, referencia),
+            font=dict(color="#f5f5f5", family="'Clash Display Semibold','Helvetica Neue'", size=22)
+        ),
+        paper_bgcolor="#0b0c0e",
+        plot_bgcolor="#0b0c0e",
+        font=dict(color="#f5f5f5")
+    )
+
+    # Exportar imagen
+    tab_name = tab_titles.get(tab, tab)
+    filename = f"grafico_{tab_name}.{fmt}"
+    image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
+    return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)     
     
 
 

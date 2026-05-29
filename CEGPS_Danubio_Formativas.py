@@ -1077,21 +1077,23 @@ def actualizar_tab(
         # Agregar cada métrica con degradé gris -> color sólido
         for i, m in enumerate(metricas):
             df_m = promedio[promedio["Métrica"] == m]
-            fig.add_trace(go.Bar(
-                x=df_m["Valor"],
-                y=df_m[referencia],
-                orientation="h",
-                name=m,
-                marker=dict(
-                    color=df_m["Valor"],
-                    colorscale=[
-                        [0, "rgba(11, 12, 14, 1)"],   
-                        [1, colores_base[i]]         
-                    ],
-                    line=dict(width=1, color="#ffffff")
-                ),
-                opacity=1
-            ))
+        fig.add_trace(go.Bar(
+            x=df_m["Valor"],
+            y=df_m[referencia],
+            orientation="h",
+            name=m,
+            marker=dict(
+                color=df_m["Valor"],  # usa valores para aplicar escala
+                colorscale=[
+                    [0, "rgba(11,12,14,0.3)"],   # inicio gris oscuro difuminado
+                    [1, colores_base[i]]         # final color sólido
+                ],
+                cmin=0,
+                cmax=df_m["Valor"].max(),
+                line=dict(width=1, color="#ffffff")
+            ),
+            opacity=1
+        ))
 
 
         fig.update_layout(

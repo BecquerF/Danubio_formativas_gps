@@ -8,7 +8,10 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import dash
 import dash_auth
-import kaleido
+try:
+    import kaleido
+except ImportError:
+    kaleido = None
 from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx
 from openpyxl.drawing.image import Image as ExcelImage
 from fileinput import filename
@@ -1317,17 +1320,12 @@ def actualizar_tab(
         ]
 
     metricas = metricas or ["Distance"]
+    metricas = [m for m in metricas if m in dff.columns]
     referencia = referencia or "Category"
     title_text = build_chart_title(tab, categorias, metricas, referencia)
 
     # COMPARATIVAS
     if tab == "comparativas":
-        promedio = (
-            dff.groupby(referencia)[metricas]
-            .mean()
-            .reset_index()
-        )
-
         fig = build_comparativas(dff, categorias, metricas, referencia)
         return html.Div([
             dcc.Graph(
@@ -2219,6 +2217,10 @@ def descargar_grafico(n_png, n_pdf,
         return no_update
 
     # Exportar imagen
+    if kaleido is None:
+        print("Error: kaleido no está instalado, no se puede exportar PNG/PDF.")
+        return no_update
+
     tab_name = tab_titles.get(tab, tab)
     filename = f"grafico_{tab_name}.{fmt}"
     try:

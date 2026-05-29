@@ -1,14 +1,16 @@
 import io
 import base64
 import textwrap
-import altair as alt
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 import dash
-import dash_auth
+try:
+    import dash_auth
+except ImportError:
+    dash_auth = None
 try:
     import kaleido
 except ImportError:
@@ -67,10 +69,13 @@ VALID_USERNAME_PASSWORD_PAIRS = {
     "Danubioformativas": "formativas2026"
 }
 
-auth = dash_auth.BasicAuth(
-    app,
-    VALID_USERNAME_PASSWORD_PAIRS
-)
+if dash_auth is not None:
+    auth = dash_auth.BasicAuth(
+        app,
+        VALID_USERNAME_PASSWORD_PAIRS
+    )
+else:
+    auth = None
 app.title = "DATA LOAD - Sports Performance Platform"
 
 metricas = [

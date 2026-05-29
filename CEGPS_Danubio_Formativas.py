@@ -1,5 +1,6 @@
 import io
 import base64
+import altair as alt
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
@@ -1049,10 +1050,10 @@ def actualizar_tab(
     # COMPARATIVAS
     if tab == "comparativas":
         promedio = (
-        dff.groupby(referencia)[metricas]
-        .mean()
-        .reset_index()
-    )
+            dff.groupby(referencia)[metricas]
+            .mean()
+            .reset_index()
+        )
 
         promedio = pd.melt(
             promedio,
@@ -1062,113 +1063,43 @@ def actualizar_tab(
             value_name="Valor"
         )
 
-        # Crear figura con go.Bar
-        fig = go.Figure()
+        # Definir gradiente gris oscuro -> blanco
+        gradient = alt.Gradient(
+            gradient='linear',
+            stops=[
+                alt.GradientStop(color='#011c24', offset=0),   # inicio gris oscuro
+                alt.GradientStop(color='#ffffff', offset=1)    # final blanco sólido
+            ]
+        )
 
-        # Paleta de colores base
-        colores_base = [
-            "#edf1f2",
-            "#f0c1f7",
-            "#a3e3d0",
-            "#89bcef",
-            "#48f788",
-            "#72d2e4"
-        ]
+        chart = alt.Chart(promedio).mark_bar().encode(
+            y=alt.Y(referencia, sort='-x'),
+            x=alt.X('Valor:Q'),
+            color=gradient,
+            tooltip=['Métrica','Valor']
+        ).properties(
+            width=500,
+            height=300,
+            title="Comparativas con degradé gris → blanco"
+        )
 
-    # Agregar cada métrica como una traza con degradé
-        for i, m in enumerate(metricas):
-            df_m = promedio[promedio["Métrica"] == m]
-            fig.add_trace(go.Bar(
-                x=df_m["Valor"],
-                y=df_m[referencia],
-                orientation="h",
-                name=m,
-                marker=dict(
-                    color=df_m["Valor"],  # usa valores para aplicar escala
-                    colorscale=[
-                        [0, f"rgba{tuple(int(colores_base[i][1+j:3+j],16) for j in (0,2,4)) + (0.3,)}"],  # inicio transparente
-                        [1, colores_base[i]]  # final sólido
-                    ],
-                    line=dict(width=1, color="#ffffff")
-                ),
-                opacity=1
-            ))
-
-        # Estilo general
-        fig.update_layout(
-            barmode="group",
-            template="plotly_dark",
-            paper_bgcolor="#0b0c0e",
-            plot_bgcolor="#0b0c0e",
-            title={
-                "text": title_text,
-                "font": {
-                    "color": "#f5f5f5",
-                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
-                    "size": 22
-                }
-            },
-            legend=dict(
-                bgcolor="rgba(11,12,14,0.75)",
-                bordercolor="#89bcef",
-                borderwidth=1
+        return html.Div([
+            html.Iframe(
+                srcDoc=chart.to_html(),   # 👈 renderiza Altair dentro de Dash
+                style={"border":"none","width":"100%","height":"100%"}
             )
-        )
-
-        if LOGO_BASE64:
-            fig.add_layout_image(
-                dict(
-                    source="data:image/png;base64," + LOGO_BASE64,
-                    xref="paper",
-                    yref="paper",
-                    x=0.98,
-                    y=0.08,
-                    xanchor="right",
-                    yanchor="bottom",
-                    sizex=0.12,
-                    sizey=0.10,
-                    opacity=0.7,
-                    layer="above"
-                )
-            )
-
-        fig.update_xaxes(
-            showgrid=True,
-            gridcolor="rgba(137,188,239,0.18)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#89bcef",
-            tickfont_color="#f5f5f5",
-            title_font_color="#a3e3d0"
-        )
-
-        fig.update_yaxes(
-            showgrid=True,
-            gridcolor="rgba(137,188,239,0.18)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            linecolor="#89bcef",
-            tickfont_color="#f5f5f5",
-            title_font_color="#a3e3d0"
-        )
-
-        return html.Div(
-            dcc.Graph(
-                figure=fig,
-                style={"width":"100%","height":"100%"}
+        ], style={
+            "border":"1px solid rgba(137,188,239,0.18)",
+            "borderRadius":"18px",
+            "overflow":"hidden",
+            "background":"#0b0c0e",
+            "boxShadow":(
+                "0 0 20px rgba(72,247,136,0.10), "
+                "0 0 50px rgba(137,188,239,0.08), "
+                "0 18px 40px rgba(0,0,0,0.35)"
             ),
-            style={
-                "border":"1px solid rgba(137,188,239,0.18)",
-                "borderRadius":"18px",
-                "overflow":"hidden",
-                "background":"#0b0c0e",
-                "boxShadow":(
-                    "0 0 20px rgba(72,247,136,0.10), "
-                    "0 0 50px rgba(137,188,239,0.08), "
-                    "0 18px 40px rgba(0,0,0,0.35)"
-                ),
-                "padding":"10px"
-            }
-        )
-
+            "padding":"10px"
+        })
 
         # ACTIVIDAD POR JUGADOR
     elif tab == "actividad":

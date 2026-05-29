@@ -1085,13 +1085,14 @@ def actualizar_tab(
                 marker=dict(
                     color=df_m["Valor"],
                     colorscale=[
-                        [0, "rgba(20,20,20,0.2)"],   # inicio gris oscuro difuminado
-                        [1, colores_base[i]]         # final color sólido
+                        [0, "rgba(11, 12, 14, 0.5)"],   
+                        [1, colores_base[i]]         
                     ],
                     line=dict(width=1, color="#ffffff")
                 ),
                 opacity=1
             ))
+
 
         fig.update_layout(
             barmode="group",

@@ -5,8 +5,10 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 import dash
 import dash_auth
+import kaleido
 from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx
 from openpyxl.drawing.image import Image as ExcelImage
 from fileinput import filename
@@ -89,6 +91,8 @@ metricas_radar = [
     "Sprint Efforts"
 ]
 
+metricas_promedios = metricas_radar + ["Max Velocity", "Duration"]
+
 
 # ======================================================
 # ACTIVIDAD COMPARATIVA INDIVIDUAL
@@ -145,6 +149,7 @@ tab_titles = {
     "cronologico": "Cronológico",
     "actividad": "Actividad_por_Jugador",
     "actividad_comparativa": "Actividad_Comparativa_Individual",
+    "actividad_promedios": "Actividad_Promedios",
     "acwr": "ACWR_Zona_Segura",
     "plyr_vs_plyr": "PLYR_vs_PLYR"
 }
@@ -198,6 +203,12 @@ def build_chart_title(tab, categorias, metricas, referencia):
     
     if tab == "actividad_comparativa":
         title = "Actividad comparativa individual"
+        if categorias:
+            title += f" - Categoría(s): {categoria_text}"
+        return title
+
+    if tab == "actividad_promedios":
+        title = "Actividad / Promedios"
         if categorias:
             title += f" - Categoría(s): {categoria_text}"
         return title
@@ -624,6 +635,38 @@ app.layout = html.Div([
         dcc.Tab(
             label="ACTIVIDAD COMPARATIVA INDIVIDUAL",
             value="actividad_comparativa",
+            className="tab-item",
+            selected_className="tab-item-selected",
+            style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#edf1f2",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"2px 6px",       
+                "marginBottom":"1px"       
+            },
+            selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#a3e3d0",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"2px 6px",
+                "backgroundColor":"#011c24",
+                "marginBottom":"1px"
+            }
+        ),
+
+        dcc.Tab(
+            label="ACTIVIDAD/PROMEDIOS",
+            value="actividad_promedios",
             className="tab-item",
             selected_className="tab-item-selected",
             style={
@@ -1215,7 +1258,7 @@ style={
     Input("tabs","value")
 )
 def toggle_actividad_fecha(tab):
-    if tab in ["actividad", "actividad_comparativa"]:
+    if tab in ["actividad", "actividad_comparativa", "actividad_promedios"]:
         return {"display": "block", "marginTop": "10px"}
     return {"display": "none"}
 
@@ -1285,41 +1328,11 @@ def actualizar_tab(
             .reset_index()
         )
 
-        promedio = pd.melt(
-            promedio,
-            id_vars=[referencia],
-            value_vars=metricas,
-            var_name="Métrica",
-            value_name="Valor"
-        )
-
-        # Definir gradiente gris oscuro -> blanco
-        gradient = alt.Gradient(
-            gradient='linear',
-            stops=[
-                alt.GradientStop(color='#011c24', offset=0),   # inicio gris oscuro
-                alt.GradientStop(color='#ffffff', offset=1)    # final blanco sólido
-            ]
-        )
-
-        chart = alt.Chart(promedio).mark_bar().encode(
-        y=alt.Y(referencia, sort='-x'),
-        x=alt.X('Valor:Q'),
-        color=gradient,
-        tooltip=['Métrica','Valor']
-    ).properties(
-        width=500,
-        height=300,
-        title="Comparativas con degradé gris → blanco"
-    )
-
-        # Renderizar como HTML
-        chart_html = chart.to_html()
-
+        fig = build_comparativas(dff, categorias, metricas, referencia)
         return html.Div([
-            html.Iframe(
-                srcDoc=chart_html,   # 👈 renderiza Altair dentro de Dash
-                style={"border":"none","width":"100%","height":"100%"}
+            dcc.Graph(
+                figure=fig,
+                style={"width":"100%", "height":"100%"}
             )
         ], style={
             "border":"1px solid rgba(137,188,239,0.18)",
@@ -1481,6 +1494,62 @@ def actualizar_tab(
                 "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
                 "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
 
+    elif tab == "actividad_promedios":
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+
+        metricas_promedios_validas = [m for m in metricas_promedios if m in dff_fecha.columns]
+        resumen = dff_fecha[metricas_promedios_validas].mean().round(2).to_dict() if not dff_fecha.empty else {}
+
+        categoria_text = summarize_items(categorias, max_items=10, default="Todas")
+        gametag_text = summarize_items(gametags, max_items=10, default="Todos")
+        periodtag_text = summarize_items(periodtags, max_items=10, default="Todos")
+        fecha_text = fecha_dt.strftime("%d/%m/%Y")
+
+        cards = []
+        for m in metricas_promedios_validas:
+            valor = resumen.get(m, 0)
+            cards.append(
+                html.Div([
+                    html.Div(m, style={"color": "#a3e3d0", "fontSize": "13px", "marginBottom": "8px"}),
+                    html.Div(f"{valor:.2f}", style={"color": "#edf1f2", "fontSize": "26px", "fontWeight": "700"})
+                ], style={
+                    "padding": "20px",
+                    "background": "#0b0c0e",
+                    "border": "1px solid rgba(137,188,239,0.18)",
+                    "borderRadius": "20px",
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+                    "minWidth": "190px",
+                    "flex": "1"
+                })
+            )
+
+        return html.Div([
+            html.Div([
+                html.H3("Actividad / Promedios", style={"color":"white","textAlign":"center","marginBottom":"20px",
+                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
+                html.Div([
+                    html.Div([html.Div("Fecha de actividad", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
+                              html.Div(fecha_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
+                             style={"minWidth": "180px", "padding": "14px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
+                    html.Div([html.Div("Game Tags", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
+                              html.Div(gametag_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
+                             style={"minWidth": "180px", "padding": "14px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
+                    html.Div([html.Div("Period Tags", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
+                              html.Div(periodtag_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
+                             style={"minWidth": "180px", "padding": "14px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
+                    html.Div([html.Div("Category", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
+                              html.Div(categoria_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
+                             style={"minWidth": "180px", "padding": "14px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"})
+                ], style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(180px, 1fr))", "gap": "16px", "marginBottom": "24px"})
+            ], style={"marginBottom": "10px"}),
+            html.Div(
+                cards if cards else [html.Div("No hay datos para la fecha seleccionada.", style={"color": "#edf1f2", "textAlign": "center", "padding": "24px"})],
+                style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(200px, 1fr))", "gap": "20px"}
+            )
+        ], style={"padding": "28px", "background": "linear-gradient(145deg, #0b0c0e, #1a1c1f)",
+                    "border": "1px solid rgba(137,188,239,0.25)", "borderRadius": "28px",
+                    "boxShadow": "0 12px 30px rgba(0,0,0,0.35)", "margin": "20px auto", "maxWidth": "1100px"})
 
 
     # ACWR
@@ -2152,7 +2221,11 @@ def descargar_grafico(n_png, n_pdf,
     # Exportar imagen
     tab_name = tab_titles.get(tab, tab)
     filename = f"grafico_{tab_name}.{fmt}"
-    image_bytes = fig.to_image(format=fmt, width=1200, height=800, scale=2)
+    try:
+        image_bytes = pio.to_image(fig, format=fmt, width=1200, height=800, scale=2)
+    except Exception as e:
+        print(f"Error exportando imagen: {e}")
+        return no_update
     return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
 
 

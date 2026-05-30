@@ -23,6 +23,25 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+BASE_DIR = Path(__file__).resolve().parent
+FONT_DIR = BASE_DIR / "assets" / "fonts"
+
+
+def register_pdf_fonts():
+    try:
+        pdfmetrics.registerFont(TTFont("ClashDisplay-Semibold", str(FONT_DIR / "ClashDisplay-Semibold.otf")))
+    except Exception:
+        pass
+    try:
+        pdfmetrics.registerFont(TTFont("Manrope-Light", str(FONT_DIR / "Manrope-Light.ttf")))
+    except Exception:
+        pass
+
+
+register_pdf_fonts()
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
@@ -692,7 +711,31 @@ def build_section_report_fig(section, dff, fecha_dt, categorias):
 
 
 def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
+    if fig is None or not getattr(fig, "data", None):
+        return None
+
+    global kaleido
     if kaleido is None:
+        try:
+            import kaleido as _kaleido
+            kaleido = _kaleido
+        except Exception:
+            kaleido = None
+
+    if kaleido is None:
+        return None
+
+    def try_export(exporter):
+        try:
+            result = exporter()
+            if isinstance(result, bytes) and result:
+                return result
+            if hasattr(result, "getvalue"):
+                data = result.getvalue()
+                if data:
+                    return data
+        except Exception:
+            pass
         return None
 
     candidates = [
@@ -701,31 +744,33 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
         {"width": max(600, width // 2), "height": max(400, height // 2), "scale": 1}
     ]
 
-    for opts in candidates:
+    def write_image_to_buffer(opts):
+        buf = io.BytesIO()
         try:
-            return pio.to_image(fig, format="png", engine="kaleido", **opts)
+            fig.write_image(buf, format="png", engine="kaleido", **opts)
+            buf.seek(0)
+            return buf.getvalue()
         except Exception:
-            pass
-        try:
-            return fig.to_image(format="png", engine="kaleido", **opts)
-        except Exception:
-            pass
+            return None
 
-    try:
-        return pio.to_image(fig, format="png", width=width, height=height, scale=scale)
-    except Exception:
-        pass
-    try:
-        return fig.to_image(format="png", width=width, height=height)
-    except Exception:
-        pass
+    for opts in candidates:
+        image_bytes = try_export(lambda: pio.to_image(fig, format="png", engine="kaleido", **opts))
+        if image_bytes:
+            return image_bytes
+        image_bytes = try_export(lambda: fig.to_image(format="png", engine="kaleido", **opts))
+        if image_bytes:
+            return image_bytes
+        image_bytes = write_image_to_buffer(opts)
+        if image_bytes:
+            return image_bytes
 
     return None
 
 
 def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header_func=None):
+    font_name = "Manrope-Light" if "Manrope-Light" in pdfmetrics.getRegisteredFontNames() else "Helvetica"
     text_obj = c.beginText(x, y)
-    text_obj.setFont("Helvetica", 10)
+    text_obj.setFont(font_name, 10)
     for paragraph in text.split("\n"):
         lines = textwrap.wrap(paragraph, width=100)
         if not lines:
@@ -739,7 +784,7 @@ def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header
                 else:
                     y = page_height - margin
                 text_obj = c.beginText(x, y)
-                text_obj.setFont("Helvetica", 10)
+                text_obj.setFont(font_name, 10)
             text_obj.textLine(line)
             y -= leading
     c.drawText(text_obj)
@@ -748,18 +793,19 @@ def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header
 
 def draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin):
     y = height - margin
-    c.setFont("Helvetica-Bold", 20)
+    title_font = "ClashDisplay-Semibold" if "ClashDisplay-Semibold" in pdfmetrics.getRegisteredFontNames() else "Helvetica-Bold"
+    small_font = "Manrope-Light" if "Manrope-Light" in pdfmetrics.getRegisteredFontNames() else "Helvetica"
+
+    c.setFont(title_font, 22)
     c.drawString(margin, y, title)
-    c.setFont("Helvetica", 10)
-    c.drawRightString(width - margin, y, f"Creado por {author}")
     if logo_bytes:
         try:
             logo = ImageReader(io.BytesIO(logo_bytes))
             c.drawImage(logo, width - margin - 100, height - margin - 60, width=100, height=60, preserveAspectRatio=True, mask='auto')
         except Exception:
             pass
-    y -= 18
-    c.setFont("Helvetica-Oblique", 9)
+    y -= 22
+    c.setFont(small_font, 9)
     c.drawString(margin, y, fecha_text)
     if filters_text:
         y = draw_wrapped_text(c, filters_text, margin, y - 12, width - 2 * margin, 11, height, margin)
@@ -770,20 +816,35 @@ def draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, wid
     return y - 12
 
 
+def draw_page_footer(c, author, width, margin):
+    footer_font = "ClashDisplay-Semibold" if "ClashDisplay-Semibold" in pdfmetrics.getRegisteredFontNames() else "Helvetica-Bold"
+    c.setFont(footer_font, 9)
+    footer_text = f"Creado por {author}"
+    footer_y = margin / 2
+    c.drawRightString(width - margin, footer_y, footer_text)
+
+
+def draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin):
+    y = draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+    draw_page_footer(c, author, width, margin)
+    return y
+
+
 def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_text=None):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
     margin = inch * 0.5
 
-    y = draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+    y = draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
 
     for section in sections:
         if y < margin + 220:
             c.showPage()
-            y = draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+            y = draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
 
-        c.setFont("Helvetica-Bold", 16)
+        section_font = "ClashDisplay-Semibold" if "ClashDisplay-Semibold" in pdfmetrics.getRegisteredFontNames() else "Helvetica-Bold"
+        c.setFont(section_font, 16)
         c.drawString(margin, y, section["title"])
         y -= 20
 
@@ -815,7 +876,7 @@ def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_te
             13,
             height,
             margin,
-            header_func=lambda: draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+            header_func=lambda: draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
         )
         y -= 18
 

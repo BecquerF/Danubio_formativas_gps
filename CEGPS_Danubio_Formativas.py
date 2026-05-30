@@ -25,6 +25,8 @@ from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib import colors
 
 BASE_DIR = Path(__file__).resolve().parent
 FONT_DIR = BASE_DIR / "assets" / "fonts"
@@ -713,7 +715,106 @@ def build_section_report_fig(section, dff, fecha_dt, categorias):
     if section == "cronologico":
         return build_cronologico(dff, categorias, ["Distance"], "Category")
     return go.Figure()
-    
+
+
+def build_plotly_table(header, rows, title):
+    if not rows:
+        return None
+
+    columns = [[row.get(col, "") for row in rows] for col in header]
+    fig = go.Figure(data=[
+        go.Table(
+            header=dict(
+                values=header,
+                fill_color="#1f2c56",
+                font=dict(color="white", size=11),
+                align="center"
+            ),
+            cells=dict(
+                values=columns,
+                fill_color="#0b0c0e",
+                font=dict(color="white", size=10),
+                align="center"
+            )
+        )
+    ])
+    fig.update_layout(
+        title={"text": title, "font": {"color": "#f5f5f5", "size": 16}, "x": 0.01},
+        width=1200,
+        height=max(340, 40 + 20 * len(rows)),
+        margin=dict(l=10, r=10, t=40, b=10),
+        paper_bgcolor="#0b0c0e"
+    )
+    return fig
+
+
+def build_section_report_table_fig(section, dff, fecha_dt, categorias):
+    if section == "actividad":
+        if "Date" not in dff.columns:
+            return None
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        metrics = [m for m in ["Distance", "Player Load", "Sprint Distance", "High Speed Distance", "Sprint Efforts"] if m in dff_fecha.columns]
+        if dff_fecha.empty or not metrics:
+            return None
+        resumen = dff_fecha.groupby("Player Name")[metrics].sum().reset_index()
+        resumen = resumen.sort_values(metrics[0], ascending=False).head(10).round(2)
+        header = ["Player Name"] + metrics
+        rows = resumen.to_dict(orient="records")
+        return build_plotly_table(header, rows, f"Tabla de Actividad {fecha_dt.strftime('%d/%m/%Y')}")
+
+    if section == "actividad_comparativa":
+        if "Date" not in dff.columns:
+            return None
+        metrics = [m for m in ["Distance", "Player Load", "Sprint Distance"] if m in dff.columns]
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        if dff_fecha.empty or not metrics:
+            return None
+        resumen = dff_fecha.groupby("Player Name")[metrics].sum().reset_index()
+        promedio = dff[dff["Date"].dt.normalize() <= fecha_dt].groupby("Player Name")[metrics].mean().reset_index()
+        resumen = resumen.rename(columns={m: f"{m} Actual" for m in metrics})
+        promedio = promedio.rename(columns={m: f"{m} Prom" for m in metrics})
+        tabla = resumen.merge(promedio, on="Player Name", how="left").fillna(0).round(2)
+        header = ["Player Name"] + [f"{m} Actual" for m in metrics] + [f"{m} Prom" for m in metrics]
+        rows = tabla.sort_values(f"{metrics[0]} Actual", ascending=False).head(10).to_dict(orient="records")
+        return build_plotly_table(header, rows, f"Tabla de Actividad Comparativa Individual {fecha_dt.strftime('%d/%m/%Y')}")
+
+    if section == "actividad_promedios":
+        if "Date" not in dff.columns:
+            return None
+        metrics = [m for m in metricas_promedios if m in dff.columns]
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        if dff_fecha.empty or not metrics:
+            return None
+        promedio = dff_fecha[metrics].mean().reset_index()
+        promedio.columns = ["Métrica", "Valor"]
+        promedio["Valor"] = promedio["Valor"].round(2)
+        rows = promedio.to_dict(orient="records")
+        return build_plotly_table(["Métrica", "Valor"], rows, f"Tabla de Actividad / Promedios {fecha_dt.strftime('%d/%m/%Y')}")
+
+    if section == "acwr":
+        metrics = [m for m in ["Distance", "Player Load", "Sprint Distance", "High Speed Distance", "Sprint Efforts", "High Speed Efforts", "Impacts"] if m in dff.columns]
+        if dff.empty or not metrics:
+            return None
+        ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
+        ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
+        df21 = dff[dff["Date"] >= ultimos21]
+        df7 = dff[dff["Date"] >= ultimos7]
+        cronica = df21.groupby("Player Name")[metrics].mean().reset_index()
+        aguda = df7.groupby("Player Name")[metrics].mean().reset_index()
+        tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7")).fillna(0)
+        rows = []
+        for _, row in tabla.iterrows():
+            item = {"Player Name": row["Player Name"]}
+            for m in metrics:
+                item[f"{m} ACWR"] = round((row[f"{m}_7"] / row[f"{m}_21"]) if row[f"{m}_21"] else 0, 2)
+            rows.append(item)
+        if not rows:
+            return None
+        header = ["Player Name"] + [f"{m} ACWR" for m in metrics]
+        df_ratio = pd.DataFrame(rows).sort_values(f"{metrics[0]} ACWR", ascending=False).head(10)
+        return build_plotly_table(header, df_ratio.to_dict(orient="records"), "Tabla ACWR (7 días vs 21 días)")
+
+    return None
 
 
 def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
@@ -868,6 +969,23 @@ def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_te
                 y -= img_height + 8
                 c.setFont("Helvetica-Oblique", 9)
                 c.drawString(margin, y, caption)
+                y -= 18
+            except Exception:
+                y -= 8
+
+        if section.get("table_img") is not None:
+            try:
+                image = ImageReader(io.BytesIO(section["table_img"]))
+                img_width = width - 2 * margin
+                available_height = y - margin - 60
+                img_height = min(360, max(260, available_height))
+                if y - img_height < margin:
+                    c.showPage()
+                    y = draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+                c.drawImage(image, margin, y - img_height, width=img_width, height=img_height, preserveAspectRatio=True, mask='auto')
+                y -= img_height + 8
+                c.setFont("Helvetica-Oblique", 9)
+                c.drawString(margin, y, section.get("table_caption", ""))
                 y -= 18
             except Exception:
                 y -= 8
@@ -2767,21 +2885,34 @@ def generar_informe(
     report_sections = []
     for section in selected_sections:
         fig = None
+        table_fig = None
         try:
             fig = build_section_report_fig(section, dff, fecha_dt, categorias)
         except Exception:
             fig = None
+
+        try:
+            table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
+        except Exception:
+            table_fig = None
 
         img_bytes = None
         if fig is not None and fig.data:
             img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
             print("DEBUG sección:", section, type(img_bytes), len(img_bytes) if img_bytes else 0)
 
+        table_bytes = None
+        if table_fig is not None and getattr(table_fig, "data", None):
+            table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
+            print("DEBUG tabla sección:", section, type(table_bytes), len(table_bytes) if table_bytes else 0)
+
         report_sections.append({
             "title": section_title(section),
             "text": truncate_to_n_words(section_texts.get(section, ""), 500),
             "img": img_bytes,
-            "caption": f"Figura: {section_title(section)} con los filtros seleccionados."
+            "table_img": table_bytes,
+            "caption": f"Figura: {section_title(section)} con los filtros seleccionados.",
+            "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados."
         })
 
     if not any(item["text"] for item in report_sections):

@@ -1081,7 +1081,7 @@ app.layout = html.Div([
                 style={
                     "flex":"1",
                     "height":"100px",
-                    "width": "90%",
+                    "width": "95%",
                     "padding": "18px",
                     "display": "flex",
                     "alignItems": "center",
@@ -1400,7 +1400,7 @@ app.layout = html.Div([
 
             style={
                 "padding":"2px",
-                "width":"160px",
+                "width":"140px",
                 "background":"linear-gradient(180deg,#000c0f,#011c24)",
                 "borderRadius":"12px",
                 "border":"1px solid rgba(137,188,239,.18)"
@@ -1411,11 +1411,11 @@ app.layout = html.Div([
             "display":"flex",
             "flexDirection":"column",
             "width":"160px",
-            "minWidth":"160px",
+            "minWidth":"140px",
             "minHeight":"60vh",
             "gap":"2px 4px",
             "position":"sticky",
-            "top":"6px",
+            "top":"190px",
             "alignSelf":"flex-start",
             "alignItems":"center"
         }),

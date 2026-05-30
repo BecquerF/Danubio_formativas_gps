@@ -691,6 +691,18 @@ def build_section_report_fig(section, dff, fecha_dt, categorias):
     return go.Figure()
 
 
+def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
+    if kaleido is None:
+        return None
+    try:
+        return pio.to_image(fig, format="png", width=width, height=height, scale=scale)
+    except Exception:
+        try:
+            return fig.to_image(format="png", width=width, height=height)
+        except Exception:
+            return None
+
+
 def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header_func=None):
     text_obj = c.beginText(x, y)
     text_obj.setFont("Helvetica", 10)
@@ -2667,13 +2679,14 @@ def generar_informe(
     report_sections = []
     for section in selected_sections:
         img_bytes = None
-        if kaleido:
-            try:
-                fig = build_section_report_fig(section, dff, fecha_dt, categorias)
-                if fig and fig.data:
-                    img_bytes = fig.to_image(format="png", width=1200, height=900)
-            except Exception:
-                img_bytes = None
+        fig = None
+        try:
+            fig = build_section_report_fig(section, dff, fecha_dt, categorias)
+        except Exception:
+            fig = None
+
+        if fig is not None and fig.data:
+            img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
 
         report_sections.append({
             "title": section_title(section),

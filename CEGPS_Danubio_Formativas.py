@@ -20,7 +20,7 @@ from openpyxl.drawing.image import Image as ExcelImage
 from fileinput import filename
 from datetime import datetime
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 
@@ -691,7 +691,7 @@ def build_section_report_fig(section, dff, fecha_dt, categorias):
     return go.Figure()
 
 
-def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin):
+def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header_func=None):
     text_obj = c.beginText(x, y)
     text_obj.setFont("Helvetica", 10)
     for paragraph in text.split("\n"):
@@ -702,62 +702,90 @@ def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin):
             if y < margin + 60:
                 c.drawText(text_obj)
                 c.showPage()
-                text_obj = c.beginText(x, page_height - margin)
+                if header_func:
+                    y = header_func()
+                else:
+                    y = page_height - margin
+                text_obj = c.beginText(x, y)
                 text_obj.setFont("Helvetica", 10)
-                y = page_height - margin
             text_obj.textLine(line)
             y -= leading
     c.drawText(text_obj)
     return y
 
 
-def build_report_pdf(title, author, logo_bytes, sections, fecha_text):
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
-    margin = inch * 0.5
+def draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin):
     y = height - margin
-
-    c.setFont("Helvetica-Bold", 18)
+    c.setFont("Helvetica-Bold", 20)
     c.drawString(margin, y, title)
     c.setFont("Helvetica", 10)
     c.drawRightString(width - margin, y, f"Creado por {author}")
-    y -= 18
-    c.drawString(margin, y, f"Fecha: {fecha_text}")
-    y -= 20
-
     if logo_bytes:
         try:
             logo = ImageReader(io.BytesIO(logo_bytes))
             c.drawImage(logo, width - margin - 100, height - margin - 60, width=100, height=60, preserveAspectRatio=True, mask='auto')
         except Exception:
             pass
-    y -= 10
+    y -= 18
+    c.setFont("Helvetica-Oblique", 9)
+    c.drawString(margin, y, fecha_text)
+    if filters_text:
+        y = draw_wrapped_text(c, filters_text, margin, y - 12, width - 2 * margin, 11, height, margin)
+    y -= 14
+    c.setStrokeColorRGB(0.6, 0.7, 0.8)
+    c.setLineWidth(0.5)
+    c.line(margin, y, width - margin, y)
+    return y - 12
+
+
+def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_text=None):
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    margin = inch * 0.5
+
+    y = draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
 
     for section in sections:
-        if y < 220:
+        if y < margin + 220:
             c.showPage()
-            y = height - margin
-        c.setFont("Helvetica-Bold", 14)
+            y = draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+
+        c.setFont("Helvetica-Bold", 16)
         c.drawString(margin, y, section["title"])
         y -= 20
 
+        caption = section.get("caption") or f"Figura: {section['title']} con los filtros seleccionados."
         if section.get("img") is not None:
             try:
                 image = ImageReader(io.BytesIO(section["img"]))
                 img_width = width - 2 * margin
-                img_height = 360
+                available_height = y - margin - 60
+                img_height = min(420, max(260, available_height))
                 if y - img_height < margin:
                     c.showPage()
-                    y = height - margin
+                    y = draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
                 c.drawImage(image, margin, y - img_height, width=img_width, height=img_height, preserveAspectRatio=True, mask='auto')
-                y -= img_height + 12
+                y -= img_height + 8
+                c.setFont("Helvetica-Oblique", 9)
+                c.drawString(margin, y, caption)
+                y -= 18
             except Exception:
-                pass
+                y -= 8
 
         content = truncate_to_n_words(section.get("text", ""), 500)
-        y = draw_wrapped_text(c, content, margin, y, width - 2 * margin, 14, height, margin)
-        y -= 16
+        y = draw_wrapped_text(
+            c,
+            content,
+            margin,
+            y,
+            width - 2 * margin,
+            13,
+            height,
+            margin,
+            header_func=lambda: draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+        )
+        y -= 18
 
     c.save()
     buffer.seek(0)
@@ -2537,6 +2565,12 @@ def generar_informe(
     }
     selected_sections = sections or ["actividad", "actividad_promedios", "acwr"]
 
+    filtros = []
+    if categorias:
+        filtros.append(f"Categorías: {', '.join(categorias)}")
+    filtros.append(f"Fecha: {fecha_text}")
+    filters_text = " | ".join(filtros)
+
     report_sections = []
     for section in selected_sections:
         img_bytes = None
@@ -2544,14 +2578,15 @@ def generar_informe(
             try:
                 fig = build_section_report_fig(section, dff, fecha_dt, categorias)
                 if fig and fig.data:
-                    img_bytes = fig.to_image(format="png", width=720, height=600)
+                    img_bytes = fig.to_image(format="png", width=1200, height=900)
             except Exception:
                 img_bytes = None
 
         report_sections.append({
             "title": section_title(section),
             "text": truncate_to_n_words(section_texts.get(section, ""), 500),
-            "img": img_bytes
+            "img": img_bytes,
+            "caption": f"Figura: {section_title(section)} con los filtros seleccionados."
         })
 
     if not any(item["text"] for item in report_sections):
@@ -2559,7 +2594,7 @@ def generar_informe(
             item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
 
     logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
-    pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text)
+    pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
     filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.pdf"
     return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
 

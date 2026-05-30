@@ -697,6 +697,7 @@ def build_plyr_vs_plyr_report_fig(dff):
 
 
 def build_section_report_fig(section, dff, fecha_dt, categorias):
+    
     if section == "actividad":
         return build_actividad_report_fig(dff, fecha_dt)
     if section == "actividad_comparativa":
@@ -712,6 +713,7 @@ def build_section_report_fig(section, dff, fecha_dt, categorias):
     if section == "cronologico":
         return build_cronologico(dff, categorias, ["Distance"], "Category")
     return go.Figure()
+    
 
 
 def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
@@ -2712,7 +2714,8 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     State("report_text_comparativas", "value"),
     State("report_text_cronologico", "value"),
     State("categoria", "value"),
-    State("report_fecha_actividad", "date")
+    State("report_fecha_actividad", "date"),
+    prevent_initial_call=True
 )
 def generar_informe(
     n_clicks,
@@ -2763,15 +2766,16 @@ def generar_informe(
 
     report_sections = []
     for section in selected_sections:
-        img_bytes = None
         fig = None
         try:
             fig = build_section_report_fig(section, dff, fecha_dt, categorias)
         except Exception:
             fig = None
 
+        img_bytes = None
         if fig is not None and fig.data:
             img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
+            print("DEBUG sección:", section, type(img_bytes), len(img_bytes) if img_bytes else 0)
 
         report_sections.append({
             "title": section_title(section),

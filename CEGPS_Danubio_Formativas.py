@@ -52,6 +52,9 @@ df["Date"] = pd.to_datetime(
     errors="coerce"
 )
 
+if "Duration" in df.columns:
+    df["Duration"] = pd.to_timedelta(df["Duration"], errors="coerce").dt.total_seconds() / 60.0
+
 fecha_max = df["Date"].max()
 
 ultimos21 = fecha_max - pd.Timedelta(days=21)

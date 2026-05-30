@@ -694,13 +694,33 @@ def build_section_report_fig(section, dff, fecha_dt, categorias):
 def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
     if kaleido is None:
         return None
+
+    candidates = [
+        {"width": width, "height": height, "scale": scale},
+        {"width": width, "height": height, "scale": 1},
+        {"width": max(600, width // 2), "height": max(400, height // 2), "scale": 1}
+    ]
+
+    for opts in candidates:
+        try:
+            return pio.to_image(fig, format="png", engine="kaleido", **opts)
+        except Exception:
+            pass
+        try:
+            return fig.to_image(format="png", engine="kaleido", **opts)
+        except Exception:
+            pass
+
     try:
         return pio.to_image(fig, format="png", width=width, height=height, scale=scale)
     except Exception:
-        try:
-            return fig.to_image(format="png", width=width, height=height)
-        except Exception:
-            return None
+        pass
+    try:
+        return fig.to_image(format="png", width=width, height=height)
+    except Exception:
+        pass
+
+    return None
 
 
 def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header_func=None):

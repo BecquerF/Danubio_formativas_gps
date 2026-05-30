@@ -2354,7 +2354,26 @@ def actualizar_tab(
                 html.Div([
                     html.Label("Creado por", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Input(id="report_author", type="text", placeholder="Nombre del creador", value="", style={"width":"100%","padding":"10px","borderRadius":"12px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
-                ], style={"flex":"1","marginLeft":"16px"})
+                ], style={"flex":"1","minWidth":"260px","marginLeft":"16px"}),
+                html.Div([
+                    html.Label("Fecha de actividad", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    dcc.DatePickerSingle(
+                        id="report_fecha_actividad",
+                        date=fecha_max.date(),
+                        min_date_allowed=df["Date"].min().date(),
+                        max_date_allowed=df["Date"].max().date(),
+                        display_format="DD/MM/YYYY",
+                        style={
+                            "width": "100%",
+                            "backgroundColor": "#011c24",
+                            "color": "#f5f5f5",
+                            "border": "1px solid rgba(137,188,239,0.18)",
+                            "borderRadius": "12px",
+                            "padding": "10px"
+                        }
+                    ),
+                    html.Div("Selecciona la fecha de actividad para construir el informe.", style={"color":"#dcdcdc","fontSize":"11px","marginTop":"6px"})
+                ], style={"flex":"1","minWidth":"260px","marginLeft":"16px"})
             ], style={"display":"flex","gap":"16px","marginBottom":"24px","flexWrap":"wrap"}),
             html.Div([
                 html.Label("Secciones del informe", style={"color":"#a3e3d0","marginBottom":"8px"}),
@@ -2524,7 +2543,7 @@ def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias):
     State("report_text_comparativas", "value"),
     State("report_text_cronologico", "value"),
     State("categoria", "value"),
-    State("fecha-actividad", "date")
+    State("report_fecha_actividad", "date")
 )
 def generar_informe(
     n_clicks,
@@ -2553,6 +2572,8 @@ def generar_informe(
         dff = dff[dff["Category"].isin(categorias)]
 
     fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+    if fecha_dt is not None:
+        dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
 
     section_texts = {
         "actividad": texto_actividad or "",

@@ -1027,7 +1027,7 @@ app.layout = html.Div([
                             html.Img(
                                 src="/assets/logo_dataload_2.png",
                                 style={
-                                    "width": "100%",
+                                    "width": "90%",
                                     "height": "auto",
                                     "objectFit": "contain",
                                     "marginBottom": "10px",
@@ -1080,7 +1080,7 @@ app.layout = html.Div([
                 ],
                 style={
                     "flex":"1",
-                    "height":"100px",
+                    "height":"90px",
                     "width": "80%",
                     "padding": "18px",
                     "display": "flex",
@@ -1412,7 +1412,7 @@ app.layout = html.Div([
             "flexDirection":"column",
             "width":"120px",
             "minWidth":"160px",
-            "minHeight":"55vh",
+            "minHeight":"45vh",
             "gap":"2px 4px",
             "position":"sticky",
             "top":"100px",

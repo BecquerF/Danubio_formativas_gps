@@ -442,6 +442,10 @@ def build_cronologico(dff, categorias, metricas, referencia):
     if "Date" not in dff.columns or not metricas:
         return go.Figure()
 
+    dff = dff.dropna(subset=["Date"]).copy()
+    if dff.empty:
+        return go.Figure()
+
     cronologico = pd.melt(
         dff,
         id_vars=["Date", "Category"],
@@ -857,7 +861,7 @@ def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_te
                 img_height = min(420, max(260, available_height))
                 if y - img_height < margin:
                     c.showPage()
-                    y = draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+                    y = draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
                 c.drawImage(image, margin, y - img_height, width=img_width, height=img_height, preserveAspectRatio=True, mask='auto')
                 y -= img_height + 8
                 c.setFont("Helvetica-Oblique", 9)

@@ -2431,6 +2431,7 @@ def actualizar_tab(
                     dcc.Textarea(id="report_text_cronologico", placeholder="Describe la sección Cronológico. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
             ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"24px"}),
+            html.Div(id="report_figures_preview", style={"display":"grid","gridTemplateColumns":"repeat(auto-fit,minmax(320px,1fr))","gap":"20px","marginBottom":"24px"}),
             html.Div([
                 html.Button("Generar PDF", id="generate_report", n_clicks=0, style={"width":"100%","padding":"16px","borderRadius":"18px","border":"none","background":"#89bcef","color":"#0b0c0e","fontWeight":"700","cursor":"pointer"})
             ], style={"maxWidth":"320px","margin":"0 auto"}),
@@ -2527,6 +2528,77 @@ def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias):
     periodtag_options = [{"label": x, "value": x} for x in periodtag_vals]
 
     return gametag_options, gametag_vals, periodtag_options, periodtag_vals
+
+
+@app.callback(
+    Output("report_figures_preview", "children"),
+    Input("report_sections", "value"),
+    Input("categoria", "value"),
+    Input("report_fecha_actividad", "date")
+)
+def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
+    if not sections:
+        return html.Div(
+            "Selecciona al menos una sección para ver las figuras en el informe.",
+            style={"color": "#edf1f2", "textAlign": "center", "padding": "20px"}
+        )
+
+    dff = df.copy()
+    if categorias:
+        dff = dff[dff["Category"].isin(categorias)]
+
+    fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+    if fecha_dt is not None:
+        dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
+
+    preview_cards = []
+    for section in sections:
+        try:
+            fig = build_section_report_fig(section, dff, fecha_dt, categorias)
+        except Exception:
+            fig = None
+
+        if fig is None or not fig.data:
+            preview_cards.append(
+                html.Div(
+                    [
+                        html.H4(section_title(section), style={"color": "#a3e3d0", "marginBottom": "10px"}),
+                        html.Div(
+                            "No hay figura disponible para esta sección con los filtros seleccionados.",
+                            style={"color": "#edf1f2", "fontSize": "14px"}
+                        )
+                    ],
+                    style={
+                        "padding": "18px",
+                        "background": "#0b0c0e",
+                        "border": "1px solid rgba(137,188,239,0.18)",
+                        "borderRadius": "24px",
+                        "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                    }
+                )
+            )
+        else:
+            preview_cards.append(
+                html.Div(
+                    [
+                        html.H4(section_title(section), style={"color": "#a3e3d0", "marginBottom": "10px"}),
+                        dcc.Graph(
+                            figure=fig,
+                            config={"displayModeBar": False},
+                            style={"height": "320px", "width": "100%"}
+                        )
+                    ],
+                    style={
+                        "padding": "18px",
+                        "background": "#0b0c0e",
+                        "border": "1px solid rgba(137,188,239,0.18)",
+                        "borderRadius": "24px",
+                        "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                    }
+                )
+            )
+
+    return preview_cards
 
 
 @app.callback(

@@ -2075,7 +2075,7 @@ def actualizar_tab(
         periodtag_text = summarize_items(periodtags, max_items=10, default="Todos")
         fecha_text = fecha_dt.strftime("%d/%m/%Y")
         grafico_titulo = (
-            f"Actividad - {fecha_text} - Game Tags: {gametag_text} - Period Tags: {periodtag_text} - Category: {categoria_text}"
+            f"Actividad {fecha_text}  |  Dinámica: {gametag_text}  |  Microciclo: {periodtag_text}  |  Plantel: {categoria_text}"
         )
 
         cards = []

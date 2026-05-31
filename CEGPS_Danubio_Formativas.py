@@ -1959,23 +1959,27 @@ def actualizar_tab(
                 html.H4(fecha_dt.strftime("%d/%m/%Y"), style={"color":"#a3e3d0","textAlign":"center","marginBottom":"15px",
                                                             "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
                 dcc.Loading(
-                    dash_table.DataTable(
-                        className="tab-table",
-                        data=dff_fecha[columnas_presentes].to_dict("records") if columnas_presentes else [],
-                        columns=columnas_actividad,
-                        filter_action="native",
-                        sort_action="native",
-                        fixed_columns={"headers": True, "data": 1},
-                        page_size=20,
-                        style_table={"overflowX":"auto","minWidth":"100%","border":"1px solid rgba(137,188,239,0.18)",
-                                    "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"},
-                        style_header={"backgroundColor":"#000000","color":"white","fontWeight":"bold","position":"sticky","top":0},
-                        style_cell={
-                                    "backgroundColor":"#1a1a1a","color":"white",
-                                    "fontSize":"11px","textAlign":"center",
-                                    "minWidth":"100px","whiteSpace":"normal"
-                                    },
-                        style_data_conditional=estilos_condicionales
+                    html.Div(
+                        className="tab-table-wrapper",
+                        children=[
+                            dash_table.DataTable(
+                                data=dff_fecha[columnas_presentes].to_dict("records") if columnas_presentes else [],
+                                columns=columnas_actividad,
+                                filter_action="native",
+                                sort_action="native",
+                                fixed_columns={"headers": True, "data": 1},
+                                page_size=20,
+                                style_table={"overflowX":"auto","minWidth":"100%","border":"1px solid rgba(137,188,239,0.18)",
+                                            "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"},
+                                style_header={"backgroundColor":"#000000","color":"white","fontWeight":"bold","position":"sticky","top":0},
+                                style_cell={
+                                            "backgroundColor":"#1a1a1a","color":"white",
+                                            "fontSize":"11px","textAlign":"center",
+                                            "minWidth":"100px","whiteSpace":"normal"
+                                            },
+                                style_data_conditional=estilos_condicionales
+                            )
+                        ]
                     )
                 )
             ], style={
@@ -2233,12 +2237,14 @@ def actualizar_tab(
 
             dcc.Loading(
 
-                dash_table.DataTable(
-                    className="tab-table",
+                html.Div(
+                    className="tab-table-wrapper",
+                    children=[
+                        dash_table.DataTable(
 
-                    data=tabla.to_dict("records"),
+                            data=tabla.to_dict("records"),
 
-                    columns=[
+                            columns=[
 
                         {
                             "name":"Player Name",
@@ -2470,6 +2476,8 @@ def actualizar_tab(
                             }
                         ],
                         page_size=20
+                            )
+                        ]
                     )
                 )
             ],style={

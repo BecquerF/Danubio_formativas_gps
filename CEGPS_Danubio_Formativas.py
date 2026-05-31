@@ -2084,7 +2084,7 @@ def actualizar_tab(
             cards.append(
                 html.Div([
                     html.Div(m, style={"color": "#a3e3d0", "fontSize": "13px", "marginBottom": "8px"}),
-                    html.Div(f"{valor:.2f}", style={"color": "#edf1f2", "fontSize": "26px", "fontWeight": "700"})
+                    html.Div(f"{valor:.2f}", style={"color": "#edf1f2", "fontSize": "20px", "fontWeight": "700"})
                 ], style={
                     "padding": "20px",
                     "background": "#0b0c0e",

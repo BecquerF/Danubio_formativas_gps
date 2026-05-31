@@ -856,9 +856,13 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
             import kaleido as _kaleido
             kaleido = _kaleido
             try:
-                pio.kaleido.scope.chromium_args = ["--no-sandbox"]
+                import plotly.io as pio
+                # Configuración actualizada para Kaleido
+                pio.defaults.kaleido_scope = {
+                    "chromium_args": ["--no-sandbox"]
+                }
             except Exception as e:
-                logging.warning("No se pudo establecer pio.kaleido.scope.chromium_args tras importar kaleido: %s", e)
+                logging.warning("No se pudo establecer pio.defaults.kaleido_scope tras importar kaleido: %s", e)
         except Exception as e:
             logging.warning("Kaleido no está disponible; no se puede generar imágenes PNG: %s", e)
             kaleido = None

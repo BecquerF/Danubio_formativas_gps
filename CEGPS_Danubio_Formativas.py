@@ -1,6 +1,7 @@
 import io
 import base64
 import textwrap
+import logging
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
@@ -44,6 +45,7 @@ def register_pdf_fonts():
 
 
 register_pdf_fonts()
+logging.basicConfig(level=logging.INFO)
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
@@ -836,23 +838,25 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
             kaleido = None
 
     if kaleido is None:
+        logging.warning("Kaleido no está disponible; no se puede generar imágenes PNG.")
         return None
 
     try:
         return fig.to_image(format="png", engine="kaleido", width=width, height=height, scale=scale)
-    except Exception:
-        pass
+    except Exception as e:
+        logging.warning("fig.to_image failed: %s", e)
 
     try:
         return pio.to_image(fig, format="png", engine="kaleido", width=width, height=height, scale=scale)
-    except Exception:
-        pass
+    except Exception as e:
+        logging.warning("pio.to_image failed: %s", e)
 
     try:
         buf = io.BytesIO()
         fig.write_image(buf, format="png", engine="kaleido", width=width, height=height, scale=scale)
         return buf.getvalue()
-    except Exception:
+    except Exception as e:
+        logging.warning("fig.write_image failed: %s", e)
         return None
 
 
@@ -2884,12 +2888,14 @@ def generar_informe(
         table_fig = None
         try:
             fig = build_section_report_fig(section, dff, fecha_dt, categorias)
-        except Exception:
+        except Exception as e:
+            logging.exception("Error construyendo figura para sección %s", section)
             fig = None
 
         try:
             table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
-        except Exception:
+        except Exception as e:
+            logging.exception("Error construyendo tabla para sección %s", section)
             table_fig = None
 
         img_bytes = None
@@ -2899,6 +2905,13 @@ def generar_informe(
         table_bytes = None
         if table_fig is not None and getattr(table_fig, "data", None):
             table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
+
+        logging.info(
+            "Sección %s: img_bytes=%s table_bytes=%s",
+            section,
+            len(img_bytes) if img_bytes is not None else None,
+            len(table_bytes) if table_bytes is not None else None,
+        )
 
         table_only_sections = {"actividad", "actividad_comparativa", "acwr"}
         graph_capture_sections = {"actividad_promedios", "comparativas", "cronologico"}
@@ -2912,9 +2925,13 @@ def generar_informe(
         else:
             section_img = img_bytes if img_bytes is not None else table_bytes
 
+        section_note = ""
+        if section_img is None and section_table_img is None:
+            section_note = "\nNota: no se generó ninguna imagen o tabla para esta sección con los filtros seleccionados."
+
         report_sections.append({
             "title": section_title(section),
-            "text": truncate_to_n_words(section_texts.get(section, ""), 500),
+            "text": truncate_to_n_words(section_texts.get(section, ""), 500) + section_note,
             "img": section_img,
             "table_img": section_table_img,
             "caption": f"Figura: {section_title(section)} con los filtros seleccionados.",

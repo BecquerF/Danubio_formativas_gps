@@ -2901,13 +2901,13 @@ def generar_informe(
             table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
 
         table_only_sections = {"actividad", "actividad_comparativa", "acwr"}
-        figure_only_sections = {"actividad_promedios", "comparativas", "cronologico", "plyr_vs_plyr"}
+        graph_capture_sections = {"actividad_promedios", "comparativas", "cronologico"}
 
         section_img = None
         section_table_img = None
         if section in table_only_sections:
             section_table_img = table_bytes if table_bytes is not None else img_bytes
-        elif section in figure_only_sections:
+        elif section in graph_capture_sections:
             section_img = img_bytes if img_bytes is not None else table_bytes
         else:
             section_img = img_bytes if img_bytes is not None else table_bytes

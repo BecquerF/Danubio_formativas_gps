@@ -1,1 +1,1 @@
-web: gunicorn CEGPS_Danubio_Formativas:server
+web: gunicorn CEGPS_Danubio_Formativas:server --bind 0.0.0.0:$PORT --workers 1

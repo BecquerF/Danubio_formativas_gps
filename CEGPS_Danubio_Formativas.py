@@ -2077,15 +2077,6 @@ def actualizar_tab(
         grafico_titulo = (
             f"Actividad {fecha_text}  |  Dinámica: {gametag_text}  |  Microciclo: {periodtag_text}  |  Plantel: {categoria_text}"
         )
-        fig.update_layout(
-    title=dict(
-        text=grafico_titulo,
-        font=dict(
-            color="#f5f5f5",
-            family="'Clash Display Semibold','Helvetica Neue'",
-            size=22,
-            letterspacing=2  
-        )))
 
         cards = []
         for m in metricas_promedios_validas:

@@ -836,6 +836,12 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
     return None
 
 
+def _fig_write_image(fig, width, height, scale):
+    buf = io.BytesIO()
+    fig.write_image(buf, format="png", engine="kaleido", width=width, height=height, scale=scale)
+    return buf.getvalue()
+
+
 def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
     if fig is None or not getattr(fig, "data", None):
         return None
@@ -845,30 +851,27 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
         try:
             import kaleido as _kaleido
             kaleido = _kaleido
-        except Exception:
+        except Exception as e:
+            logging.warning("Kaleido no está disponible; no se puede generar imágenes PNG: %s", e)
             kaleido = None
 
     if kaleido is None:
-        logging.warning("Kaleido no está disponible; no se puede generar imágenes PNG.")
         return None
 
-    try:
-        return fig.to_image(format="png", engine="kaleido", width=width, height=height, scale=scale)
-    except Exception as e:
-        logging.warning("fig.to_image failed: %s", e)
+    for method, call in [
+        ("fig.to_image", lambda: fig.to_image(format="png", engine="kaleido", width=width, height=height, scale=scale)),
+        ("pio.to_image", lambda: pio.to_image(fig, format="png", engine="kaleido", width=width, height=height, scale=scale)),
+        ("fig.write_image", lambda: _fig_write_image(fig, width, height, scale)),
+    ]:
+        try:
+            result = call()
+            if result:
+                return result
+        except Exception as e:
+            logging.warning("%s failed para figura %s: %s", method, getattr(fig, 'name', '<unnamed>'), e)
 
-    try:
-        return pio.to_image(fig, format="png", engine="kaleido", width=width, height=height, scale=scale)
-    except Exception as e:
-        logging.warning("pio.to_image failed: %s", e)
-
-    try:
-        buf = io.BytesIO()
-        fig.write_image(buf, format="png", engine="kaleido", width=width, height=height, scale=scale)
-        return buf.getvalue()
-    except Exception as e:
-        logging.warning("fig.write_image failed: %s", e)
-        return None
+    logging.warning("No se pudo generar PNG para la figura.")
+    return None
 
 
 def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header_func=None):
@@ -906,8 +909,8 @@ def draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, wid
         try:
             logo = load_image_reader_from_bytes(logo_bytes)
             c.drawImage(logo, width - margin - 100, height - margin - 60, width=100, height=60, preserveAspectRatio=True, mask='auto')
-        except Exception:
-            pass
+        except Exception as e:
+            logging.warning("No se pudo dibujar el logo en PDF: %s", e)
     y -= 22
     c.setFont(small_font, 9)
     c.drawString(margin, y, fecha_text)
@@ -980,7 +983,8 @@ def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_te
                 c.setFont("Helvetica-Oblique", 9)
                 c.drawString(margin, y, caption)
                 y -= 18
-            except Exception:
+            except Exception as e:
+                logging.warning("No se pudo dibujar imagen de sección %s en PDF: %s", section['title'], e)
                 y -= 8
 
         if section.get("table_img") is not None:
@@ -997,7 +1001,8 @@ def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_te
                 c.setFont("Helvetica-Oblique", 9)
                 c.drawString(margin, y, section.get("table_caption", ""))
                 y -= 18
-            except Exception:
+            except Exception as e:
+                logging.warning("No se pudo dibujar tabla de sección %s en PDF: %s", section['title'], e)
                 y -= 8
 
         content = truncate_to_n_words(section.get("text", ""), 500)
@@ -3009,10 +3014,14 @@ def generar_informe(
         img_bytes = None
         if fig is not None and getattr(fig, "data", None):
             img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
+            if img_bytes is None:
+                logging.warning("No se generaron bytes PNG para figura de sección %s", section)
 
         table_bytes = None
         if table_fig is not None and getattr(table_fig, "data", None):
             table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
+            if table_bytes is None:
+                logging.warning("No se generaron bytes PNG para tabla de sección %s", section)
 
         logging.info(
             "Sección %s: img_bytes=%s table_bytes=%s",

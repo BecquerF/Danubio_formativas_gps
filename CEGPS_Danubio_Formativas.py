@@ -2,6 +2,7 @@ import io
 import base64
 import textwrap
 import logging
+import html as html_module
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
@@ -16,6 +17,10 @@ try:
     import kaleido
 except ImportError:
     kaleido = None
+try:
+    from weasyprint import HTML as WeasyHTML
+except ImportError:
+    WeasyHTML = None
 from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
 from openpyxl.drawing.image import Image as ExcelImage
 from fileinput import filename
@@ -993,6 +998,81 @@ def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_te
     c.save()
     buffer.seek(0)
     return buffer.read()
+
+
+def build_report_html(title, author, logo_bytes, sections, fecha_text, filters_text=None):
+    logo_html = ""
+    if logo_bytes:
+        logo_b64 = base64.b64encode(logo_bytes).decode("utf-8")
+        logo_html = f'<img class="report-logo" src="data:image/png;base64,{logo_b64}" alt="Logo" />'
+
+    section_blocks = []
+    for section in sections:
+        section_text = html_module.escape(section.get("text", "")).replace("\n", "<br />")
+        block = [f'<section class="report-section">', f'<h2>{html_module.escape(section["title"])}</h2>']
+
+        if section.get("img") is not None:
+            img_b64 = base64.b64encode(section["img"]).decode("utf-8")
+            block.append(
+                f'<img class="report-image" src="data:image/png;base64,{img_b64}" alt="{html_module.escape(section["title"])}" />'
+            )
+            if section.get("caption"):
+                block.append(f'<p class="caption">{html_module.escape(section.get("caption"))}</p>')
+
+        if section.get("table_img") is not None:
+            table_b64 = base64.b64encode(section["table_img"]).decode("utf-8")
+            block.append(
+                f'<img class="report-table-image" src="data:image/png;base64,{table_b64}" alt="{html_module.escape(section["title"])} table" />'
+            )
+            if section.get("table_caption"):
+                block.append(f'<p class="caption">{html_module.escape(section.get("table_caption"))}</p>')
+
+        if section_text:
+            block.append(f'<div class="report-text">{section_text}</div>')
+        block.append("</section>")
+        section_blocks.append("\n".join(block))
+
+    filters_html = html_module.escape(filters_text or "").replace("\n", "<br />")
+    html_content = f"""
+    <html>
+    <head>
+      <meta charset="utf-8" />
+      <style>
+        body {{ font-family: Arial, sans-serif; color: #222; margin: 0; padding: 0; background: #ffffff; }}
+        .container {{ width: 100%; max-width: 1100px; margin: 0 auto; padding: 28px; }}
+        .header {{ text-align: center; margin-bottom: 28px; }}
+        .report-logo {{ max-height: 80px; margin-bottom: 18px; }}
+        h1 {{ margin: 0; font-size: 32px; color: #1b3a73; }}
+        .meta {{ font-size: 13px; color: #555; margin: 12px 0 24px; }}
+        .report-section {{ margin-bottom: 36px; page-break-inside: avoid; }}
+        .report-section h2 {{ font-size: 22px; margin-bottom: 12px; color: #1f447f; }}
+        .report-image, .report-table-image {{ width: 100%; max-width: 100%; border: 1px solid #d0d0d0; border-radius: 10px; margin-bottom: 10px; }}
+        .caption {{ font-size: 12px; color: #666; margin: 0 0 18px; }}
+        .report-text {{ font-size: 13px; line-height: 1.7; color: #333; margin-bottom: 0; }}
+        .section-header {{ margin-bottom: 4px; color: #444; }}
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          {logo_html}
+          <h1>{html_module.escape(title)}</h1>
+          <div class="meta">Autor: {html_module.escape(author)} | Fecha: {html_module.escape(fecha_text)}</div>
+          <div class="meta">{filters_html}</div>
+        </div>
+        {"\n".join(section_blocks)}
+      </div>
+    </body>
+    </html>
+    """
+    return html_content
+
+
+def build_report_html_pdf(title, author, logo_bytes, sections, fecha_text, filters_text=None):
+    if WeasyHTML is None:
+        raise ImportError("WeasyPrint no está instalado. Instalar weasyprint para generar PDF desde HTML.")
+    html_content = build_report_html(title, author, logo_bytes, sections, fecha_text, filters_text)
+    return WeasyHTML(string=html_content).write_pdf()
 
 ultima_actualizacion = (
     datetime.now() - timedelta(hours=3)
@@ -2943,7 +3023,14 @@ def generar_informe(
             item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
 
     logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
-    pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+    if WeasyHTML is not None:
+        try:
+            pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+        except Exception as e:
+            logging.exception("Error generando PDF HTML con WeasyPrint, usando ReportLab como fallback.")
+            pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+    else:
+        pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
     filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.pdf"
     return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
 

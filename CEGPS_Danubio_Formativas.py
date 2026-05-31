@@ -2900,11 +2900,23 @@ def generar_informe(
         if table_fig is not None and getattr(table_fig, "data", None):
             table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
 
+        table_only_sections = {"actividad", "actividad_comparativa", "acwr"}
+        figure_only_sections = {"actividad_promedios", "comparativas", "cronologico", "plyr_vs_plyr"}
+
+        section_img = None
+        section_table_img = None
+        if section in table_only_sections:
+            section_table_img = table_bytes if table_bytes is not None else img_bytes
+        elif section in figure_only_sections:
+            section_img = img_bytes if img_bytes is not None else table_bytes
+        else:
+            section_img = img_bytes if img_bytes is not None else table_bytes
+
         report_sections.append({
             "title": section_title(section),
             "text": truncate_to_n_words(section_texts.get(section, ""), 500),
-            "img": img_bytes,
-            "table_img": table_bytes,
+            "img": section_img,
+            "table_img": section_table_img,
             "caption": f"Figura: {section_title(section)} con los filtros seleccionados.",
             "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados."
         })

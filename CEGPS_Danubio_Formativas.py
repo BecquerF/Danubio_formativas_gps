@@ -53,7 +53,10 @@ df["Date"] = pd.to_datetime(
 )
 
 if "Duration" in df.columns:
-    df["Duration"] = pd.to_timedelta(df["Duration"], errors="coerce").dt.total_seconds() / 60.0
+    if pd.api.types.is_numeric_dtype(df["Duration"]):
+        df["Duration"] = pd.to_timedelta(df["Duration"], unit="D", errors="coerce").dt.total_seconds() / 60.0
+    else:
+        df["Duration"] = pd.to_timedelta(df["Duration"], errors="coerce").dt.total_seconds() / 60.0
 
 fecha_max = df["Date"].max()
 

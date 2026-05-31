@@ -3,6 +3,7 @@ import base64
 import textwrap
 import logging
 import html as html_module
+import tempfile
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
@@ -1073,6 +1074,15 @@ def build_report_html_pdf(title, author, logo_bytes, sections, fecha_text, filte
         raise ImportError("WeasyPrint no está instalado. Instalar weasyprint para generar PDF desde HTML.")
     html_content = build_report_html(title, author, logo_bytes, sections, fecha_text, filters_text)
     return WeasyHTML(string=html_content).write_pdf()
+
+
+def save_pdf_bytes_to_temp_file(pdf_bytes, filename=None):
+    """Guarda pdf_bytes en un archivo temporal y devuelve la ruta del archivo."""
+    if filename is None:
+        filename = "reporte_temporal.pdf"
+    temp_path = Path(tempfile.gettempdir()) / filename
+    temp_path.write_bytes(pdf_bytes)
+    return temp_path
 
 ultima_actualizacion = (
     datetime.now() - timedelta(hours=3)

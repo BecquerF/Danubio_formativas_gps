@@ -20,12 +20,17 @@ except ImportError:
     kaleido = None
 try:
     from weasyprint import HTML as WeasyHTML
-except ImportError:
+except Exception as e:
+    logging.warning("WeasyPrint no está disponible: %s", e)
     WeasyHTML = None
 from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
 from openpyxl.drawing.image import Image as ExcelImage
 from fileinput import filename
 from datetime import datetime
+try:
+    from PIL import Image as PILImage
+except ImportError:
+    PILImage = None
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
@@ -899,7 +904,7 @@ def draw_page_header(c, title, author, fecha_text, filters_text, logo_bytes, wid
     c.drawString(margin, y, title)
     if logo_bytes:
         try:
-            logo = ImageReader(io.BytesIO(logo_bytes))
+            logo = load_image_reader_from_bytes(logo_bytes)
             c.drawImage(logo, width - margin - 100, height - margin - 60, width=100, height=60, preserveAspectRatio=True, mask='auto')
         except Exception:
             pass
@@ -929,6 +934,19 @@ def draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo
     return y
 
 
+def load_image_reader_from_bytes(image_bytes):
+    try:
+        return ImageReader(io.BytesIO(image_bytes))
+    except Exception:
+        if PILImage is not None:
+            try:
+                pil_img = PILImage.open(io.BytesIO(image_bytes))
+                return ImageReader(pil_img)
+            except Exception:
+                pass
+        raise
+
+
 def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_text=None):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
@@ -950,7 +968,7 @@ def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_te
         caption = section.get("caption") or f"Figura: {section['title']} con los filtros seleccionados."
         if section.get("img") is not None:
             try:
-                image = ImageReader(io.BytesIO(section["img"]))
+                image = load_image_reader_from_bytes(section["img"])
                 img_width = width - 2 * margin
                 available_height = y - margin - 60
                 img_height = min(420, max(260, available_height))
@@ -967,7 +985,7 @@ def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_te
 
         if section.get("table_img") is not None:
             try:
-                image = ImageReader(io.BytesIO(section["table_img"]))
+                image = load_image_reader_from_bytes(section["table_img"])
                 img_width = width - 2 * margin
                 available_height = y - margin - 60
                 img_height = min(360, max(260, available_height))

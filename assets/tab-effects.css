@@ -1,0 +1,38 @@
+.tab-menu .tab-item,
+.tab-menu .tab-item-selected {
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tab-menu .tab-item:hover {
+  transform: translateX(4px);
+  color: #a3e3d0 !important;
+}
+
+.tab-menu .tab-item-selected {
+  box-shadow: inset 4px 0 0 #a3e3d0;
+}
+
+.tab-content {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-content > div {
+  animation: fadeSlideIn 0.35s ease both;
+  will-change: opacity, transform;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-content .dash-graph, .tab-content .dash-table {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}

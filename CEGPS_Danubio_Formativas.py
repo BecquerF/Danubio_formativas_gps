@@ -1439,6 +1439,7 @@ app.layout = html.Div([
             # GRÁFICO
 
             html.Div(    id="contenido-tab",
+    className="tab-content",
     style={
         "displey":"flex",
         "flex":"1",

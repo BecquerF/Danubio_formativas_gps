@@ -838,46 +838,22 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
     if kaleido is None:
         return None
 
-    def try_export(exporter):
-        try:
-            result = exporter()
-            if isinstance(result, bytes) and result:
-                return result
-            if hasattr(result, "getvalue"):
-                data = result.getvalue()
-                if data:
-                    return data
-        except Exception:
-            pass
-        return None
+    try:
+        return fig.to_image(format="png", engine="kaleido", width=width, height=height, scale=scale)
+    except Exception:
+        pass
 
-    candidates = [
-        {"width": width, "height": height, "scale": scale},
-        {"width": width, "height": height, "scale": 1},
-        {"width": max(600, width // 2), "height": max(400, height // 2), "scale": 1}
-    ]
+    try:
+        return pio.to_image(fig, format="png", engine="kaleido", width=width, height=height, scale=scale)
+    except Exception:
+        pass
 
-    def write_image_to_buffer(opts):
+    try:
         buf = io.BytesIO()
-        try:
-            fig.write_image(buf, format="png", engine="kaleido", **opts)
-            buf.seek(0)
-            return buf.getvalue()
-        except Exception:
-            return None
-
-    for opts in candidates:
-        image_bytes = try_export(lambda: pio.to_image(fig, format="png", engine="kaleido", **opts))
-        if image_bytes:
-            return image_bytes
-        image_bytes = try_export(lambda: fig.to_image(format="png", engine="kaleido", **opts))
-        if image_bytes:
-            return image_bytes
-        image_bytes = write_image_to_buffer(opts)
-        if image_bytes:
-            return image_bytes
-
-    return None
+        fig.write_image(buf, format="png", engine="kaleido", width=width, height=height, scale=scale)
+        return buf.getvalue()
+    except Exception:
+        return None
 
 
 def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header_func=None):
@@ -2917,14 +2893,12 @@ def generar_informe(
             table_fig = None
 
         img_bytes = None
-        if fig is not None and fig.data:
+        if fig is not None and getattr(fig, "data", None):
             img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
-            print("DEBUG sección:", section, type(img_bytes), len(img_bytes) if img_bytes else 0)
 
         table_bytes = None
         if table_fig is not None and getattr(table_fig, "data", None):
             table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
-            print("DEBUG tabla sección:", section, type(table_bytes), len(table_bytes) if table_bytes else 0)
 
         report_sections.append({
             "title": section_title(section),

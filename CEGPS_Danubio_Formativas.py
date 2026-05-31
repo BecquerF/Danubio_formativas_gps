@@ -9,6 +9,10 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
+try:
+    pio.kaleido.scope.chromium_args = ["--no-sandbox"]
+except Exception as e:
+    logging.warning("No se pudo establecer pio.kaleido.scope.chromium_args: %s", e)
 import dash
 try:
     import dash_auth
@@ -851,6 +855,10 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
         try:
             import kaleido as _kaleido
             kaleido = _kaleido
+            try:
+                pio.kaleido.scope.chromium_args = ["--no-sandbox"]
+            except Exception as e:
+                logging.warning("No se pudo establecer pio.kaleido.scope.chromium_args tras importar kaleido: %s", e)
         except Exception as e:
             logging.warning("Kaleido no está disponible; no se puede generar imágenes PNG: %s", e)
             kaleido = None

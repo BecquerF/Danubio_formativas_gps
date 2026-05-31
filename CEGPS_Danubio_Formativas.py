@@ -1,16 +1,19 @@
+import logging
+import plotly.io as pio
 import io
 import base64
 import textwrap
-import logging
 import html as html_module
 import tempfile
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import plotly.io as pio
+
 try:
-    pio.kaleido.scope.chromium_args = ["--no-sandbox"]
+    pio.defaults.kaleido_scope = {
+    "chromium_args": ["--no-sandbox"]
+}
 except Exception as e:
     logging.warning("No se pudo establecer pio.kaleido.scope.chromium_args: %s", e)
 import dash
@@ -850,25 +853,18 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
     if fig is None or not getattr(fig, "data", None):
         return None
 
-    global kaleido
+        global kaleido
     if kaleido is None:
         try:
             import kaleido as _kaleido
             kaleido = _kaleido
-            try:
-                import plotly.io as pio
-                # Configuración actualizada para Kaleido
-                pio.defaults.kaleido_scope = {
-                    "chromium_args": ["--no-sandbox"]
-                }
-            except Exception as e:
-                logging.warning("No se pudo establecer pio.defaults.kaleido_scope tras importar kaleido: %s", e)
         except Exception as e:
             logging.warning("Kaleido no está disponible; no se puede generar imágenes PNG: %s", e)
             kaleido = None
 
     if kaleido is None:
         return None
+
 
     for method, call in [
         ("fig.to_image", lambda: fig.to_image(format="png", engine="kaleido", width=width, height=height, scale=scale)),

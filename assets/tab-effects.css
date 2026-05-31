@@ -33,6 +33,22 @@
   }
 }
 
-.tab-content .dash-graph, .tab-content .dash-table {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+.tab-content .dash-graph,
+.tab-content .tab-graph,
+.tab-content .dash-table-container,
+.tab-content .dash-spreadsheet-container,
+.tab-content .tab-table {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  opacity: 1;
+}
+
+.tab-content .dash-graph,
+.tab-content .tab-graph {
+  will-change: opacity, transform;
+}
+
+.tab-content .dash-table-container,
+.tab-content .dash-spreadsheet-container,
+.tab-content .tab-table {
+  will-change: opacity, transform;
 }

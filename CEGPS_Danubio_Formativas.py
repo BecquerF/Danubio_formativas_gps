@@ -1901,6 +1901,7 @@ def actualizar_tab(
         fig = build_comparativas(dff, categorias, metricas, referencia)
         return html.Div([
             dcc.Graph(
+                className="tab-graph",
                 figure=fig,
                 style={"width":"100%", "height":"100%"}
             )
@@ -1959,6 +1960,7 @@ def actualizar_tab(
                                                             "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
                 dcc.Loading(
                     dash_table.DataTable(
+                        className="tab-table",
                         data=dff_fecha[columnas_presentes].to_dict("records") if columnas_presentes else [],
                         columns=columnas_actividad,
                         filter_action="native",
@@ -2232,6 +2234,7 @@ def actualizar_tab(
             dcc.Loading(
 
                 dash_table.DataTable(
+                    className="tab-table",
 
                     data=tabla.to_dict("records"),
 
@@ -2559,6 +2562,7 @@ def actualizar_tab(
 
         return html.Div(
             dcc.Graph(
+                className="tab-graph",
                 figure=fig,
                 style={"width": "100%", "height": "100%"}
             ),
@@ -2714,7 +2718,7 @@ def actualizar_tab(
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
             # Gráfico
-            dcc.Graph(id="radar_chart", style={"height":"600px"})
+            dcc.Graph(id="radar_chart", className="tab-graph", style={"height":"600px"})
         ], style={
             "padding":"28px",
             "background":"linear-gradient(145deg, #0b0c0e, #1a1c1f)",
@@ -2807,6 +2811,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
                     [
                         html.H4(section_title(section), style={"color": "#a3e3d0", "marginBottom": "10px"}),
                         dcc.Graph(
+                            className="tab-graph",
                             figure=fig,
                             config={"displayModeBar": False},
                             style={"height": "320px", "width": "100%"}

@@ -3340,31 +3340,38 @@ def descargar_grafico(_n_png, _n_pdf,
         if table_png is None:
             logging.warning("No se pudo generar PNG de la tabla para el tab %s", tab)
 
-    if fmt == "png":
-        fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
-        if fig_png is None:
-            logging.warning("No se pudo generar PNG para la figura del tab %s", tab)
-            return no_update
+    fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+    if fig_png is None:
+        logging.warning("No se pudo generar PNG para la figura del tab %s", tab)
+        return no_update
 
+    if fmt == "png":
         image_bytes = combine_image_bytes_vertically([fig_png, table_png]) if table_png is not None else fig_png
     else:
-        fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
-        if fig_png is None:
-            logging.warning("No se pudo generar PNG de la figura para el PDF del tab %s", tab)
-            return no_update
-
         logo_html = ""
         if LOGO_BASE64:
             logo_bytes = base64.b64decode(LOGO_BASE64)
-            logo_html = f'<img src="data:image/png;base64,{base64.b64encode(logo_bytes).decode("utf-8")}" alt="Logo" style="max-height:70px;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;" />'
+            logo_html = (
+                '<img src="data:image/png;base64,'
+                f'{base64.b64encode(logo_bytes).decode("utf-8")}'
+                '" alt="Logo" style="max-height:70px;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;" />'
+            )
 
         fig_b64 = base64.b64encode(fig_png).decode("utf-8")
         table_html = ""
         if table_png is not None:
             table_b64 = base64.b64encode(table_png).decode("utf-8")
-            table_html = f"<div style='margin-top:20px;'><img src='data:image/png;base64,{table_b64}' alt='Tabla' style='width:100%;border:1px solid #ccc;border-radius:10px;' /></div>"
+            table_html = (
+                "<div style='margin-top:20px;'>"
+                f"<img src='data:image/png;base64,{table_b64}' alt='Tabla' "
+                "style='width:100%;border:1px solid #ccc;border-radius:10px;' />"
+                "</div>"
+            )
 
-        filters_html = html_module.escape(f"Categorías: {', '.join(categorias) if categorias else 'Todas'}").replace("\n", "<br />")
+        filters_html = html_module.escape(
+            f"Categorías: {', '.join(categorias) if categorias else 'Todas'}"
+        ).replace("\n", "<br />")
+
         html_content = f"""
         <html>
           <head>

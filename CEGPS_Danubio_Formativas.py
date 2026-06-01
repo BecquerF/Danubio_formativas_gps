@@ -3354,8 +3354,14 @@ def descargar_grafico(_n_png, _n_pdf,
         logging.warning("No hay figura disponible para exportar en el tab %s", tab)
         return no_update
 
-    tab_name = tab_titles.get(tab, tab)
+    tab_name = tab_titles.get(tab, tab).replace(" ", "_")
     filename = f"grafico_{tab_name}.{fmt}"
+
+    table_png = None
+    if table_fig is not None and getattr(table_fig, "data", None):
+        table_png = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
+        if table_png is None:
+            logging.warning("No se pudo generar PNG de la tabla para el tab %s", tab)
 
     if fmt == "png":
         fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
@@ -3363,20 +3369,8 @@ def descargar_grafico(_n_png, _n_pdf,
             logging.warning("No se pudo generar PNG para la figura del tab %s", tab)
             return no_update
 
-        table_png = None
-        if table_fig is not None and getattr(table_fig, "data", None):
-            table_png = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
-
-        if table_png is not None:
-            image_bytes = combine_image_bytes_vertically([fig_png, table_png])
-        else:
-            image_bytes = fig_png
-
+        image_bytes = combine_image_bytes_vertically([fig_png, table_png]) if table_png is not None else fig_png
     else:
-        table_png = None
-        if table_fig is not None and getattr(table_fig, "data", None):
-            table_png = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
-
         if table_png is not None:
             fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
             if fig_png is None:
@@ -3405,7 +3399,8 @@ def descargar_grafico(_n_png, _n_pdf,
     Input("athlete","value"),
     Input("gametag","value"),
     Input("periodtag","value"),
-    Input("fecha-actividad","date")
+    Input("fecha-actividad","date"),
+    prevent_initial_call=True
 )
 def descargar_tabla(
     _n_csv,

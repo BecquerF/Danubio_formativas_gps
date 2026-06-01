@@ -878,7 +878,51 @@ def fig_to_pdf_bytes(fig, width=1200, height=900, scale=2):
         return None
 
     title = getattr(fig, "name", "Grafico") or "Grafico"
-    return build_graph_html_pdf(title=title, fig_png=fig_png)
+    return build_graph_pdf_bytes(title=title, fig_png=fig_png)
+
+
+def build_graph_pdf_bytes(title, fig_png, page_size=A4, margin=inch * 0.75):
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=page_size)
+    width, height = page_size
+
+    header_font = "ClashDisplay-Semibold" if "ClashDisplay-Semibold" in pdfmetrics.getRegisteredFontNames() else "Helvetica-Bold"
+    c.setFont(header_font, 16)
+    y = height - margin
+    c.drawString(margin, y, title)
+    y -= 24
+
+    try:
+        image = load_image_reader_from_bytes(fig_png)
+        img_width, img_height = image.getSize()
+        max_width = width - 2 * margin
+        max_height = y - margin
+        ratio = min(max_width / img_width, max_height / img_height, 1)
+        draw_width = img_width * ratio
+        draw_height = img_height * ratio
+
+        if draw_height <= 0 or draw_width <= 0:
+            raise ValueError("Imagen de figura inválida para PDF")
+
+        if y - draw_height < margin:
+            c.showPage()
+            y = height - margin
+            c.setFont(header_font, 16)
+            c.drawString(margin, y, title)
+            y -= 24
+
+        c.drawImage(image, margin, y - draw_height, width=draw_width, height=draw_height, preserveAspectRatio=True, mask='auto')
+        y -= draw_height + 12
+        footer_font = "Manrope-Light" if "Manrope-Light" in pdfmetrics.getRegisteredFontNames() else "Helvetica"
+        c.setFont(footer_font, 9)
+        c.drawString(margin, margin / 2, "Generado con ReportLab")
+    except Exception as e:
+        logging.warning("No se pudo generar PDF embebiendo PNG para la figura: %s", e)
+        return None
+
+    c.save()
+    buffer.seek(0)
+    return buffer.read()
 
 
 def combine_image_bytes_vertically(image_bytes_list, spacing=20, background=(255, 255, 255, 255)):

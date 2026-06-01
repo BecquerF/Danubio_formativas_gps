@@ -3276,6 +3276,9 @@ def descargar_grafico(_n_png, _n_pdf,
                       tab, categorias, metricas, referencia,
                       jugadores, athlete, gametags, periodtags, fecha_actividad,
                       jugador_1, jugador_2, game_tags, period_tags):
+    # Estos valores solo están presentes para que Dash pase los inputs del botón,
+    # el callback determina cuál botón disparó usando callback_context.
+    del _n_png, _n_pdf
 
     # Detectar qué botón disparó
     ctx = dash.callback_context
@@ -3307,25 +3310,18 @@ def descargar_grafico(_n_png, _n_pdf,
     # Construir figura según tab
     if tab == "actividad":
         fig = build_actividad_report_fig(dff, fecha_actividad)
-        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "actividad_comparativa":
         fig = build_actividad_comparativa_report_fig(dff, fecha_actividad)
-        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "actividad_promedios":
         fig = build_actividad_promedios_report_fig(dff, fecha_actividad)
-        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "acwr":
         fig = build_acwr_report_fig(dff)
-        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "plyr_vs_plyr":
         fig = build_plyr_vs_plyr(dff, jugador_1, jugador_2, game_tags, period_tags)
-        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "comparativas":
         fig = build_comparativas(dff, categorias, metricas, referencia)
-        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "cronologico":
         fig = build_cronologico(dff, categorias, metricas, referencia)
-        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     else:
         return no_update
 

@@ -3357,26 +3357,6 @@ def descargar_grafico(_n_png, _n_pdf,
     if fmt == "png":
         image_bytes = combine_image_bytes_vertically([fig_png, table_png]) if table_png is not None else fig_png
     else:
-        logo_html = ""
-        if LOGO_BASE64:
-            logo_bytes = base64.b64decode(LOGO_BASE64)
-            logo_html = (
-                '<img src="data:image/png;base64,'
-                f'{base64.b64encode(logo_bytes).decode("utf-8")}'
-                '" alt="Logo" style="max-height:70px;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;" />'
-            )
-
-        fig_b64 = base64.b64encode(fig_png).decode("utf-8")
-        table_html = ""
-        if table_png is not None:
-            table_b64 = base64.b64encode(table_png).decode("utf-8")
-            table_html = (
-                "<div style='margin-top:20px;'>"
-                f"<img src='data:image/png;base64,{table_b64}' alt='Tabla' "
-                "style='width:100%;border:1px solid #ccc;border-radius:10px;' />"
-                "</div>"
-            )
-
         filters_text = f"Categorías: {', '.join(categorias) if categorias else 'Todas'}"
         logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
         try:

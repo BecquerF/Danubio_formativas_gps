@@ -12,24 +12,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import dcc, no_update
-
-try:
-    pio.defaults.chromium_args = ["--no-sandbox", "--disable-dev-shm-usage"]
-    logging.info("Plotly defaults configured. python=%s chrome_in_PATH=%s",
-                 sys.executable,
-                 any("chrome" in p.lower() for p in os.environ.get("PATH", "").split(os.pathsep)))
-    try:
-        pio.kaleido.scope = None
-        logging.info("Plotly Kaleido scope disabled.")
-    except Exception as e:
-        logging.warning("No se pudo desactivar Kaleido: %s", e)
-    try:
-        pio.orca.config.executable = os.environ.get("ORCA_EXECUTABLE", "/usr/bin/orca")
-        logging.info("Plotly Orca ejecutable configurado en %s", pio.orca.config.executable)
-    except Exception as e:
-        logging.warning("No se pudo configurar Orca: %s", e)
-except Exception as e:
-    logging.warning("No se pudo establecer plotly.io.defaults.chromium_args: %s", e)
 import dash
 try:
     import dash_auth

@@ -12,34 +12,18 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Ensure headless Chromium flags are available for Kaleido in container environments like Render.
-for env_var in ("KALEIDO_CHROMIUM_ARGS", "KALIEDO_CHROMIUM_ARGS"):
-    os.environ.setdefault(env_var, "--no-sandbox --disable-dev-shm-usage")
-
 try:
     pio.defaults.chromium_args = ["--no-sandbox", "--disable-dev-shm-usage"]
-    pio.defaults.engine = "kaleido"
-    if hasattr(pio.defaults, "kaleido_scope"):
-        pio.defaults.kaleido_scope = {"scope": "chromium"}
-    elif hasattr(pio, "kaleido") and hasattr(pio.kaleido, "scope"):
-        try:
-            pio.kaleido.scope.chromium_args = ["--no-sandbox", "--disable-dev-shm-usage"]
-        except Exception:
-            pass
-    logging.info("Kaleido defaults configured. python=%s chrome_in_PATH=%s",
+    logging.info("Plotly defaults configured. python=%s chrome_in_PATH=%s",
                  sys.executable,
                  any("chrome" in p.lower() for p in os.environ.get("PATH", "").split(os.pathsep)))
 except Exception as e:
-    logging.warning("No se pudo establecer plotly.io.defaults chromium_args o engine: %s", e)
+    logging.warning("No se pudo establecer plotly.io.defaults.chromium_args: %s", e)
 import dash
 try:
     import dash_auth
 except ImportError:
     dash_auth = None
-try:
-    import kaleido
-except ImportError:
-    kaleido = None
 try:
     from weasyprint import HTML as WeasyHTML
 except Exception as e:
@@ -871,23 +855,6 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
     if fig is None or not getattr(fig, "data", None):
         return None
 
-    global kaleido
-    if kaleido is None:
-        try:
-            import kaleido as _kaleido
-            kaleido = _kaleido
-            try:
-                pio.defaults.chromium_args = ["--no-sandbox", "--disable-dev-shm-usage"]
-                pio.defaults.engine = "kaleido"
-            except Exception as e:
-                logging.warning("No se pudo establecer plotly.io.defaults.chromium_args tras importar kaleido: %s", e)
-        except Exception as e:
-            logging.warning("Kaleido no está disponible; no se puede generar imágenes PNG: %s", e)
-            kaleido = None
-
-    if kaleido is None:
-        return None
-
     for method, call in [
         ("fig.to_image", lambda: fig.to_image(format="png", width=width, height=height, scale=scale)),
         ("pio.to_image", lambda: pio.to_image(fig, format="png", width=width, height=height, scale=scale)),
@@ -906,36 +873,7 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
         except Exception as e:
             logging.warning("%s failed para figura %s: %s", method, getattr(fig, 'name', '<unnamed>'), e)
 
-    logging.warning("No se pudo generar PNG para la figura.")
-    return None
-
-
-def fig_to_image_bytes(fig, fmt="png", width=1200, height=900, scale=2):
-    if fmt == "png":
-        return fig_to_png_bytes(fig, width=width, height=height, scale=scale)
-
-    if fig is None or not getattr(fig, "data", None):
-        return None
-
-    for method, call in [
-        ("fig.to_image", lambda: fig.to_image(format=fmt, width=width, height=height, scale=scale)),
-        ("pio.to_image", lambda: pio.to_image(fig, format=fmt, width=width, height=height, scale=scale)),
-    ]:
-        try:
-            result = call()
-            if result:
-                logging.info(
-                    "Generado %s para figura %s usando %s, tamaño=%s bytes",
-                    fmt,
-                    getattr(fig, 'name', '<unnamed>'),
-                    method,
-                    len(result),
-                )
-                return result
-        except Exception as e:
-            logging.warning("%s failed para figura %s: %s", method, getattr(fig, 'name', '<unnamed>'), e)
-
-    logging.warning("No se pudo generar %s para la figura.", fmt)
+    logging.warning("No se pudo generar PNG para la figura; revise la instalación del renderer de Plotly.")
     return None
 
 
@@ -965,37 +903,6 @@ def combine_image_bytes_vertically(image_bytes_list, spacing=20, background=(255
     buf = io.BytesIO()
     combined.convert("RGB").save(buf, format="PNG")
     return buf.getvalue()
-
-
-def images_to_pdf_bytes(image_bytes_list, page_size=A4, margin=inch * 0.5):
-    if not image_bytes_list:
-        return None
-
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=page_size)
-    width, height = page_size
-
-    for image_bytes in image_bytes_list:
-        try:
-            image = load_image_reader_from_bytes(image_bytes)
-            iw, ih = image.getSize()
-        except Exception as e:
-            logging.warning("No se pudo leer imagen PNG para PDF: %s", e)
-            continue
-
-        available_width = width - 2 * margin
-        available_height = height - 2 * margin
-        scale = min(available_width / iw, available_height / ih, 1)
-        draw_width = iw * scale
-        draw_height = ih * scale
-        x = (width - draw_width) / 2
-        y = (height - draw_height) / 2
-        c.drawImage(image, x, y, width=draw_width, height=draw_height, preserveAspectRatio=True, mask="auto")
-        c.showPage()
-
-    c.save()
-    buffer.seek(0)
-    return buffer.read()
 
 
 def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header_func=None):
@@ -1220,6 +1127,63 @@ def build_report_html_pdf(title, author, logo_bytes, sections, fecha_text, filte
     if WeasyHTML is None:
         raise ImportError("WeasyPrint no está instalado. Instalar weasyprint para generar PDF desde HTML.")
     html_content = build_report_html(title, author, logo_bytes, sections, fecha_text, filters_text)
+    return WeasyHTML(string=html_content).write_pdf()
+
+
+def build_graph_html_pdf(title, fig_png, table_png=None, filters_text=None, logo_bytes=None):
+    if WeasyHTML is None:
+        raise ImportError("WeasyPrint no está instalado. Instalar weasyprint para generar PDF desde HTML.")
+
+    logo_html = ""
+    if logo_bytes is not None:
+        logo_base64 = base64.b64encode(logo_bytes).decode("utf-8")
+        logo_html = f'<img class="report-logo" src="data:image/png;base64,{logo_base64}" alt="Logo" />'
+
+    fig_b64 = base64.b64encode(fig_png).decode("utf-8")
+    table_html = ""
+    if table_png is not None:
+        table_b64 = base64.b64encode(table_png).decode("utf-8")
+        table_html = f"<div class='report-table'><img class='report-image' src='data:image/png;base64,{table_b64}' alt='Tabla' /></div>"
+
+    filters_html = html_module.escape(filters_text or "").replace("\n", "<br />")
+
+    html_content = f"""
+    <html>
+    <head>
+      <meta charset='utf-8' />
+      <style>
+        body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #222; }}
+        .container {{ width: 100%; max-width: 1100px; margin: 0 auto; padding: 24px; }}
+        .header {{ text-align: center; margin-bottom: 24px; }}
+        .report-logo {{ max-height: 70px; margin-bottom: 16px; }}
+        h1 {{ font-size: 28px; color: #1c3d72; margin: 0 0 8px; }}
+        .meta {{ font-size: 12px; color: #555; margin-bottom: 18px; }}
+        .report-section {{ margin-bottom: 30px; page-break-inside: avoid; }}
+        .report-section h2 {{ font-size: 20px; margin-bottom: 10px; color: #1f4a7d; }}
+        .report-image, .report-table-image {{ width: 100%; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px; }}
+        .caption {{ font-size: 12px; color: #555; margin: 0 0 12px; }}
+        .report-text {{ font-size: 13px; line-height: 1.6; color: #333; }}
+      </style>
+    </head>
+    <body>
+      <div class='container'>
+        <div class='header'>
+          {logo_html}
+          <h1>{html_module.escape(title)}</h1>
+          <div class='meta'>{filters_html}</div>
+        </div>
+        <div class='report-section'>
+          <h2>{html_module.escape(title)}</h2>
+          <div class='report-image-container'>
+            <img class='report-image' src='data:image/png;base64,{fig_b64}' alt='Figura' />
+          </div>
+          {table_html}
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+
     return WeasyHTML(string=html_content).write_pdf()
 
 
@@ -3382,14 +3346,27 @@ def descargar_grafico(_n_png, _n_pdf,
 
         image_bytes = combine_image_bytes_vertically([fig_png, table_png]) if table_png is not None else fig_png
     else:
+        fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+        if fig_png is None:
+            logging.warning("No se pudo generar PNG de la figura para el PDF del tab %s", tab)
+            return no_update
+
         if table_png is not None:
-            fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
-            if fig_png is None:
-                logging.warning("No se pudo generar PNG de la figura para el PDF del tab %s", tab)
-                return no_update
-            image_bytes = images_to_pdf_bytes([fig_png, table_png])
+            image_bytes = build_graph_html_pdf(
+                title=tab_titles.get(tab, tab),
+                fig_png=fig_png,
+                table_png=table_png,
+                filters_text=f"Categorías: {', '.join(categorias) if categorias else 'Todas'}",
+                logo_bytes=base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None,
+            )
         else:
-            image_bytes = fig_to_image_bytes(fig, fmt="pdf", width=1200, height=800, scale=2)
+            image_bytes = build_graph_html_pdf(
+                title=tab_titles.get(tab, tab),
+                fig_png=fig_png,
+                table_png=None,
+                filters_text=f"Categorías: {', '.join(categorias) if categorias else 'Todas'}",
+                logo_bytes=base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None,
+            )
 
     if image_bytes is None:
         logging.warning("No se pudo exportar el tab %s en formato %s", tab, fmt)

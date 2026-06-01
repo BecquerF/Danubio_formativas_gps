@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import plotly.io as pio
 import io
 import base64
@@ -18,6 +19,9 @@ for env_var in ("KALEIDO_CHROMIUM_ARGS", "KALIEDO_CHROMIUM_ARGS"):
 try:
     pio.defaults.chromium_args = ["--no-sandbox", "--disable-dev-shm-usage"]
     pio.defaults.engine = "kaleido"
+    logging.info("Kaleido defaults configured. python=%s chrome_in_PATH=%s",
+                 sys.executable,
+                 any("chrome" in p.lower() for p in os.environ.get("PATH", "").split(os.pathsep)))
 except Exception as e:
     logging.warning("No se pudo establecer plotly.io.defaults chromium_args o engine: %s", e)
 import dash
@@ -852,7 +856,7 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
 
 def _fig_write_image(fig, width, height, scale):
     buf = io.BytesIO()
-    fig.write_image(buf, format="png", engine="kaleido", width=width, height=height, scale=scale)
+    fig.write_image(buf, format="png", width=width, height=height, scale=scale)
     return buf.getvalue()
 
 
@@ -878,8 +882,8 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
         return None
 
     for method, call in [
-        ("fig.to_image", lambda: fig.to_image(format="png", engine="kaleido", width=width, height=height, scale=scale)),
-        ("pio.to_image", lambda: pio.to_image(fig, format="png", engine="kaleido", width=width, height=height, scale=scale)),
+        ("fig.to_image", lambda: fig.to_image(format="png", width=width, height=height, scale=scale)),
+        ("pio.to_image", lambda: pio.to_image(fig, format="png", width=width, height=height, scale=scale)),
         ("fig.write_image", lambda: _fig_write_image(fig, width, height, scale)),
     ]:
         try:
@@ -907,8 +911,8 @@ def fig_to_image_bytes(fig, fmt="png", width=1200, height=900, scale=2):
         return None
 
     for method, call in [
-        ("fig.to_image", lambda: fig.to_image(format=fmt, engine="kaleido", width=width, height=height, scale=scale)),
-        ("pio.to_image", lambda: pio.to_image(fig, format=fmt, engine="kaleido", width=width, height=height, scale=scale)),
+        ("fig.to_image", lambda: fig.to_image(format=fmt, width=width, height=height, scale=scale)),
+        ("pio.to_image", lambda: pio.to_image(fig, format=fmt, width=width, height=height, scale=scale)),
     ]:
         try:
             result = call()

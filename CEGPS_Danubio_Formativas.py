@@ -3351,22 +3351,47 @@ def descargar_grafico(_n_png, _n_pdf,
             logging.warning("No se pudo generar PNG de la figura para el PDF del tab %s", tab)
             return no_update
 
+        logo_html = ""
+        if LOGO_BASE64:
+            logo_bytes = base64.b64decode(LOGO_BASE64)
+            logo_html = f'<img src="data:image/png;base64,{base64.b64encode(logo_bytes).decode("utf-8")}" alt="Logo" style="max-height:70px;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;" />'
+
+        fig_b64 = base64.b64encode(fig_png).decode("utf-8")
+        table_html = ""
         if table_png is not None:
-            image_bytes = build_graph_html_pdf(
-                title=tab_titles.get(tab, tab),
-                fig_png=fig_png,
-                table_png=table_png,
-                filters_text=f"Categorías: {', '.join(categorias) if categorias else 'Todas'}",
-                logo_bytes=base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None,
-            )
-        else:
-            image_bytes = build_graph_html_pdf(
-                title=tab_titles.get(tab, tab),
-                fig_png=fig_png,
-                table_png=None,
-                filters_text=f"Categorías: {', '.join(categorias) if categorias else 'Todas'}",
-                logo_bytes=base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None,
-            )
+            table_b64 = base64.b64encode(table_png).decode("utf-8")
+            table_html = f"<div style='margin-top:20px;'><img src='data:image/png;base64,{table_b64}' alt='Tabla' style='width:100%;border:1px solid #ccc;border-radius:10px;' /></div>"
+
+        filters_html = html_module.escape(f"Categorías: {', '.join(categorias) if categorias else 'Todas'}").replace("\n", "<br />")
+        html_content = f"""
+        <html>
+          <head>
+            <meta charset='utf-8' />
+            <style>
+              body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #222; }}
+              .container {{ width: 100%; max-width: 1100px; margin: 0 auto; padding: 24px; }}
+              .header {{ text-align: center; margin-bottom: 24px; }}
+              h1 {{ font-size: 28px; color: #1c3d72; margin: 0 0 8px; }}
+              .meta {{ font-size: 12px; color: #555; margin-bottom: 18px; }}
+              .report-image {{ width: 100%; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px; }}
+            </style>
+          </head>
+          <body>
+            <div class='container'>
+              <div class='header'>
+                {logo_html}
+                <h1>{html_module.escape(tab_titles.get(tab, tab))}</h1>
+                <div class='meta'>{filters_html}</div>
+              </div>
+              <div>
+                <img class='report-image' src='data:image/png;base64,{fig_b64}' alt='Figura' />
+                {table_html}
+              </div>
+            </div>
+          </body>
+        </html>
+        """
+        image_bytes = WeasyHTML(string=html_content).write_pdf()
 
     if image_bytes is None:
         logging.warning("No se pudo exportar el tab %s en formato %s", tab, fmt)

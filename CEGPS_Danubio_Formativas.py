@@ -11,9 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 try:
-    pio.defaults.kaleido_scope = {
-    "chromium_args": ["--no-sandbox"]
-}
+    pio.kaleido.scope.chromium_args = ["--no-sandbox"]
 except Exception as e:
     logging.warning("No se pudo establecer pio.kaleido.scope.chromium_args: %s", e)
 import dash
@@ -853,18 +851,21 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
     if fig is None or not getattr(fig, "data", None):
         return None
 
-        global kaleido
+    global kaleido
     if kaleido is None:
         try:
             import kaleido as _kaleido
             kaleido = _kaleido
+            try:
+                pio.kaleido.scope.chromium_args = ["--no-sandbox"]
+            except Exception as e:
+                logging.warning("No se pudo establecer pio.kaleido.scope.chromium_args tras importar kaleido: %s", e)
         except Exception as e:
             logging.warning("Kaleido no está disponible; no se puede generar imágenes PNG: %s", e)
             kaleido = None
 
     if kaleido is None:
         return None
-
 
     for method, call in [
         ("fig.to_image", lambda: fig.to_image(format="png", engine="kaleido", width=width, height=height, scale=scale)),
@@ -874,6 +875,12 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
         try:
             result = call()
             if result:
+                logging.info(
+                    "Generado PNG para figura %s usando %s, tamaño=%s bytes",
+                    getattr(fig, 'name', '<unnamed>'),
+                    method,
+                    len(result),
+                )
                 return result
         except Exception as e:
             logging.warning("%s failed para figura %s: %s", method, getattr(fig, 'name', '<unnamed>'), e)
@@ -3230,27 +3237,53 @@ def descargar_grafico(n_png, n_pdf,
     referencia = referencia or "Category"
 
     # Construir figura según tab
-    if tab == "comparativas":
+    if tab == "actividad":
+        fig = build_actividad_report_fig(dff, fecha_actividad)
+    elif tab == "actividad_comparativa":
+        fig = build_actividad_comparativa_report_fig(dff, fecha_actividad)
+    elif tab == "actividad_promedios":
+        fig = build_actividad_promedios_report_fig(dff, fecha_actividad)
+    elif tab == "acwr":
+        fig = build_acwr_report_fig(dff)
+    elif tab == "plyr_vs_plyr":
+        fig = build_plyr_vs_plyr(dff, jugador_1, jugador_2, game_tags, period_tags)
+    elif tab == "comparativas":
         fig = build_comparativas(dff, categorias, metricas, referencia)
     elif tab == "cronologico":
         fig = build_cronologico(dff, categorias, metricas, referencia)
-    elif tab == "plyr_vs_plyr":
-        fig = build_plyr_vs_plyr(dff, jugador_1, jugador_2, game_tags, period_tags)
     else:
         return no_update
 
-    # Exportar imagen
+    if fig is None or not getattr(fig, "data", None):
+        logging.warning("No hay figura disponible para exportar en el tab %s", tab)
+        return no_update
+
     if kaleido is None:
-        print("Error: kaleido no está instalado, no se puede exportar PNG/PDF.")
+        logging.warning("Error: kaleido no está instalado, no se puede exportar PNG/PDF.")
         return no_update
 
     tab_name = tab_titles.get(tab, tab)
     filename = f"grafico_{tab_name}.{fmt}"
-    try:
-        image_bytes = pio.to_image(fig, format=fmt, width=1200, height=800, scale=2)
-    except Exception as e:
-        print(f"Error exportando imagen: {e}")
+
+    image_bytes = None
+    for method, call in [
+        ("fig.to_image", lambda: fig.to_image(format=fmt, engine="kaleido", width=1200, height=800, scale=2)),
+        ("pio.to_image", lambda: pio.to_image(fig, format=fmt, engine="kaleido", width=1200, height=800, scale=2)),
+        ("fig.write_image", lambda: _fig_write_image(fig, width=1200, height=800, scale=2) if fmt == "png" else None),
+    ]:
+        try:
+            result = call()
+            if result:
+                image_bytes = result
+                logging.info("Exportado gráfico %s como %s con %s, bytes=%s", tab, fmt, method, len(result))
+                break
+        except Exception as e:
+            logging.warning("%s falló para %s: %s", method, tab, e)
+
+    if image_bytes is None:
+        logging.warning("No se pudo exportar la figura del tab %s en formato %s", tab, fmt)
         return no_update
+
     return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
 
 

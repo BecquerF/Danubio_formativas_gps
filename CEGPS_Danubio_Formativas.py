@@ -12,13 +12,22 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import dcc, no_update
-from weasyprint import HTML
 
 try:
     pio.defaults.chromium_args = ["--no-sandbox", "--disable-dev-shm-usage"]
     logging.info("Plotly defaults configured. python=%s chrome_in_PATH=%s",
                  sys.executable,
                  any("chrome" in p.lower() for p in os.environ.get("PATH", "").split(os.pathsep)))
+    try:
+        pio.kaleido.scope = None
+        logging.info("Plotly Kaleido scope disabled.")
+    except Exception as e:
+        logging.warning("No se pudo desactivar Kaleido: %s", e)
+    try:
+        pio.orca.config.executable = os.environ.get("ORCA_EXECUTABLE", "/usr/bin/orca")
+        logging.info("Plotly Orca ejecutable configurado en %s", pio.orca.config.executable)
+    except Exception as e:
+        logging.warning("No se pudo configurar Orca: %s", e)
 except Exception as e:
     logging.warning("No se pudo establecer plotly.io.defaults.chromium_args: %s", e)
 import dash
@@ -3368,39 +3377,19 @@ def descargar_grafico(_n_png, _n_pdf,
                 "</div>"
             )
 
-        filters_html = html_module.escape(
-            f"Categorías: {', '.join(categorias) if categorias else 'Todas'}"
-        ).replace("\n", "<br />")
-
-        html_content = f"""
-        <html>
-          <head>
-            <meta charset='utf-8' />
-            <style>
-              body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #222; }}
-              .container {{ width: 100%; max-width: 1100px; margin: 0 auto; padding: 24px; }}
-              .header {{ text-align: center; margin-bottom: 24px; }}
-              h1 {{ font-size: 28px; color: #1c3d72; margin: 0 0 8px; }}
-              .meta {{ font-size: 12px; color: #555; margin-bottom: 18px; }}
-              .report-image {{ width: 100%; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px; }}
-            </style>
-          </head>
-          <body>
-            <div class='container'>
-              <div class='header'>
-                {logo_html}
-                <h1>{html_module.escape(tab_titles.get(tab, tab))}</h1>
-                <div class='meta'>{filters_html}</div>
-              </div>
-              <div>
-                <img class='report-image' src='data:image/png;base64,{fig_b64}' alt='Figura' />
-                {table_html}
-              </div>
-            </div>
-          </body>
-        </html>
-        """
-        image_bytes = WeasyHTML(string=html_content).write_pdf()
+        filters_text = f"Categorías: {', '.join(categorias) if categorias else 'Todas'}"
+        logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
+        try:
+            image_bytes = build_graph_html_pdf(
+                title=tab_titles.get(tab, tab),
+                fig_png=fig_png,
+                table_png=table_png,
+                filters_text=filters_text,
+                logo_bytes=logo_bytes,
+            )
+        except Exception as e:
+            logging.exception("Error generando PDF con WeasyPrint para el tab %s: %s", tab, e)
+            return no_update
 
     if image_bytes is None:
         logging.warning("No se pudo exportar el tab %s en formato %s", tab, fmt)

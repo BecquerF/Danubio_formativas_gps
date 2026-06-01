@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 import plotly.io as pio
 import io
 import base64
@@ -851,7 +850,7 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
     for method, call in [
         ("fig.to_image", lambda: fig.to_image(format="png", width=width, height=height, scale=scale)),
         ("pio.to_image", lambda: pio.to_image(fig, format="png", width=width, height=height, scale=scale)),
-        ("fig.write_image", lambda: _fig_write_image(fig, width, height, scale)),
+        ("fig.write_image", lambda: _fig_write_image(fig, width=width, height=height, scale=scale)),
     ]:
         try:
             result = call()
@@ -868,6 +867,18 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
 
     logging.warning("No se pudo generar PNG para la figura; revise la instalación del renderer de Plotly.")
     return None
+
+
+def fig_to_pdf_bytes(fig, width=1200, height=900, scale=2):
+    if fig is None or not getattr(fig, "data", None):
+        return None
+
+    fig_png = fig_to_png_bytes(fig, width=width, height=height, scale=scale)
+    if fig_png is None:
+        return None
+
+    title = getattr(fig, "name", "Grafico") or "Grafico"
+    return build_graph_html_pdf(title=title, fig_png=fig_png)
 
 
 def combine_image_bytes_vertically(image_bytes_list, spacing=20, background=(255, 255, 255, 255)):
@@ -3325,39 +3336,21 @@ def descargar_grafico(_n_png, _n_pdf,
     tab_name = tab_titles.get(tab, tab).replace(" ", "_")
     filename = f"grafico_{tab_name}.{fmt}"
 
-    table_png = None
-    if table_fig is not None and getattr(table_fig, "data", None):
-        table_png = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
-        if table_png is None:
-            logging.warning("No se pudo generar PNG de la tabla para el tab %s", tab)
-
-    fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
-    if fig_png is None:
-        logging.warning("No se pudo generar PNG para la figura del tab %s", tab)
-        return no_update
-
     if fmt == "png":
-        image_bytes = combine_image_bytes_vertically([fig_png, table_png]) if table_png is not None else fig_png
-    else:
-        filters_text = f"Categorías: {', '.join(categorias) if categorias else 'Todas'}"
-        logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
-        try:
-            image_bytes = build_graph_html_pdf(
-                title=tab_titles.get(tab, tab),
-                fig_png=fig_png,
-                table_png=table_png,
-                filters_text=filters_text,
-                logo_bytes=logo_bytes,
-            )
-        except Exception as e:
-            logging.exception("Error generando PDF con WeasyPrint para el tab %s: %s", tab, e)
+        png_bytes = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+        if png_bytes is None:
+            logging.warning("No se pudo generar PNG para la figura del tab %s", tab)
             return no_update
+        return dcc.send_bytes(lambda buf: buf.write(png_bytes), filename)
 
-    if image_bytes is None:
-        logging.warning("No se pudo exportar el tab %s en formato %s", tab, fmt)
-        return no_update
+    if fmt == "pdf":
+        pdf_bytes = fig_to_pdf_bytes(fig, width=1200, height=800, scale=2)
+        if pdf_bytes is None:
+            logging.warning("No se pudo generar PDF para la figura del tab %s", tab)
+            return no_update
+        return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
 
-    return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
+    return no_update
 
 
 @app.callback(

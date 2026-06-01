@@ -116,6 +116,9 @@ df = df.drop(columns=columnas_eliminar, errors="ignore")
 app = Dash(__name__)
 app.config.suppress_callback_exceptions = True
 server = app.server
+# Configurar una clave secreta para las sesiones desde la variable de entorno SECRET_KEY
+SECRET_KEY = os.environ["SECRET_KEY"]
+server.secret_key = SECRET_KEY
 VALID_USERNAME_PASSWORD_PAIRS = {
     "Danubioformativas": "formativas2026"
 }

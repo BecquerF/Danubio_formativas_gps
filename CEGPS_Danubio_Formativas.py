@@ -19,6 +19,13 @@ for env_var in ("KALEIDO_CHROMIUM_ARGS", "KALIEDO_CHROMIUM_ARGS"):
 try:
     pio.defaults.chromium_args = ["--no-sandbox", "--disable-dev-shm-usage"]
     pio.defaults.engine = "kaleido"
+    if hasattr(pio.defaults, "kaleido_scope"):
+        pio.defaults.kaleido_scope = {"scope": "chromium"}
+    elif hasattr(pio, "kaleido") and hasattr(pio.kaleido, "scope"):
+        try:
+            pio.kaleido.scope.chromium_args = ["--no-sandbox", "--disable-dev-shm-usage"]
+        except Exception:
+            pass
     logging.info("Kaleido defaults configured. python=%s chrome_in_PATH=%s",
                  sys.executable,
                  any("chrome" in p.lower() for p in os.environ.get("PATH", "").split(os.pathsep)))

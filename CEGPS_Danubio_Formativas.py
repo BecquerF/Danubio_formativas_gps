@@ -928,6 +928,65 @@ def fig_to_image_bytes(fig, fmt="png", width=1200, height=900, scale=2):
     return None
 
 
+def combine_image_bytes_vertically(image_bytes_list, spacing=20, background=(255, 255, 255, 255)):
+    if not image_bytes_list:
+        return None
+
+    images = []
+    for image_bytes in image_bytes_list:
+        try:
+            img = PILImage.open(io.BytesIO(image_bytes)).convert("RGBA")
+            images.append(img)
+        except Exception as e:
+            logging.warning("No se pudo abrir imagen para combinar en PNG: %s", e)
+            return None
+
+    max_width = max(img.width for img in images)
+    total_height = sum(img.height for img in images) + spacing * (len(images) - 1)
+    combined = PILImage.new("RGBA", (max_width, total_height), background)
+
+    y = 0
+    for img in images:
+        x = (max_width - img.width) // 2
+        combined.paste(img, (x, y), img)
+        y += img.height + spacing
+
+    buf = io.BytesIO()
+    combined.convert("RGB").save(buf, format="PNG")
+    return buf.getvalue()
+
+
+def images_to_pdf_bytes(image_bytes_list, page_size=A4, margin=inch * 0.5):
+    if not image_bytes_list:
+        return None
+
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=page_size)
+    width, height = page_size
+
+    for image_bytes in image_bytes_list:
+        try:
+            image = load_image_reader_from_bytes(image_bytes)
+            iw, ih = image.getSize()
+        except Exception as e:
+            logging.warning("No se pudo leer imagen PNG para PDF: %s", e)
+            continue
+
+        available_width = width - 2 * margin
+        available_height = height - 2 * margin
+        scale = min(available_width / iw, available_height / ih, 1)
+        draw_width = iw * scale
+        draw_height = ih * scale
+        x = (width - draw_width) / 2
+        y = (height - draw_height) / 2
+        c.drawImage(image, x, y, width=draw_width, height=draw_height, preserveAspectRatio=True, mask="auto")
+        c.showPage()
+
+    c.save()
+    buffer.seek(0)
+    return buffer.read()
+
+
 def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header_func=None):
     font_name = "Manrope-Light" if "Manrope-Light" in pdfmetrics.getRegisteredFontNames() else "Helvetica"
     text_obj = c.beginText(x, y)
@@ -3084,17 +3143,8 @@ def generar_informe(
             len(table_bytes) if table_bytes is not None else None,
         )
 
-        table_only_sections = {"actividad", "actividad_comparativa", "acwr"}
-        graph_capture_sections = {"actividad_promedios", "comparativas", "cronologico"}
-
-        section_img = None
-        section_table_img = None
-        if section in table_only_sections:
-            section_table_img = table_bytes if table_bytes is not None else img_bytes
-        elif section in graph_capture_sections:
-            section_img = img_bytes if img_bytes is not None else table_bytes
-        else:
-            section_img = img_bytes if img_bytes is not None else table_bytes
+        section_img = img_bytes if img_bytes is not None else None
+        section_table_img = table_bytes if table_bytes is not None else None
 
         section_note = ""
         if section_img is None and section_table_img is None:
@@ -3243,7 +3293,7 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     State("period_tags","value"),
     prevent_initial_call=True
 )
-def descargar_grafico(n_png, n_pdf,
+def descargar_grafico(_n_png, _n_pdf,
                       tab, categorias, metricas, referencia,
                       jugadores, athlete, gametags, periodtags, fecha_actividad,
                       jugador_1, jugador_2, game_tags, period_tags):
@@ -3278,18 +3328,25 @@ def descargar_grafico(n_png, n_pdf,
     # Construir figura según tab
     if tab == "actividad":
         fig = build_actividad_report_fig(dff, fecha_actividad)
+        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "actividad_comparativa":
         fig = build_actividad_comparativa_report_fig(dff, fecha_actividad)
+        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "actividad_promedios":
         fig = build_actividad_promedios_report_fig(dff, fecha_actividad)
+        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "acwr":
         fig = build_acwr_report_fig(dff)
+        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "plyr_vs_plyr":
         fig = build_plyr_vs_plyr(dff, jugador_1, jugador_2, game_tags, period_tags)
+        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "comparativas":
         fig = build_comparativas(dff, categorias, metricas, referencia)
+        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     elif tab == "cronologico":
         fig = build_cronologico(dff, categorias, metricas, referencia)
+        table_fig = build_section_report_table_fig(tab, dff, fecha_actividad, categorias)
     else:
         return no_update
 
@@ -3300,9 +3357,37 @@ def descargar_grafico(n_png, n_pdf,
     tab_name = tab_titles.get(tab, tab)
     filename = f"grafico_{tab_name}.{fmt}"
 
-    image_bytes = fig_to_image_bytes(fig, fmt=fmt, width=1200, height=800, scale=2)
+    if fmt == "png":
+        fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+        if fig_png is None:
+            logging.warning("No se pudo generar PNG para la figura del tab %s", tab)
+            return no_update
+
+        table_png = None
+        if table_fig is not None and getattr(table_fig, "data", None):
+            table_png = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
+
+        if table_png is not None:
+            image_bytes = combine_image_bytes_vertically([fig_png, table_png])
+        else:
+            image_bytes = fig_png
+
+    else:
+        table_png = None
+        if table_fig is not None and getattr(table_fig, "data", None):
+            table_png = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
+
+        if table_png is not None:
+            fig_png = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+            if fig_png is None:
+                logging.warning("No se pudo generar PNG de la figura para el PDF del tab %s", tab)
+                return no_update
+            image_bytes = images_to_pdf_bytes([fig_png, table_png])
+        else:
+            image_bytes = fig_to_image_bytes(fig, fmt="pdf", width=1200, height=800, scale=2)
+
     if image_bytes is None:
-        logging.warning("No se pudo exportar la figura del tab %s en formato %s", tab, fmt)
+        logging.warning("No se pudo exportar el tab %s en formato %s", tab, fmt)
         return no_update
 
     return dcc.send_bytes(lambda buffer: buffer.write(image_bytes), filename)
@@ -3323,8 +3408,8 @@ def descargar_grafico(n_png, n_pdf,
     Input("fecha-actividad","date")
 )
 def descargar_tabla(
-    n_csv,
-    n_xlsx,
+    _n_csv,
+    _n_xlsx,
     tab,
     categorias,
     metricas,

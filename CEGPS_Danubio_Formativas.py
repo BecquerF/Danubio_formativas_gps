@@ -859,7 +859,9 @@ def build_graph_pdf_from_fig(fig, width=1200, height=900, scale=2):
 
 
 def build_graph_pdf_bytes(title, fig_png, page_size=A4, margin=inch * 0.75):
-    """Construye un PDF con una imagen PNG incrustada."""
+    """Construye un PDF con una imagen PNG incrustada y devuelve bytes."""
+    if fig_png is None:
+        return None
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=page_size)
     width, height = page_size
@@ -879,6 +881,9 @@ def build_graph_pdf_bytes(title, fig_png, page_size=A4, margin=inch * 0.75):
         draw_width = img_width * ratio
         draw_height = img_height * ratio
 
+        if draw_width <= 0 or draw_height <= 0:
+            raise ValueError("Imagen inválida para PDF")
+
         if y - draw_height < margin:
             c.showPage()
             y = height - margin
@@ -886,11 +891,7 @@ def build_graph_pdf_bytes(title, fig_png, page_size=A4, margin=inch * 0.75):
             c.drawString(margin, y, title)
             y -= 24
 
-        c.drawImage(image, margin, y - draw_height,
-                    width=draw_width, height=draw_height,
-                    preserveAspectRatio=True, mask='auto')
-
-        # Footer
+        c.drawImage(image, margin, y - draw_height, width=draw_width, height=draw_height, preserveAspectRatio=True, mask='auto')
         y -= draw_height + 12
         c.setFont("Helvetica", 9)
         c.drawString(margin, margin / 2, "Generado con ReportLab")
@@ -903,18 +904,17 @@ def build_graph_pdf_bytes(title, fig_png, page_size=A4, margin=inch * 0.75):
     return buffer.read()
 
 
-
 def combine_image_bytes_vertically(image_bytes_list, spacing=20, background=(255, 255, 255, 255)):
+    """Combina varias imágenes (bytes PNG) verticalmente y devuelve PNG bytes."""
     if not image_bytes_list:
         return None
-
     images = []
     for image_bytes in image_bytes_list:
         try:
             img = PILImage.open(io.BytesIO(image_bytes)).convert("RGBA")
             images.append(img)
         except Exception as e:
-            logging.warning("No se pudo abrir imagen para combinar en PNG: %s", e)
+            logging.warning("No se pudo abrir imagen para combinar: %s", e)
             return None
 
     max_width = max(img.width for img in images)
@@ -930,7 +930,6 @@ def combine_image_bytes_vertically(image_bytes_list, spacing=20, background=(255
     buf = io.BytesIO()
     combined.convert("RGB").save(buf, format="PNG")
     return buf.getvalue()
-
 
 def draw_wrapped_text(c, text, x, y, width, leading, page_height, margin, header_func=None):
     font_name = "Manrope-Light" if "Manrope-Light" in pdfmetrics.getRegisteredFontNames() else "Helvetica"
@@ -3050,7 +3049,6 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     return preview_cards
 
 
-
 @app.callback(
     Output("download-report", "data"),
     Input("generate_report", "n_clicks"),
@@ -3066,7 +3064,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     State("report_text_cronologico", "value"),
     State("categoria", "value"),
     State("report_fecha_actividad", "date"),
-    State("download_format", "value"),  # <-- nuevo: dropdown o radio para elegir formato
+    State("download_format", "value"),  # 'pdf' o 'png' (agregar control en layout)
     prevent_initial_call=True
 )
 def generar_informe(
@@ -3087,21 +3085,20 @@ def generar_informe(
 ):
     if not n_clicks:
         return no_update
-
-    # Título y autor
-    title = title.strip() if title else build_auto_report_title(categorias, fecha_actividad)
-    author = author.strip() if author else "Desconocido"
+    
+    # --- Preparar título, autor y filtros ---
+    title = (title or "").strip() or build_auto_report_title(categorias, fecha_actividad)
+    author = (author or "").strip() or "Desconocido"
     fecha_text = pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y") if fecha_actividad else datetime.now().strftime("%d/%m/%Y")
-
-    # Filtrar dataframe
+    selected_sections = sections or ["actividad", "actividad_promedios", "acwr"]
+    
     dff = df.copy()
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
-    fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
-    if fecha_dt is not None:
+    fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else (dff["Date"].max().normalize() if "Date" in dff.columns else None)
+    if fecha_dt is not None and "Date" in dff.columns:
         dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
-
-    # Textos por sección
+        
     section_texts = {
         "actividad": texto_actividad or "",
         "actividad_comparativa": texto_actividad_comparativa or "",
@@ -3121,20 +3118,29 @@ def generar_informe(
 
     # Construcción de secciones
     report_sections = []
+    image_bytes_for_png = []  # lista para combinar si el usuario pide PNG
     for section in selected_sections:
-        fig, table_fig = None, None
+        fig = None
+        table_fig = None
         try:
             fig = build_section_report_fig(section, dff, fecha_dt, categorias)
-        except Exception:
-            logging.exception("Error construyendo figura para sección %s", section)
+        except Exception as e:
+            logging.exception("Error construyendo figura para sección %s: %s", section, e)
+            fig = None
 
         try:
             table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
-        except Exception:
-            logging.exception("Error construyendo tabla para sección %s", section)
+        except Exception as e:
+            logging.exception("Error construyendo tabla para sección %s: %s", section, e)
+            table_fig = None
 
         img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2) if fig else None
         table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2) if table_fig else None
+
+        if img_bytes:
+            image_bytes_for_png.append(img_bytes)
+        if table_bytes:
+            image_bytes_for_png.append(table_bytes)
 
         section_note = "" if (img_bytes or table_bytes) else "\nNota: no se generó ninguna imagen o tabla para esta sección."
 
@@ -3146,27 +3152,40 @@ def generar_informe(
             "caption": f"Figura: {section_title(section)} con los filtros seleccionados.",
             "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados."
         })
-
-    if not any(item["text"] for item in report_sections):
-        for item in report_sections:
-            item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
-
+        
+        if not any(item["text"].strip() for item in report_sections):
+            for item in report_sections:
+                item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
+            
     logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
-
+    filters_text = " | ".join([f"Categorías: {', '.join(categorias)}"] if categorias else []) + (f" | Fecha: {fecha_text}" if fecha_text else "")
+    
     # --- Exportar según formato elegido ---
-    if download_format == "png":
-        # Generar una sola imagen combinada de las secciones
-        image_bytes_list = [s["img"] for s in report_sections if s["img"]]
-        combined_png = combine_image_bytes_vertically(image_bytes_list)
+    if (download_format or "pdf").lower() == "png":
+        if not image_bytes_for_png:
+                logging.warning("No hay imágenes para combinar en PNG.")
+                return no_update
+        combined_png = combine_image_bytes_vertically(image_bytes_for_png)
+        if combined_png is None:
+            logging.warning("Fallo al combinar imágenes para PNG.")
+            return no_update
         filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.png"
         return dcc.send_bytes(lambda buf: buf.write(combined_png), filename)
 
     # Por defecto PDF
     try:
-        pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
-    except Exception:
-        logging.exception("Error generando PDF con WeasyPrint, usando ReportLab como fallback.")
+            # Intentar HTML -> PDF si tenés WeasyPrint y build_report_html_pdf implementado
+        if 'build_report_html_pdf' in globals() and callable(build_report_html_pdf):
+                pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+        else:
+                raise Exception("WeasyPrint no disponible, usar ReportLab")
+    except Exception as e:
+        logging.exception("Error generando PDF con HTML/WeasyPrint: %s. Usando ReportLab.", e)
         pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+
+    if not pdf_bytes:
+        logging.warning("No se pudo generar el PDF final.")
+        return no_update
 
     filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.pdf"
     return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)

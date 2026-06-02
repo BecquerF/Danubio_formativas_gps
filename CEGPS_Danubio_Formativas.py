@@ -9,6 +9,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 from dash import dcc, no_update
 import dash
 try:
@@ -842,9 +843,9 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
         return None
 
     try:
-        return fig.to_image(format="png", width=width, height=height, scale=scale)
+        return pio.to_image(fig, format="png", width=width, height=height, scale=scale)
     except Exception as e:
-        logging.warning("No se pudo generar PNG con Kaleido para la figura: %s", e)
+        logging.warning("No se pudo generar PNG con Kaleido: %s", e)
         return None
 
 
@@ -3283,6 +3284,48 @@ def crear_figura(dff, metricas, referencia):
         return go.Figure()
     return build_comparativas(dff, [], metricas, referencia)
 
+
+def _get_graph_trigger_id():
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return None
+    if hasattr(ctx, "triggered_id"):
+        return ctx.triggered_id
+    return ctx.triggered[0]["prop_id"].split(".")[0]
+
+
+def _filter_graph_dataframe(categoria, jugador, athlete, gametags, periodtags):
+    dff = df.copy()
+    if categoria:
+        dff = dff[dff["Category"].isin(categoria)]
+    if jugador:
+        dff = dff[dff["Player Name"].isin(jugador)]
+    if athlete:
+        dff = dff[dff["Athlete Tags"].isin(athlete)]
+    if gametags:
+        dff = dff[dff["Game Tags"].isin(gametags)]
+    if periodtags:
+        dff = dff[dff["Period Tags"].isin(periodtags)]
+    return dff
+
+
+def _build_graph_download(fig, filename, format):
+    if fig is None or not getattr(fig, "data", None):
+        logging.warning("Figura vacía o sin datos para descarga de gráfico")
+        return None
+
+    if format == "png":
+        content = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+    else:
+        content = fig_to_pdf_bytes(fig, width=1200, height=800, scale=2)
+
+    if content is None:
+        logging.warning("No se pudo generar el archivo %s para descarga", filename)
+        return None
+
+    return dcc.send_bytes(lambda buf: buf.write(content), filename)
+
+
 @app.callback(
     Output("download-graph", "data"),
     Input("download-graph-png", "n_clicks"),
@@ -3303,55 +3346,23 @@ def descargar_grafico(n_clicks_png, n_clicks_pdf,
     if not (n_clicks_png or n_clicks_pdf):
         return no_update
 
-    ctx = dash.callback_context
-    if not ctx.triggered:
+    trigger_id = _get_graph_trigger_id()
+    if trigger_id not in {"download-graph-png", "download-graph-pdf"}:
         return no_update
 
-    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    # Filtrar dataframe según tus dropdowns
-    dff = df.copy()
-    if categoria:
-        dff = dff[dff["Category"].isin(categoria)]
-    if jugador:
-        dff = dff[dff["Player Name"].isin(jugador)]
-    if athlete:
-        dff = dff[dff["Athlete Tags"].isin(athlete)]
-    if gametags:
-        dff = dff[dff["Game Tags"].isin(gametags)]
-    if periodtags:
-        dff = dff[dff["Period Tags"].isin(periodtags)]
-
+    dff = _filter_graph_dataframe(categoria, jugador, athlete, gametags, periodtags)
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
     referencia_label = referencia if isinstance(referencia, str) else "Grafico"
-
-    # Crear figura
-    fig = crear_figura(dff, metricas, referencia)
-    graph_title = f"Gráfico {referencia_label}"
     filename_base = referencia_label.replace(" ", "_")
+    filename = f"{filename_base}.{'png' if trigger_id == 'download-graph-png' else 'pdf'}"
 
+    fig = crear_figura(dff, metricas, referencia)
     if trigger_id == "download-graph-png":
-        try:
-            png_bytes = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
-            if png_bytes is None:
-                raise ValueError("No se pudo generar PNG con Kaleido")
-            return dcc.send_bytes(lambda buf: buf.write(png_bytes), "grafico.png")
-        except Exception as e:
-            logging.warning("No se pudo generar PNG: %s", e)
-            return no_update
+        return _build_graph_download(fig, filename, "png") or no_update
 
-    elif trigger_id == "download-graph-pdf":
-        try:
-            pdf_bytes = fig_to_pdf_bytes(fig, width=1200, height=800, scale=2)
-            if pdf_bytes is None:
-                raise ValueError("No se pudo generar PDF con Kaleido/ReportLab")
-            return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), "grafico.pdf")
-        except Exception as e:
-            logging.warning("No se pudo generar PDF: %s", e)
-            return no_update
+    return _build_graph_download(fig, filename, "pdf") or no_update
 
-    return no_update 
 
 @app.callback(
     Output("download-table","data"),

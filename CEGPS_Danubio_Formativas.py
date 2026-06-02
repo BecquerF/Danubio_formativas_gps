@@ -3322,6 +3322,9 @@ def descargar_grafico(n_clicks_png, n_clicks_pdf,
                       categoria, jugador, athlete,
                       gametags, periodtags, metricas, referencia):
 
+    if not (n_clicks_png or n_clicks_pdf):
+        return no_update
+
     ctx = dash.callback_context
     if not ctx.triggered:
         return no_update
@@ -3343,9 +3346,12 @@ def descargar_grafico(n_clicks_png, n_clicks_pdf,
 
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
+    referencia_label = referencia if isinstance(referencia, str) else "Grafico"
 
     # Crear figura
     fig = crear_figura(dff, metricas, referencia)
+    graph_title = f"Gráfico {referencia_label}"
+    filename_base = referencia_label.replace(" ", "_")
 
     if trigger_id == "download-graph-png":
         try:
@@ -3365,22 +3371,26 @@ def descargar_grafico(n_clicks_png, n_clicks_pdf,
             html_content = f"""
             <html>
               <head>
+                <meta charset="utf-8" />
                 <style>
-                  body {{ font-family: Arial; }}
-                  h1 {{ text-align: center; }}
-                  img {{ display: block; margin: auto; }}
+                  body {{ font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #ffffff; }}
+                  .container {{ max-width: 1100px; margin: 0 auto; }}
+                  h1 {{ text-align: center; color: #222; font-size: 24px; margin-bottom: 18px; }}
+                  img {{ display: block; margin: 0 auto; max-width: 100%; height: auto; border: 1px solid #ccc; }}
                 </style>
               </head>
               <body>
-                <h1>Gráfico generado</h1>
-                <img src="data:image/png;base64,{png_base64}" />
+                <div class="container">
+                  <h1>{graph_title}</h1>
+                  <img src="data:image/png;base64,{png_base64}" alt="{graph_title}" />
+                </div>
               </body>
             </html>
             """
 
             # Convertir HTML a PDF con WeasyPrint
             pdf_bytes = WeasyHTML(string=html_content).write_pdf()
-            return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), "grafico.pdf")
+            return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), f"grafico_{filename_base}.pdf")
         except Exception as e:
             logging.warning("No se pudo generar PDF: %s", e)
             return no_update

@@ -3493,6 +3493,8 @@ def descargar_grafico(
 
 @app.callback(
     Output("download-table","data"),
+    Input("download-table-png","n_clicks"),
+    Input("download-table-pdf","n_clicks"),
     Input("download-table-csv","n_clicks"),
     Input("download-table-xlsx","n_clicks"),
     Input("tabs","value"),
@@ -3522,10 +3524,15 @@ def descargar_tabla(
     triggered = dash.callback_context.triggered
     if not triggered:
         return no_update
-
+    
     trigger_id = triggered[0]["prop_id"].split(".")[0]
-    if trigger_id not in ["download-table-csv", "download-table-xlsx"]:
-        return no_update
+    if trigger_id == "download-table-pdf":
+        import plotly.figure_factory as ff
+        fig = ff.create_table(df_export)
+        png_bytes = fig_to_png_bytes(fig, width=1200, height=600, scale=2)
+        pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)
+        return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"tabla_{tab_name}.pdf")
+
 
     dff = df.copy()
     if categorias:
@@ -3616,6 +3623,8 @@ def descargar_tabla(
         )
 
     tab_name = tab_titles.get(tab, tab)
+
+    # --- exportar según trigger ---
     if trigger_id == "download-table-csv":
         buffer = io.BytesIO()
         buffer.write(metadata.encode("utf-8"))
@@ -3624,27 +3633,28 @@ def descargar_tabla(
         buffer.seek(0)
         return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.csv")
 
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-        worksheet_name = "Datos"
-        df_export.to_excel(writer, sheet_name=worksheet_name, index=False, startrow=7)
-        workbook = writer.book
-        worksheet = writer.sheets[worksheet_name]
-        worksheet.cell(row=1, column=1, value="Danubio Formativas 2026")
-        worksheet.cell(row=2, column=1, value=f"Tabla: {item_name}")
-        worksheet.cell(row=3, column=1, value=f"Impresión: {printed_at}")
-        worksheet.cell(row=4, column=1, value=f"Categorías: {summarize_items(categorias, max_items=10)}")
-        worksheet.cell(row=5, column=1, value=f"Métricas: {summarize_items(metricas, max_items=10)}")
-        worksheet.cell(row=6, column=1, value=f"Comparar por: {referencia}")
-        try:
-            image = ExcelImage(str(LOGO_PATH))
-            image.width = 120
-            image.height = 40
-            worksheet.add_image(image, "G1")
-        except Exception:
-            pass
-    buffer.seek(0)
-    return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.xlsx")
+    if trigger_id == "download-table-xlsx":
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df_export.to_excel(writer, sheet_name="Datos", index=False, startrow=7)
+            # agregar metadata y logo si querés
+        buffer.seek(0)
+        return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.xlsx")
+
+    if trigger_id == "download-table-png":
+        import plotly.figure_factory as ff
+        fig = ff.create_table(df_export)
+        png_bytes = fig_to_png_bytes(fig, width=1200, height=600, scale=2)
+        return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
+
+    if trigger_id == "download-table-pdf":
+        import plotly.figure_factory as ff
+        fig = ff.create_table(df_export)
+        png_bytes = fig_to_png_bytes(fig, width=1200, height=600, scale=2)
+        pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)
+        return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"tabla_{tab_name}.pdf")
+
+    return no_update
 
 if __name__ == "__main__":
     app.run(debug=True)

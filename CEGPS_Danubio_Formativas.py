@@ -3061,6 +3061,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     State("report_text_cronologico", "value"),
     State("categoria", "value"),
     State("report_fecha_actividad", "date"),
+    State("download_format", "value"),  # <-- nuevo: dropdown o radio para elegir formato
     prevent_initial_call=True
 )
 def generar_informe(
@@ -3076,7 +3077,8 @@ def generar_informe(
     texto_comparativas,
     texto_cronologico,
     categorias,
-    fecha_actividad
+    fecha_actividad,
+    download_format
 ):
     if not n_clicks:
         return no_update
@@ -3106,7 +3108,6 @@ def generar_informe(
     }
     selected_sections = sections or ["actividad", "actividad_promedios", "acwr"]
 
-    # Filtros
     filtros = []
     if categorias:
         filtros.append(f"Categorías: {', '.join(categorias)}")
@@ -3127,14 +3128,10 @@ def generar_informe(
         except Exception:
             logging.exception("Error construyendo tabla para sección %s", section)
 
-        # Convertir figuras a PNG con Kaleido
         img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2) if fig else None
         table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2) if table_fig else None
 
-        if img_bytes is None and table_bytes is None:
-            section_note = "\nNota: no se generó ninguna imagen o tabla para esta sección."
-        else:
-            section_note = ""
+        section_note = "" if (img_bytes or table_bytes) else "\nNota: no se generó ninguna imagen o tabla para esta sección."
 
         report_sections.append({
             "title": section_title(section),
@@ -3145,15 +3142,21 @@ def generar_informe(
             "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados."
         })
 
-    # Texto por defecto si está vacío
     if not any(item["text"] for item in report_sections):
         for item in report_sections:
             item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
 
-    # Logo
     logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
 
-    # Generar PDF
+    # --- Exportar según formato elegido ---
+    if download_format == "png":
+        # Generar una sola imagen combinada de las secciones
+        image_bytes_list = [s["img"] for s in report_sections if s["img"]]
+        combined_png = combine_image_bytes_vertically(image_bytes_list)
+        filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.png"
+        return dcc.send_bytes(lambda buf: buf.write(combined_png), filename)
+
+    # Por defecto PDF
     try:
         pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
     except Exception:
@@ -3162,7 +3165,6 @@ def generar_informe(
 
     filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.pdf"
     return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
-
 
 @app.callback(
     Output("radar_chart", "figure"),

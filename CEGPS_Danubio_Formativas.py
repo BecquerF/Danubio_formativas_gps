@@ -2973,7 +2973,6 @@ def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias):
 
     return gametag_options, gametag_vals, periodtag_options, periodtag_vals
 
-
 @app.callback(
     Output("report_figures_preview", "children"),
     Input("report_sections", "value"),
@@ -2984,7 +2983,14 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     if not sections:
         return html.Div(
             "Selecciona al menos una sección para ver las figuras en el informe.",
-            style={"color": "#edf1f2", "textAlign": "center", "padding": "20px"}
+            style={
+                "color": "#edf1f2",
+                "textAlign": "center",
+                "padding": "20px",
+                "background": "#0b0c0e",
+                "border": "1px solid rgba(137,188,239,0.18)",
+                "borderRadius": "24px"
+            }
         )
 
     dff = df.copy()
@@ -2999,51 +3005,50 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     for section in sections:
         try:
             fig = build_section_report_fig(section, dff, fecha_dt, categorias)
-        except Exception:
+        except Exception as e:
+            logging.warning("Error construyendo figura para sección %s: %s", section, e)
             fig = None
 
-        if fig is None or not fig.data:
-            preview_cards.append(
-                html.Div(
-                    [
-                        html.H4(section_title(section), style={"color": "#a3e3d0", "marginBottom": "10px"}),
-                        html.Div(
-                            "No hay figura disponible para esta sección con los filtros seleccionados.",
-                            style={"color": "#edf1f2", "fontSize": "14px"}
-                        )
-                    ],
-                    style={
-                        "padding": "18px",
-                        "background": "#0b0c0e",
-                        "border": "1px solid rgba(137,188,239,0.18)",
-                        "borderRadius": "24px",
-                        "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
-                    }
-                )
+        if fig is None or not getattr(fig, "data", None):
+            card = html.Div(
+                [
+                    html.H4(section_title(section), style={"color": "#a3e3d0", "marginBottom": "10px"}),
+                    html.Div(
+                        "No hay figura disponible para esta sección con los filtros seleccionados.",
+                        style={"color": "#edf1f2", "fontSize": "14px"}
+                    )
+                ],
+                style={
+                    "padding": "18px",
+                    "background": "#0b0c0e",
+                    "border": "1px solid rgba(137,188,239,0.18)",
+                    "borderRadius": "24px",
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                }
             )
         else:
-            preview_cards.append(
-                html.Div(
-                    [
-                        html.H4(section_title(section), style={"color": "#a3e3d0", "marginBottom": "10px"}),
-                        dcc.Graph(
-                            className="tab-graph",
-                            figure=fig,
-                            config={"displayModeBar": False},
-                            style={"height": "320px", "width": "100%"}
-                        )
-                    ],
-                    style={
-                        "padding": "18px",
-                        "background": "#0b0c0e",
-                        "border": "1px solid rgba(137,188,239,0.18)",
-                        "borderRadius": "24px",
-                        "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
-                    }
-                )
+            card = html.Div(
+                [
+                    html.H4(section_title(section), style={"color": "#a3e3d0", "marginBottom": "10px"}),
+                    dcc.Graph(
+                        className="tab-graph",
+                        figure=fig,
+                        config={"displayModeBar": False},
+                        style={"height": "320px", "width": "100%"}
+                    )
+                ],
+                style={
+                    "padding": "18px",
+                    "background": "#0b0c0e",
+                    "border": "1px solid rgba(137,188,239,0.18)",
+                    "borderRadius": "24px",
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                }
             )
+        preview_cards.append(card)
 
     return preview_cards
+
 
 
 @app.callback(

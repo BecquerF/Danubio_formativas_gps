@@ -56,8 +56,6 @@ def register_pdf_fonts():
 register_pdf_fonts()
 logging.basicConfig(level=logging.INFO)
 
-pdf_bytes = HTML(string=html_content).write_pdf()
-
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
@@ -3381,7 +3379,7 @@ def descargar_grafico(n_clicks_png, n_clicks_pdf,
             """
 
             # Convertir HTML a PDF con WeasyPrint
-            pdf_bytes = HTML(string=html_content).write_pdf()
+            pdf_bytes = WeasyHTML(string=html_content).write_pdf()
             return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), "grafico.pdf")
         except Exception as e:
             logging.warning("No se pudo generar PDF: %s", e)

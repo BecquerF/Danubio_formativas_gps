@@ -30,7 +30,7 @@ try:
 except ImportError:
     PILImage = None
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, inch
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
@@ -839,19 +839,16 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
 
 
 def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
+    """Convierte una figura Plotly en PNG usando Kaleido."""
     if fig is None or not getattr(fig, "data", None):
         return None
-
     try:
         return pio.to_image(fig, format="png", width=width, height=height, scale=scale)
     except Exception as e:
         logging.warning("No se pudo generar PNG con Kaleido: %s", e)
         return None
 
-
-def fig_to_pdf_bytes(fig, width=1200, height=900, scale=2):
-    if fig is None or not getattr(fig, "data", None):
-        return None
+def build_graph_pdf_from_fig(fig, width=1200, height=900, scale=2):
 
     png_bytes = fig_to_png_bytes(fig, width=width, height=height, scale=scale)
     if png_bytes is None:
@@ -862,12 +859,13 @@ def fig_to_pdf_bytes(fig, width=1200, height=900, scale=2):
 
 
 def build_graph_pdf_bytes(title, fig_png, page_size=A4, margin=inch * 0.75):
+    """Construye un PDF con una imagen PNG incrustada."""
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=page_size)
     width, height = page_size
 
-    header_font = "ClashDisplay-Semibold" if "ClashDisplay-Semibold" in pdfmetrics.getRegisteredFontNames() else "Helvetica-Bold"
-    c.setFont(header_font, 16)
+    # Header
+    c.setFont("Helvetica-Bold", 16)
     y = height - margin
     c.drawString(margin, y, title)
     y -= 24
@@ -881,28 +879,29 @@ def build_graph_pdf_bytes(title, fig_png, page_size=A4, margin=inch * 0.75):
         draw_width = img_width * ratio
         draw_height = img_height * ratio
 
-        if draw_height <= 0 or draw_width <= 0:
-            raise ValueError("Imagen de figura inválida para PDF")
-
         if y - draw_height < margin:
             c.showPage()
             y = height - margin
-            c.setFont(header_font, 16)
+            c.setFont("Helvetica-Bold", 16)
             c.drawString(margin, y, title)
             y -= 24
 
-        c.drawImage(image, margin, y - draw_height, width=draw_width, height=draw_height, preserveAspectRatio=True, mask='auto')
+        c.drawImage(image, margin, y - draw_height,
+                    width=draw_width, height=draw_height,
+                    preserveAspectRatio=True, mask='auto')
+
+        # Footer
         y -= draw_height + 12
-        footer_font = "Manrope-Light" if "Manrope-Light" in pdfmetrics.getRegisteredFontNames() else "Helvetica"
-        c.setFont(footer_font, 9)
+        c.setFont("Helvetica", 9)
         c.drawString(margin, margin / 2, "Generado con ReportLab")
     except Exception as e:
-        logging.warning("No se pudo generar PDF embebiendo PNG para la figura: %s", e)
+        logging.warning("No se pudo embebar PNG en PDF: %s", e)
         return None
 
     c.save()
     buffer.seek(0)
     return buffer.read()
+
 
 
 def combine_image_bytes_vertically(image_bytes_list, spacing=20, background=(255, 255, 255, 255)):
@@ -3082,18 +3081,20 @@ def generar_informe(
     if not n_clicks:
         return no_update
 
+    # Título y autor
     title = title.strip() if title else build_auto_report_title(categorias, fecha_actividad)
     author = author.strip() if author else "Desconocido"
     fecha_text = pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y") if fecha_actividad else datetime.now().strftime("%d/%m/%Y")
 
+    # Filtrar dataframe
     dff = df.copy()
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
-
     fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
     if fecha_dt is not None:
         dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
 
+    # Textos por sección
     section_texts = {
         "actividad": texto_actividad or "",
         "actividad_comparativa": texto_actividad_comparativa or "",
@@ -3105,76 +3106,60 @@ def generar_informe(
     }
     selected_sections = sections or ["actividad", "actividad_promedios", "acwr"]
 
+    # Filtros
     filtros = []
     if categorias:
         filtros.append(f"Categorías: {', '.join(categorias)}")
     filtros.append(f"Fecha: {fecha_text}")
     filters_text = " | ".join(filtros)
 
+    # Construcción de secciones
     report_sections = []
     for section in selected_sections:
-        fig = None
-        table_fig = None
+        fig, table_fig = None, None
         try:
             fig = build_section_report_fig(section, dff, fecha_dt, categorias)
-        except Exception as e:
+        except Exception:
             logging.exception("Error construyendo figura para sección %s", section)
-            fig = None
 
         try:
             table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
-        except Exception as e:
+        except Exception:
             logging.exception("Error construyendo tabla para sección %s", section)
-            table_fig = None
 
-        img_bytes = None
-        if fig is not None and getattr(fig, "data", None):
-            img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
-            if img_bytes is None:
-                logging.warning("No se generaron bytes PNG para figura de sección %s", section)
+        # Convertir figuras a PNG con Kaleido
+        img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2) if fig else None
+        table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2) if table_fig else None
 
-        table_bytes = None
-        if table_fig is not None and getattr(table_fig, "data", None):
-            table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2)
-            if table_bytes is None:
-                logging.warning("No se generaron bytes PNG para tabla de sección %s", section)
-
-        logging.info(
-            "Sección %s: img_bytes=%s table_bytes=%s",
-            section,
-            len(img_bytes) if img_bytes is not None else None,
-            len(table_bytes) if table_bytes is not None else None,
-        )
-
-        section_img = img_bytes if img_bytes is not None else None
-        section_table_img = table_bytes if table_bytes is not None else None
-
-        section_note = ""
-        if section_img is None and section_table_img is None:
-            section_note = "\nNota: no se generó ninguna imagen o tabla para esta sección con los filtros seleccionados."
+        if img_bytes is None and table_bytes is None:
+            section_note = "\nNota: no se generó ninguna imagen o tabla para esta sección."
+        else:
+            section_note = ""
 
         report_sections.append({
             "title": section_title(section),
             "text": truncate_to_n_words(section_texts.get(section, ""), 500) + section_note,
-            "img": section_img,
-            "table_img": section_table_img,
+            "img": img_bytes,
+            "table_img": table_bytes,
             "caption": f"Figura: {section_title(section)} con los filtros seleccionados.",
             "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados."
         })
 
+    # Texto por defecto si está vacío
     if not any(item["text"] for item in report_sections):
         for item in report_sections:
             item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
 
+    # Logo
     logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
-    if WeasyHTML is not None:
-        try:
-            pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
-        except Exception as e:
-            logging.exception("Error generando PDF HTML con WeasyPrint, usando ReportLab como fallback.")
-            pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
-    else:
+
+    # Generar PDF
+    try:
+        pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+    except Exception:
+        logging.exception("Error generando PDF con WeasyPrint, usando ReportLab como fallback.")
         pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+
     filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.pdf"
     return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
 
@@ -3426,15 +3411,21 @@ def _build_graph_download(fig, filename, format):
 
     if format == "png":
         content = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+    elif format == "pdf":
+        png_bytes = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+        if png_bytes:
+            content = build_graph_pdf_bytes(filename, png_bytes)
+        else:
+            content = None
     else:
-        content = fig_to_pdf_bytes(fig, width=1200, height=800, scale=2)
+        logging.warning("Formato %s no soportado", format)
+        return None
 
     if content is None:
         logging.warning("No se pudo generar el archivo %s para descarga", filename)
         return None
 
-    return dcc.send_bytes(lambda buf: buf.write(content), filename)
-
+    return dcc.send_bytes(lambda buf: buf.write(content), f"{filename}.{format}")
 
 @app.callback(
     Output("download-graph", "data"),

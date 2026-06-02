@@ -3309,6 +3309,119 @@ def _filter_graph_dataframe(categoria, jugador, athlete, gametags, periodtags):
     return dff
 
 
+def _create_tab_graph_figure(
+    tab,
+    dff,
+    categorias,
+    metricas,
+    referencia,
+    fecha_actividad=None,
+    jugador_1=None,
+    jugador_2=None,
+    game_tags=None,
+    period_tags=None
+):
+    metricas = metricas or ["Distance"]
+    metricas = [m for m in metricas if m in dff.columns]
+    referencia = referencia or "Category"
+
+    if tab == "comparativas":
+        return build_comparativas(dff, categorias or [], metricas, referencia)
+
+    if tab == "cronologico":
+        title_text = build_chart_title(tab, categorias, metricas, referencia)
+        cronologico = pd.melt(
+            dff,
+            id_vars=["Date", "Category"],
+            value_vars=metricas,
+            var_name="Métrica",
+            value_name="Valor",
+        )
+        fig = px.scatter(
+            cronologico,
+            x="Date",
+            y="Valor",
+            color="Category",
+            symbol="Métrica",
+            color_discrete_sequence=["#edf1f2", "#f1a3fd", "#a3e3d0", "#89bcef", "#48f788", "#f96e83"],
+            template="plotly_dark",
+        )
+        fig.update_traces(
+            marker=dict(size=10, line=dict(width=1, color="#ffffff")),
+            selector=dict(mode="markers"),
+            hoverlabel=dict(bgcolor="#011c24", font_size=12, font_color="#f5f5f5"),
+        )
+        fig.update_layout(
+            title={
+                "text": title_text,
+                "font": {
+                    "color": "#f5f5f5",
+                    "family": "'Clash Display Semibold', 'Helvetica Neue'",
+                    "size": 22,
+                },
+            },
+            paper_bgcolor="#0b0c0e",
+            plot_bgcolor="#0b0c0e",
+            font={"color": "#f5f5f5"},
+            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#89bcef", borderwidth=1),
+        )
+        if LOGO_BASE64:
+            fig.add_layout_image(
+                dict(
+                    source="data:image/png;base64," + LOGO_BASE64,
+                    xref="paper",
+                    yref="paper",
+                    x=0.99,
+                    y=0.01,
+                    xanchor="right",
+                    yanchor="bottom",
+                    sizex=0.12,
+                    sizey=0.10,
+                    opacity=0.7,
+                    layer="above",
+                )
+            )
+        fig.update_xaxes(
+            tickformat="%d/%m/%Y",
+            showgrid=True,
+            gridcolor="rgba(137,188,239,0.18)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#89bcef",
+            tickfont_color="#f5f5f5",
+            title_font_color="#a3e3d0",
+        )
+        fig.update_yaxes(
+            showgrid=True,
+            gridcolor="rgba(137,188,239,0.18)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            linecolor="#89bcef",
+            tickfont_color="#f5f5f5",
+            title_font_color="#a3e3d0",
+        )
+        return fig
+
+    if tab == "plyr_vs_plyr":
+        return build_plyr_vs_plyr(
+            dff,
+            jugador_1,
+            jugador_2,
+            game_tag=game_tags,
+            period_tag=period_tags,
+            metricas=metricas,
+        )
+
+    return None
+
+
+def _get_tab_filename(tab, referencia):
+    if tab == "comparativas":
+        referencia_label = referencia if isinstance(referencia, str) else "Grafico"
+        return f"comparativas_{referencia_label.replace(' ', '_')}"
+    if tab == "plyr_vs_plyr":
+        return "plyr_vs_plyr"
+    return tab.replace("_", "-")
+
+
 def _build_graph_download(fig, filename, format):
     if fig is None or not getattr(fig, "data", None):
         logging.warning("Figura vacía o sin datos para descarga de gráfico")
@@ -3330,18 +3443,38 @@ def _build_graph_download(fig, filename, format):
     Output("download-graph", "data"),
     Input("download-graph-png", "n_clicks"),
     Input("download-graph-pdf", "n_clicks"),
+    State("tabs", "value"),
     State("categoria", "value"),
     State("jugador", "value"),
     State("athlete", "value"),
     State("gametag", "value"),
     State("periodtag", "value"),
+    State("fecha-actividad", "date"),
     State("metrica", "value"),
     State("referencia", "value"),
+    State("jugador_1", "value"),
+    State("jugador_2", "value"),
+    State("game_tags", "value"),
+    State("period_tags", "value"),
     prevent_initial_call=True
 )
-def descargar_grafico(n_clicks_png, n_clicks_pdf,
-                      categoria, jugador, athlete,
-                      gametags, periodtags, metricas, referencia):
+def descargar_grafico(
+    n_clicks_png,
+    n_clicks_pdf,
+    tab,
+    categoria,
+    jugador,
+    athlete,
+    gametags,
+    periodtags,
+    fecha_actividad,
+    metricas,
+    referencia,
+    jugador_1,
+    jugador_2,
+    game_tags,
+    period_tags,
+):
 
     if not (n_clicks_png or n_clicks_pdf):
         return no_update
@@ -3351,17 +3484,35 @@ def descargar_grafico(n_clicks_png, n_clicks_pdf,
         return no_update
 
     dff = _filter_graph_dataframe(categoria, jugador, athlete, gametags, periodtags)
+    if fecha_actividad:
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize()
+        dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
+
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
-    referencia_label = referencia if isinstance(referencia, str) else "Grafico"
-    filename_base = referencia_label.replace(" ", "_")
+
+    fig = _create_tab_graph_figure(
+        tab,
+        dff,
+        categoria,
+        metricas,
+        referencia,
+        fecha_actividad=fecha_actividad,
+        jugador_1=jugador_1,
+        jugador_2=jugador_2,
+        game_tags=game_tags,
+        period_tags=period_tags,
+    )
+
+    if fig is None:
+        logging.warning("No hay figura disponible para la pestaña seleccionada: %s", tab)
+        return no_update
+
+    filename_base = _get_tab_filename(tab, referencia)
     filename = f"{filename_base}.{'png' if trigger_id == 'download-graph-png' else 'pdf'}"
+    format_type = "png" if trigger_id == "download-graph-png" else "pdf"
 
-    fig = crear_figura(dff, metricas, referencia)
-    if trigger_id == "download-graph-png":
-        return _build_graph_download(fig, filename, "png") or no_update
-
-    return _build_graph_download(fig, filename, "pdf") or no_update
+    return _build_graph_download(fig, filename, format_type) or no_update
 
 
 @app.callback(

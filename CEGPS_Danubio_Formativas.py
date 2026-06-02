@@ -1667,53 +1667,67 @@ app.layout = html.Div([
 
             # BOTONES DE DESCARGA
 
-            html.Div([
+          html.Div([
+    # Descarga de gráficos
+    html.Button(
+        html.Img(src="/assets/icon-download-png.svg", style={"width":"16px"}),
+        id="download-graph-png",
+        className="download-btn",
+        n_clicks=0
+    ),
+    html.Button(
+        html.Img(src="/assets/icon-download-pdf.svg", style={"width":"16px"}),
+        id="download-graph-pdf",
+        className="download-btn",
+        n_clicks=0
+    ),
 
-                html.Button(
-                    html.Img(
-                        src="/assets/icon-download-png.svg",
-                        style={"width":"16px"}
-                    ),
-                    id="download-graph-png",
-                    className="download-btn"
-                ),
+    # Descarga de tablas (CSV / XLSX / PNG / PDF)
+    html.Button(
+        html.Img(src="/assets/icon-download-csv.svg", style={"width":"16px"}),
+        id="download-table-csv",
+        className="download-btn",
+        n_clicks=0
+    ),
+    html.Button(
+        html.Img(src="/assets/icon-download-xlsx.svg", style={"width":"16px"}),
+        id="download-table-xlsx",
+        className="download-btn",
+        n_clicks=0
+    ),
+    html.Button(
+        html.Img(src="/assets/icon-download-png.svg", style={"width":"16px"}),
+        id="download-table-png",
+        className="download-btn",
+        n_clicks=0
+    ),
+    html.Button(
+        html.Img(src="/assets/icon-download-pdf.svg", style={"width":"16px"}),
+        id="download-table-pdf",
+        className="download-btn",
+        n_clicks=0
+    ),
 
-                html.Button(
-                    html.Img(
-                        src="/assets/icon-download-pdf.svg",
-                        style={"width":"16px"}
-                    ),
-                    id="download-graph-pdf",
-                    className="download-btn"
-                ),
+    # Descarga del informe completo (opcional)
+    html.Button(
+        html.Img(src="/assets/icon-download-pdf.svg", style={"width":"16px"}),
+        id="generate_report",
+        className="download-btn",
+        n_clicks=0
+    ),
 
-                html.Button(
-                    html.Img(
-                        src="/assets/icon-download-csv.svg",
-                        style={"width":"16px"}
-                    ),
-                    id="download-table-csv",
-                    className="download-btn"
-                ),
-
-                html.Button(
-                    html.Img(
-                        src="/assets/icon-download-xlsx.svg",
-                        style={"width":"16px"}
-                    ),
-                    id="download-table-xlsx",
-                    className="download-btn"
-                )
-
-            ],
-
-            style={
-                "display":"flex",
-                "justifyContent":"center",
-                "gap":"12px",
-                "marginTop":"10px",
-                "paddingBottom":"18px"
-            })
+    # Componentes que reciben el archivo para descarga
+    dcc.Download(id="download-graph"),
+    dcc.Download(id="download-table"),
+    dcc.Download(id="download-report")
+],
+style={
+    "display":"flex",
+    "justifyContent":"center",
+    "gap":"12px",
+    "marginTop":"10px",
+    "paddingBottom":"18px"
+})
 
         ],
 
@@ -3518,23 +3532,25 @@ def descargar_grafico(
 
 
 @app.callback(
-    Output("download-table","data"),
-    Input("download-table-png","n_clicks"),
-    Input("download-table-pdf","n_clicks"),
-    Input("download-table-csv","n_clicks"),
-    Input("download-table-xlsx","n_clicks"),
-    Input("tabs","value"),
-    Input("categoria","value"),
-    Input("metrica","value"),
-    Input("referencia","value"),
-    Input("jugador","value"),
-    Input("athlete","value"),
-    Input("gametag","value"),
-    Input("periodtag","value"),
-    Input("fecha-actividad","date"),
+    Output("download-table", "data"),
+    Input("download-table-png", "n_clicks"),
+    Input("download-table-pdf", "n_clicks"),
+    Input("download-table-csv", "n_clicks"),
+    Input("download-table-xlsx", "n_clicks"),
+    State("tabs", "value"),
+    State("categoria", "value"),
+    State("metrica", "value"),
+    State("referencia", "value"),
+    State("jugador", "value"),
+    State("athlete", "value"),
+    State("gametag", "value"),
+    State("periodtag", "value"),
+    State("fecha-actividad", "date"),
     prevent_initial_call=True
 )
 def descargar_tabla(
+    _n_png,
+    _n_pdf,
     _n_csv,
     _n_xlsx,
     tab,
@@ -3547,19 +3563,19 @@ def descargar_tabla(
     periodtags,
     fecha_actividad
 ):
+    """
+    Callback único para descargar tablas en CSV, XLSX, PNG o PDF.
+    - Detecta qué botón disparó el callback usando dash.callback_context.triggered.
+    - Construye df_export según la pestaña seleccionada (tab).
+    - Para PNG/PDF usa plotly.figure_factory.create_table + fig_to_png_bytes + build_graph_pdf_bytes.
+    """
+
     triggered = dash.callback_context.triggered
     if not triggered:
         return no_update
-    
     trigger_id = triggered[0]["prop_id"].split(".")[0]
-    if trigger_id == "download-table-pdf":
-        import plotly.figure_factory as ff
-        fig = ff.create_table(df_export)
-        png_bytes = fig_to_png_bytes(fig, width=1200, height=600, scale=2)
-        pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)
-        return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"tabla_{tab_name}.pdf")
 
-
+    # --- Construir dataframe filtrado ---
     dff = df.copy()
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
@@ -3576,27 +3592,17 @@ def descargar_tabla(
     referencia = referencia or "Category"
     item_name, metadata, printed_at = build_download_metadata(tab, categorias, metricas, referencia)
 
+    # --- Construir df_export según tab ---
     if tab == "comparativas":
         df_export = dff.groupby(referencia)[metricas].mean().reset_index()
     elif tab == "actividad":
         fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
         columnas_requeridas = [
-            "Player Name",
-            "Accel + Decel Efforts",
-            "Accel + Decel Efforts Per Minute",
-            "Distance",
-            "Player Load",
-            "Max Velocity",
-            "Meterage Per Minute",
-            "Player Load Per Minute",
-            "Sprint Distance",
-            "Sprint Efforts",
-            "Sprint Dist Per Min",
-            "High Speed Distance",
-            "High Speed Efforts",
-            "High Speed Distance Per Minute",
-            "Impacts"
+            "Player Name","Accel + Decel Efforts","Accel + Decel Efforts Per Minute","Distance",
+            "Player Load","Max Velocity","Meterage Per Minute","Player Load Per Minute",
+            "Sprint Distance","Sprint Efforts","Sprint Dist Per Min","High Speed Distance",
+            "High Speed Efforts","High Speed Distance Per Minute","Impacts"
         ]
         columnas_presentes = [c for c in columnas_requeridas if c in dff_fecha.columns]
         df_export = dff_fecha[columnas_presentes]
@@ -3604,12 +3610,8 @@ def descargar_tabla(
         fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
         metricas_base = [m for m in metricas if m in dff.columns]
-        resumen_fecha = (
-            dff_fecha.groupby("Player Name")[metricas_base].mean().reset_index()
-        )
-        promedio_jugador = (
-            dff.groupby("Player Name")[metricas_base].mean().reset_index()
-        )
+        resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].mean().reset_index()
+        promedio_jugador = dff.groupby("Player Name")[metricas_base].mean().reset_index()
         df_export = resumen_fecha.merge(
             promedio_jugador,
             on="Player Name",
@@ -3618,14 +3620,8 @@ def descargar_tabla(
         ).fillna(0)
     elif tab == "acwr":
         metricas_acwr = list(dict.fromkeys([
-            "Distance",
-            "Player Load",
-            "Acceleration Efforts",
-            "Sprint Distance",
-            "High Speed Distance",
-            "Sprint Efforts",
-            "High Speed Efforts",
-            "Impacts"
+            "Distance","Player Load","Acceleration Efforts","Sprint Distance",
+            "High Speed Distance","Sprint Efforts","High Speed Efforts","Impacts"
         ]))
         dff["Player Name"] = dff["Player Name"].astype(str).str.strip()
         ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
@@ -3640,6 +3636,7 @@ def descargar_tabla(
             tabla[m + "_ACWR"] = (tabla[f"{m}_7"] / tabla[f"{m}_21"]).round(2)
         df_export = tabla[["Player Name"] + [f"{m}_ACWR" for m in metricas_acwr]].fillna(0)
     else:
+        # por defecto: tabla "long" para series cronológicas u otras pestañas
         df_export = pd.melt(
             dff,
             id_vars=["Date", "Category"],
@@ -3650,7 +3647,7 @@ def descargar_tabla(
 
     tab_name = tab_titles.get(tab, tab)
 
-    # --- exportar según trigger ---
+    # --- CSV ---
     if trigger_id == "download-table-csv":
         buffer = io.BytesIO()
         buffer.write(metadata.encode("utf-8"))
@@ -3659,28 +3656,66 @@ def descargar_tabla(
         buffer.seek(0)
         return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.csv")
 
+    # --- XLSX ---
     if trigger_id == "download-table-xlsx":
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-            df_export.to_excel(writer, sheet_name="Datos", index=False, startrow=7)
-            # agregar metadata y logo si querés
+            worksheet_name = "Datos"
+            df_export.to_excel(writer, sheet_name=worksheet_name, index=False, startrow=7)
+            workbook = writer.book
+            worksheet = writer.sheets[worksheet_name]
+            worksheet.cell(row=1, column=1, value="Danubio Formativas 2026")
+            worksheet.cell(row=2, column=1, value=f"Tabla: {item_name}")
+            worksheet.cell(row=3, column=1, value=f"Impresión: {printed_at}")
+            worksheet.cell(row=4, column=1, value=f"Categorías: {summarize_items(categorias, max_items=10)}")
+            worksheet.cell(row=5, column=1, value=f"Métricas: {summarize_items(metricas, max_items=10)}")
+            worksheet.cell(row=6, column=1, value=f"Comparar por: {referencia}")
+            try:
+                image = ExcelImage(str(LOGO_PATH))
+                image.width = 120
+                image.height = 40
+                worksheet.add_image(image, "G1")
+            except Exception:
+                pass
         buffer.seek(0)
         return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.xlsx")
 
+    # --- PNG (tabla como imagen con Plotly) ---
     if trigger_id == "download-table-png":
-        import plotly.figure_factory as ff
-        fig = ff.create_table(df_export)
-        png_bytes = fig_to_png_bytes(fig, width=1200, height=600, scale=2)
-        return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
+        try:
+            import plotly.figure_factory as ff
+            fig = ff.create_table(df_export)
+            height = max(400, 40 + 20 * len(df_export))
+            png_bytes = fig_to_png_bytes(fig, width=1200, height=height, scale=2)
+            if not png_bytes:
+                logging.warning("No se pudo generar PNG para la tabla %s", tab_name)
+                return no_update
+            return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
+        except Exception as e:
+            logging.exception("Error generando PNG para la tabla %s: %s", tab_name, e)
+            return no_update
 
+    # --- PDF (tabla incrustada en PDF) ---
     if trigger_id == "download-table-pdf":
-        import plotly.figure_factory as ff
-        fig = ff.create_table(df_export)
-        png_bytes = fig_to_png_bytes(fig, width=1200, height=600, scale=2)
-        pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)
-        return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"tabla_{tab_name}.pdf")
+        try:
+            import plotly.figure_factory as ff
+            fig = ff.create_table(df_export)
+            height = max(400, 40 + 20 * len(df_export))
+            png_bytes = fig_to_png_bytes(fig, width=1200, height=height, scale=2)
+            if not png_bytes:
+                logging.warning("No se pudo generar PNG para la tabla %s", tab_name)
+                return no_update
+            pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)
+            if not pdf_bytes:
+                logging.warning("No se pudo generar PDF para la tabla %s", tab_name)
+                return no_update
+            return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"tabla_{tab_name}.pdf")
+        except Exception as e:
+            logging.exception("Error generando PDF para la tabla %s: %s", tab_name, e)
+            return no_update
 
     return no_update
+
 
 if __name__ == "__main__":
     app.run(debug=True)

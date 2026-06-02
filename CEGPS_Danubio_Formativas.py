@@ -1,6 +1,5 @@
 import logging
 import os
-import plotly.io as pio
 import io
 import base64
 import textwrap
@@ -838,48 +837,80 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
     return None
 
 
-def _fig_write_image(fig, width, height, scale):
-    buf = io.BytesIO()
-    fig.write_image(buf, format="png", width=width, height=height, scale=scale)
-    return buf.getvalue()
+def fig_to_html_summary(fig, title=None):
+    title_text = title or getattr(fig, "name", "Gráfico") or "Gráfico"
+    trace_blocks = []
+
+    for idx, trace in enumerate(fig.data):
+        trace_name = str(trace.name or f"Serie {idx + 1}")
+        trace_data = {}
+
+        if hasattr(trace, "x") and trace.x is not None:
+            trace_data["x"] = list(trace.x)
+        if hasattr(trace, "y") and trace.y is not None:
+            trace_data["y"] = list(trace.y)
+        if hasattr(trace, "z") and trace.z is not None:
+            trace_data["z"] = list(trace.z)
+        if hasattr(trace, "labels") and trace.labels is not None:
+            trace_data["labels"] = list(trace.labels)
+        if hasattr(trace, "values") and trace.values is not None:
+            trace_data["values"] = list(trace.values)
+
+        if not trace_data:
+            trace_data["info"] = [str(trace)]
+
+        trace_df = pd.DataFrame(trace_data)
+        trace_html = trace_df.to_html(index=False, border=0, classes="fig-data-table")
+        trace_blocks.append(f"<div class='trace-block'><h2>{html_module.escape(trace_name)}</h2>{trace_html}</div>")
+
+    table_html = "".join(trace_blocks)
+    return f"""
+    <html>
+      <head>
+        <meta charset='utf-8' />
+        <style>
+          body {{ font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #ffffff; color: #222; }}
+          .container {{ max-width: 1200px; margin: 0 auto; }}
+          h1 {{ text-align: center; font-size: 28px; margin-bottom: 24px; }}
+          .trace-block {{ margin-bottom: 28px; }}
+          .trace-block h2 {{ font-size: 20px; margin-bottom: 8px; color: #1b3a73; }}
+          .fig-data-table {{ width: 100%; border-collapse: collapse; margin-bottom: 12px; }}
+          .fig-data-table th, .fig-data-table td {{ padding: 8px 10px; border: 1px solid #ccc; text-align: left; font-size: 12px; }}
+          .fig-data-table th {{ background: #f4f7fb; color: #1b3a73; }}
+        </style>
+      </head>
+      <body>
+        <div class='container'>
+          <h1>{html_module.escape(title_text)}</h1>
+          {table_html}
+        </div>
+      </body>
+    </html>
+    """
 
 
 def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
-    if fig is None or not getattr(fig, "data", None):
+    if fig is None or not getattr(fig, "data", None) or WeasyHTML is None:
         return None
 
-    for method, call in [
-        ("fig.to_image", lambda: fig.to_image(format="png", width=width, height=height, scale=scale)),
-        ("pio.to_image", lambda: pio.to_image(fig, format="png", width=width, height=height, scale=scale)),
-        ("fig.write_image", lambda: _fig_write_image(fig, width=width, height=height, scale=scale)),
-    ]:
-        try:
-            result = call()
-            if result:
-                logging.info(
-                    "Generado PNG para figura %s usando %s, tamaño=%s bytes",
-                    getattr(fig, 'name', '<unnamed>'),
-                    method,
-                    len(result),
-                )
-                return result
-        except Exception as e:
-            logging.warning("%s failed para figura %s: %s", method, getattr(fig, 'name', '<unnamed>'), e)
-
-    logging.warning("No se pudo generar PNG para la figura; revise la instalación del renderer de Plotly.")
-    return None
+    html_content = fig_to_html_summary(fig, title=getattr(fig, "name", "Gráfico") or "Gráfico")
+    try:
+        return WeasyHTML(string=html_content).write_png()
+    except Exception as e:
+        logging.warning("No se pudo generar PNG desde HTML con WeasyPrint: %s", e)
+        return None
 
 
 def fig_to_pdf_bytes(fig, width=1200, height=900, scale=2):
-    if fig is None or not getattr(fig, "data", None):
+    if fig is None or not getattr(fig, "data", None) or WeasyHTML is None:
         return None
 
-    fig_png = fig_to_png_bytes(fig, width=width, height=height, scale=scale)
-    if fig_png is None:
+    html_content = fig_to_html_summary(fig, title=getattr(fig, "name", "Gráfico") or "Gráfico")
+    try:
+        return WeasyHTML(string=html_content).write_pdf()
+    except Exception as e:
+        logging.warning("No se pudo generar PDF desde HTML con WeasyPrint: %s", e)
         return None
-
-    title = getattr(fig, "name", "Grafico") or "Grafico"
-    return build_graph_pdf_bytes(title=title, fig_png=fig_png)
 
 
 def build_graph_pdf_bytes(title, fig_png, page_size=A4, margin=inch * 0.75):
@@ -3355,7 +3386,9 @@ def descargar_grafico(n_clicks_png, n_clicks_pdf,
 
     if trigger_id == "download-graph-png":
         try:
-            png_bytes = fig.to_image(format="png", width=1200, height=800, scale=2)
+            png_bytes = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+            if png_bytes is None:
+                raise ValueError("No se pudo generar PNG con WeasyPrint")
             return dcc.send_bytes(lambda buf: buf.write(png_bytes), "grafico.png")
         except Exception as e:
             logging.warning("No se pudo generar PNG: %s", e)
@@ -3363,33 +3396,9 @@ def descargar_grafico(n_clicks_png, n_clicks_pdf,
 
     elif trigger_id == "download-graph-pdf":
         try:
-            # Exportar figura a PNG en memoria
-            png_bytes = fig.to_image(format="png", width=1200, height=800, scale=2)
-            png_base64 = base64.b64encode(png_bytes).decode("utf-8")
-
-            # Incrustar en HTML
-            html_content = f"""
-            <html>
-              <head>
-                <meta charset="utf-8" />
-                <style>
-                  body {{ font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #ffffff; }}
-                  .container {{ max-width: 1100px; margin: 0 auto; }}
-                  h1 {{ text-align: center; color: #222; font-size: 24px; margin-bottom: 18px; }}
-                  img {{ display: block; margin: 0 auto; max-width: 100%; height: auto; border: 1px solid #ccc; }}
-                </style>
-              </head>
-              <body>
-                <div class="container">
-                  <h1>{graph_title}</h1>
-                  <img src="data:image/png;base64,{png_base64}" alt="{graph_title}" />
-                </div>
-              </body>
-            </html>
-            """
-
-            # Convertir HTML a PDF con WeasyPrint
-            pdf_bytes = WeasyHTML(string=html_content).write_pdf()
+            pdf_bytes = fig_to_pdf_bytes(fig, width=1200, height=800, scale=2)
+            if pdf_bytes is None:
+                raise ValueError("No se pudo generar PDF con WeasyPrint")
             return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), f"grafico_{filename_base}.pdf")
         except Exception as e:
             logging.warning("No se pudo generar PDF: %s", e)

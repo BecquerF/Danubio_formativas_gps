@@ -3285,15 +3285,6 @@ def crear_figura(dff, metricas, referencia):
     return build_comparativas(dff, [], metricas, referencia)
 
 
-def _get_graph_trigger_id():
-    ctx = dash.callback_context
-    if not ctx.triggered:
-        return None
-    if hasattr(ctx, "triggered_id"):
-        return ctx.triggered_id
-    return ctx.triggered[0]["prop_id"].split(".")[0]
-
-
 def _filter_graph_dataframe(categoria, jugador, athlete, gametags, periodtags):
     dff = df.copy()
     if categoria:
@@ -3448,7 +3439,6 @@ def _build_graph_download(fig, filename, format):
 @app.callback(
     Output("download-graph", "data"),
     Input("download-graph-png", "n_clicks"),
-    Input("download-graph-pdf", "n_clicks"),
     State("tabs", "value"),
     State("categoria", "value"),
     State("jugador", "value"),
@@ -3466,7 +3456,6 @@ def _build_graph_download(fig, filename, format):
 )
 def descargar_grafico(
     n_clicks_png,
-    n_clicks_pdf,
     tab,
     categoria,
     jugador,
@@ -3482,11 +3471,7 @@ def descargar_grafico(
     period_tags,
 ):
 
-    if not (n_clicks_png or n_clicks_pdf):
-        return no_update
-
-    trigger_id = _get_graph_trigger_id()
-    if trigger_id not in {"download-graph-png", "download-graph-pdf"}:
+    if not n_clicks_png:
         return no_update
 
     dff = _filter_graph_dataframe(categoria, jugador, athlete, gametags, periodtags)
@@ -3506,15 +3491,13 @@ def descargar_grafico(
         period_tags=period_tags,
     )
 
-    if fig is None:
+    if fig is None or not getattr(fig, "data", None):
         logging.warning("No hay figura disponible para la pestaña seleccionada: %s", tab)
         return no_update
 
     filename_base = _get_tab_filename(tab, referencia)
-    filename = f"{filename_base}.{'png' if trigger_id == 'download-graph-png' else 'pdf'}"
-    format_type = "png" if trigger_id == "download-graph-png" else "pdf"
-
-    return _build_graph_download(fig, filename, format_type) or no_update
+    filename = f"{filename_base}.png"
+    return _build_graph_download(fig, filename, "png") or no_update
 
 
 @app.callback(

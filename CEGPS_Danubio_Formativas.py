@@ -3153,11 +3153,6 @@ def generar_informe(
     fecha_actividad,
     download_format
 ):
-    """
-    Genera un informe combinando todas las secciones seleccionadas.
-    - Si download_format == "png": combina las imágenes de cada sección en un PNG vertical.
-    - Si download_format == "pdf": genera un PDF multipágina incrustando cada figura/table como imagen.
-    """
     if not n_clicks:
         return no_update
 
@@ -3192,10 +3187,15 @@ def generar_informe(
     filtros.append(f"Fecha: {fecha_text}")
     filters_text = " | ".join(filtros)
 
-    # Construcción de secciones con imágenes (PNG bytes) y textos
+    # Construcción de report_sections con imágenes (PNG bytes) y textos
     report_sections = []
     image_bytes_for_png = []
+
     for section in selected_sections:
+        # Evitar intentar construir figura para una sección inválida como "informe"
+        if section == "informe":
+            continue
+
         fig = None
         table_fig = None
         try:
@@ -3210,9 +3210,9 @@ def generar_informe(
             logging.exception("Error construyendo tabla para sección %s", section)
             table_fig = None
 
-        # Generar PNGs intermedios (Kaleido)
-        img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2) if fig else None
-        table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2) if table_fig else None
+        # Generar PNGs intermedios (Kaleido) solo si hay figura/table con datos
+        img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2) if fig and getattr(fig, "data", None) else None
+        table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2) if table_fig and getattr(table_fig, "data", None) else None
 
         if img_bytes:
             image_bytes_for_png.append(img_bytes)
@@ -3230,7 +3230,7 @@ def generar_informe(
             "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados."
         })
 
-    # Relleno de texto por defecto si está vacío
+    # Si no hay texto en ninguna sección, rellenar con texto automático
     if not any(item["text"].strip() for item in report_sections):
         for item in report_sections:
             item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
@@ -3249,9 +3249,8 @@ def generar_informe(
         filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.png"
         return dcc.send_bytes(lambda buf: buf.write(combined_png), filename)
 
-    # Generar PDF multipágina incrustando cada imagen (ReportLab)
+    # Generar PDF multipágina: preferir HTML->PDF si existe, sino ReportLab multi
     try:
-        # Preferir HTML->PDF si existe y está configurado
         if 'build_report_html_pdf' in globals() and callable(build_report_html_pdf):
             pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
             if not pdf_bytes:
@@ -3259,7 +3258,6 @@ def generar_informe(
         else:
             raise Exception("WeasyPrint no disponible o no se desea usar")
     except Exception:
-        # Fallback a ReportLab multi-page (incrusta cada img/table como imagen)
         try:
             pdf_bytes = build_report_pdf_multi(title, author, logo_bytes, report_sections, fecha_text, filters_text)
         except Exception:

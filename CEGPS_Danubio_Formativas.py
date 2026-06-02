@@ -3683,16 +3683,36 @@ def descargar_tabla(
     # --- PNG (tabla como imagen con Plotly) ---
     if trigger_id == "download-table-png":
         try:
-            import plotly.figure_factory as ff
-            fig = ff.create_table(df_export)
-            height = max(400, 40 + 20 * len(df_export))
-            png_bytes = fig_to_png_bytes(fig, width=1200, height=height, scale=2)
-            if not png_bytes:
-                logging.warning("No se pudo generar PNG para la tabla %s", tab_name)
-                return no_update
-            return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
+            # Para tablas que ya tenés como figura: usar la función que construye la figura de la sección
+            # Si la pestaña es una tabla (actividad, actividad_comparativa, actividad_promedios, acwr)
+            if tab in ["actividad", "actividad_comparativa", "actividad_promedios", "acwr"]:
+                # build_section_report_table_fig devuelve una figura Plotly (o None)
+                fig_table = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
+                if fig_table is None or not getattr(fig_table, "data", None):
+                    logging.warning("No hay figura de tabla para la pestaña %s", tab)
+                    return no_update
+                # Exportar la figura a PNG con Kaleido (equivalente a un 'print screen' de la figura)
+                height = max(400, 40 + 20 * len(df_export))
+                png_bytes = fig_to_png_bytes(fig_table, width=1200, height=height, scale=2)
+                if not png_bytes:
+                    logging.warning("No se pudo generar PNG para la figura de la tabla %s", tab_name)
+                    return no_update
+                return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
+
+            else:
+                # Para otras pestañas que muestran gráficos (comparativas, cronologico, plyr_vs_plyr)
+                fig = build_section_report_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
+                if fig is None or not getattr(fig, "data", None):
+                    logging.warning("No hay figura disponible para la pestaña %s", tab)
+                    return no_update
+                png_bytes = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+                if not png_bytes:
+                    logging.warning("No se pudo generar PNG para la figura %s", tab_name)
+                    return no_update
+                return dcc.send_bytes(lambda b: b.write(png_bytes), f"{tab_name}.png")
+
         except Exception as e:
-            logging.exception("Error generando PNG para la tabla %s: %s", tab_name, e)
+            logging.exception("Error generando PNG (Kaleido) para la pestaña %s: %s", tab, e)
             return no_update
 
     # --- PDF (tabla incrustada en PDF) ---

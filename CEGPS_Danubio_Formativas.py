@@ -1007,78 +1007,148 @@ def load_image_reader_from_bytes(image_bytes):
         raise
 
 
-def build_report_pdf(title, author, logo_bytes, sections, fecha_text, filters_text=None):
+def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filters_text=None, page_size=A4, margin=inch * 0.6):
+    """
+    Construye un PDF multi-página que incluye:
+    - Portada con título, autor, fecha y filtros.
+    - Para cada sección: título, texto envuelto y las imágenes (figura y/o tabla) incrustadas.
+    - Las imágenes se escalan manteniendo el aspecto; si no caben en la página se crea una nueva.
+    Devuelve bytes del PDF final.
+    """
     buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-    margin = inch * 0.5
+    c = canvas.Canvas(buffer, pagesize=page_size)
+    width, height = page_size
 
-    y = draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+    # Fuentes a usar (registradas previamente si están disponibles)
+    title_font = "ClashDisplay-Semibold" if "ClashDisplay-Semibold" in pdfmetrics.getRegisteredFontNames() else "Helvetica-Bold"
+    small_font = "Manrope-Light" if "Manrope-Light" in pdfmetrics.getRegisteredFontNames() else "Helvetica"
 
+    def draw_header(c):
+        """Dibuja el encabezado y devuelve la coordenada y disponible debajo del encabezado."""
+        y = height - margin
+        c.setFont(title_font, 18)
+        c.setFillColorRGB(0, 0, 0)
+        c.drawString(margin, y, title)
+        if logo_bytes:
+            try:
+                logo = load_image_reader_from_bytes(logo_bytes)
+                c.drawImage(logo, width - margin - 100, height - margin - 60, width=100, height=60, preserveAspectRatio=True, mask='auto')
+            except Exception:
+                pass
+        y -= 26
+        c.setFont(small_font, 9)
+        c.drawString(margin, y, f"Autor: {author}")
+        c.drawRightString(width - margin, y, f"Fecha: {fecha_text}")
+        y -= 14
+        if filters_text:
+            # draw_wrapped_text devuelve la nueva y después de escribir el texto
+            y = draw_wrapped_text(c, filters_text, margin, y, int(width - 2 * margin), 11, height, margin, header_func=None)
+        y -= 8
+        c.setStrokeColorRGB(0.6, 0.7, 0.8)
+        c.setLineWidth(0.5)
+        c.line(margin, y, width - margin, y)
+        return y - 12
+
+    def draw_footer(c, page_num):
+        """Dibuja el pie de página con número de página."""
+        footer_font = title_font if title_font else "Helvetica-Bold"
+        c.setFont(footer_font, 9)
+        footer_text = f"Creado por {author} — Página {page_num}"
+        c.drawRightString(width - margin, margin / 2, footer_text)
+
+    # --- Portada ---
+    c.setFont(title_font, 28)
+    c.drawCentredString(width / 2, height - 2.5 * inch, title)
+    c.setFont(small_font, 12)
+    c.drawCentredString(width / 2, height - 2.5 * inch - 28, f"Autor: {author} | Fecha: {fecha_text}")
+    if filters_text:
+        c.setFont(small_font, 10)
+        draw_wrapped_text(c, filters_text, margin, height - 2.5 * inch - 60, int(width - 2 * margin), 11, height, margin)
+    c.showPage()
+
+    page_num = 1
+
+    # --- Iterar secciones ---
     for section in sections:
-        if y < margin + 220:
-            c.showPage()
-            y = draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
+        page_num += 1
+        y = draw_header(c)
 
-        section_font = "ClashDisplay-Semibold" if "ClashDisplay-Semibold" in pdfmetrics.getRegisteredFontNames() else "Helvetica-Bold"
-        c.setFont(section_font, 16)
-        c.drawString(margin, y, section["title"])
+        # Título de sección
+        c.setFont(title_font, 16)
+        c.drawString(margin, y, section.get("title", ""))
         y -= 20
 
-        caption = section.get("caption") or f"Figura: {section['title']} con los filtros seleccionados."
-        if section.get("img") is not None:
+        # Texto de la sección (envuelto)
+        c.setFont(small_font, 10)
+        text = section.get("text", "")
+        if text:
+            y = draw_wrapped_text(
+                c,
+                text,
+                margin,
+                y,
+                int(width - 2 * margin),
+                12,
+                height,
+                margin,
+                header_func=None
+            )
+            y -= 8
+
+        # Insertar imágenes: primero figura principal, luego tabla si existe
+        for img_key, caption_key, max_h_default in [
+            ("img", "caption", 420),
+            ("table_img", "table_caption", 360)
+        ]:
+            img_bytes = section.get(img_key)
+            caption = section.get(caption_key, "")
+            if not img_bytes:
+                continue
             try:
-                image = load_image_reader_from_bytes(section["img"])
-                img_width = width - 2 * margin
-                available_height = y - margin - 60
-                img_height = min(420, max(260, available_height))
-                if y - img_height < margin:
+                image = load_image_reader_from_bytes(img_bytes)
+                img_w, img_h = image.getSize()
+                max_w = width - 2 * margin
+                max_h = y - margin
+                # Si no hay suficiente espacio vertical, abrir nueva página y redibujar encabezado
+                if max_h <= 120:
                     c.showPage()
-                    y = draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
-                c.drawImage(image, margin, y - img_height, width=img_width, height=img_height, preserveAspectRatio=True, mask='auto')
-                y -= img_height + 8
-                c.setFont("Helvetica-Oblique", 9)
-                c.drawString(margin, y, caption)
-                y -= 18
+                    page_num += 1
+                    y = draw_header(c)
+                    c.setFont(title_font, 16)
+                    c.drawString(margin, y, section.get("title", ""))
+                    y -= 20
+                    max_h = y - margin
+
+                # limitar altura a un valor razonable para evitar imágenes gigantes
+                max_h = min(max_h, max_h_default)
+                ratio = min(max_w / img_w, max_h / img_h, 1)
+                draw_w = img_w * ratio
+                draw_h = img_h * ratio
+                x = margin + (max_w - draw_w) / 2
+                c.drawImage(image, x, y - draw_h, width=draw_w, height=draw_h, preserveAspectRatio=True, mask='auto')
+                y -= draw_h + 6
+
+                if caption:
+                    c.setFont(small_font, 9)
+                    c.drawString(margin, y, caption)
+                    y -= 14
+
             except Exception as e:
-                logging.warning("No se pudo dibujar imagen de sección %s en PDF: %s", section['title'], e)
+                logging.warning("No se pudo incrustar imagen en sección '%s': %s", section.get("title", ""), e)
+                # dejar un pequeño espacio y continuar
                 y -= 8
 
-        if section.get("table_img") is not None:
-            try:
-                image = load_image_reader_from_bytes(section["table_img"])
-                img_width = width - 2 * margin
-                available_height = y - margin - 60
-                img_height = min(360, max(260, available_height))
-                if y - img_height < margin:
-                    c.showPage()
-                    y = draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
-                c.drawImage(image, margin, y - img_height, width=img_width, height=img_height, preserveAspectRatio=True, mask='auto')
-                y -= img_height + 8
-                c.setFont("Helvetica-Oblique", 9)
-                c.drawString(margin, y, section.get("table_caption", ""))
-                y -= 18
-            except Exception as e:
-                logging.warning("No se pudo dibujar tabla de sección %s en PDF: %s", section['title'], e)
-                y -= 8
+        # Después de insertar contenido, si queda poco espacio, crear nueva página
+        if y < margin + 120:
+            c.showPage()
+            page_num += 1
 
-        content = truncate_to_n_words(section.get("text", ""), 500)
-        y = draw_wrapped_text(
-            c,
-            content,
-            margin,
-            y,
-            width - 2 * margin,
-            13,
-            height,
-            margin,
-            header_func=lambda: draw_page_header_and_footer(c, title, author, fecha_text, filters_text, logo_bytes, width, height, margin)
-        )
-        y -= 18
-
+    # Pie de página en la última página
+    draw_footer(c, page_num)
     c.save()
     buffer.seek(0)
     return buffer.read()
+
 
 
 def build_report_html(title, author, logo_bytes, sections, fecha_text, filters_text=None):
@@ -1668,21 +1738,7 @@ app.layout = html.Div([
             # BOTONES DE DESCARGA
 
           html.Div([
-    # Descarga de gráficos
-    html.Button(
-        html.Img(src="/assets/icon-download-png.svg", style={"width":"16px"}),
-        id="download-graph-png",
-        className="download-btn",
-        n_clicks=0
-    ),
-    html.Button(
-        html.Img(src="/assets/icon-download-pdf.svg", style={"width":"16px"}),
-        id="download-graph-pdf",
-        className="download-btn",
-        n_clicks=0
-    ),
-
-    # Descarga de tablas (CSV / XLSX / PNG / PDF)
+                 # Descarga de tablas (CSV / XLSX / PNG / PDF)
     html.Button(
         html.Img(src="/assets/icon-download-csv.svg", style={"width":"16px"}),
         id="download-table-csv",
@@ -3078,7 +3134,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     State("report_text_cronologico", "value"),
     State("categoria", "value"),
     State("report_fecha_actividad", "date"),
-    State("download_format", "value"),  # 'pdf' o 'png' (agregar control en layout)
+    State("download_format", "value"),  # 'pdf' o 'png'
     prevent_initial_call=True
 )
 def generar_informe(
@@ -3097,22 +3153,29 @@ def generar_informe(
     fecha_actividad,
     download_format
 ):
+    """
+    Genera un informe combinando todas las secciones seleccionadas.
+    - Si download_format == "png": combina las imágenes de cada sección en un PNG vertical.
+    - Si download_format == "pdf": genera un PDF multipágina incrustando cada figura/table como imagen.
+    """
     if not n_clicks:
         return no_update
-    
-    # --- Preparar título, autor y filtros ---
+
+    # Metadatos
     title = (title or "").strip() or build_auto_report_title(categorias, fecha_actividad)
     author = (author or "").strip() or "Desconocido"
     fecha_text = pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y") if fecha_actividad else datetime.now().strftime("%d/%m/%Y")
     selected_sections = sections or ["actividad", "actividad_promedios", "acwr"]
-    
+
+    # Filtrar dataframe
     dff = df.copy()
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
     fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else (dff["Date"].max().normalize() if "Date" in dff.columns else None)
     if fecha_dt is not None and "Date" in dff.columns:
         dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
-        
+
+    # Textos por sección
     section_texts = {
         "actividad": texto_actividad or "",
         "actividad_comparativa": texto_actividad_comparativa or "",
@@ -3122,7 +3185,6 @@ def generar_informe(
         "comparativas": texto_comparativas or "",
         "cronologico": texto_cronologico or ""
     }
-    selected_sections = sections or ["actividad", "actividad_promedios", "acwr"]
 
     filtros = []
     if categorias:
@@ -3130,24 +3192,25 @@ def generar_informe(
     filtros.append(f"Fecha: {fecha_text}")
     filters_text = " | ".join(filtros)
 
-    # Construcción de secciones
+    # Construcción de secciones con imágenes (PNG bytes) y textos
     report_sections = []
-    image_bytes_for_png = []  # lista para combinar si el usuario pide PNG
+    image_bytes_for_png = []
     for section in selected_sections:
         fig = None
         table_fig = None
         try:
             fig = build_section_report_fig(section, dff, fecha_dt, categorias)
-        except Exception as e:
-            logging.exception("Error construyendo figura para sección %s: %s", section, e)
+        except Exception:
+            logging.exception("Error construyendo figura para sección %s", section)
             fig = None
 
         try:
             table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
-        except Exception as e:
-            logging.exception("Error construyendo tabla para sección %s: %s", section, e)
+        except Exception:
+            logging.exception("Error construyendo tabla para sección %s", section)
             table_fig = None
 
+        # Generar PNGs intermedios (Kaleido)
         img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2) if fig else None
         table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2) if table_fig else None
 
@@ -3166,19 +3229,19 @@ def generar_informe(
             "caption": f"Figura: {section_title(section)} con los filtros seleccionados.",
             "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados."
         })
-        
-        if not any(item["text"].strip() for item in report_sections):
-            for item in report_sections:
-                item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
-            
+
+    # Relleno de texto por defecto si está vacío
+    if not any(item["text"].strip() for item in report_sections):
+        for item in report_sections:
+            item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
+
     logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
-    filters_text = " | ".join([f"Categorías: {', '.join(categorias)}"] if categorias else []) + (f" | Fecha: {fecha_text}" if fecha_text else "")
-    
-    # --- Exportar según formato elegido ---
+
+    # Si el usuario pidió PNG combinado
     if (download_format or "pdf").lower() == "png":
         if not image_bytes_for_png:
-                logging.warning("No hay imágenes para combinar en PNG.")
-                return no_update
+            logging.warning("No hay imágenes para combinar en PNG.")
+            return no_update
         combined_png = combine_image_bytes_vertically(image_bytes_for_png)
         if combined_png is None:
             logging.warning("Fallo al combinar imágenes para PNG.")
@@ -3186,16 +3249,22 @@ def generar_informe(
         filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.png"
         return dcc.send_bytes(lambda buf: buf.write(combined_png), filename)
 
-    # Por defecto PDF
+    # Generar PDF multipágina incrustando cada imagen (ReportLab)
     try:
-            # Intentar HTML -> PDF si tenés WeasyPrint y build_report_html_pdf implementado
+        # Preferir HTML->PDF si existe y está configurado
         if 'build_report_html_pdf' in globals() and callable(build_report_html_pdf):
-                pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+            pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+            if not pdf_bytes:
+                raise Exception("build_report_html_pdf devolvió None")
         else:
-                raise Exception("WeasyPrint no disponible, usar ReportLab")
-    except Exception as e:
-        logging.exception("Error generando PDF con HTML/WeasyPrint: %s. Usando ReportLab.", e)
-        pdf_bytes = build_report_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+            raise Exception("WeasyPrint no disponible o no se desea usar")
+    except Exception:
+        # Fallback a ReportLab multi-page (incrusta cada img/table como imagen)
+        try:
+            pdf_bytes = build_report_pdf_multi(title, author, logo_bytes, report_sections, fecha_text, filters_text)
+        except Exception:
+            logging.exception("Error generando PDF con ReportLab")
+            return no_update
 
     if not pdf_bytes:
         logging.warning("No se pudo generar el PDF final.")

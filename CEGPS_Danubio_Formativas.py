@@ -3377,18 +3377,40 @@ def descargar_grafico(_n_png, _n_pdf,
     filename = f"grafico_{tab_name}.{fmt}"
 
     if fmt == "png":
-        png_bytes = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
-        if png_bytes is None:
-            logging.warning("No se pudo generar PNG para la figura del tab %s", tab)
+        try:
+            png_bytes = fig.to_image(format="png", width=1200, height=800, scale=2)
+            return dcc.send_bytes(lambda buf: buf.write(png_bytes), filename)
+        except Exception as e:
+            logging.warning("No se pudo generar PNG para la figura del tab %s: %s", tab, e)
             return no_update
-        return dcc.send_bytes(lambda buf: buf.write(png_bytes), filename)
 
     if fmt == "pdf":
-        pdf_bytes = fig_to_pdf_bytes(fig, width=1200, height=800, scale=2)
-        if pdf_bytes is None:
-            logging.warning("No se pudo generar PDF para la figura del tab %s", tab)
+        try:
+            png_bytes = fig.to_image(format="png", width=1200, height=800, scale=2)
+            png_base64 = base64.b64encode(png_bytes).decode("utf-8")
+            html_content = f"""
+            <html>
+              <head>
+                <style>
+                  body {{ font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #ffffff; }}
+                  .container {{ max-width: 1100px; margin: 0 auto; }}
+                  h1 {{ text-align: center; color: #222; font-size: 22px; margin-bottom: 20px; }}
+                  img {{ display: block; margin: 0 auto; max-width: 100%; height: auto; }}
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <h1>Gráfico generado</h1>
+                  <img src="data:image/png;base64,{png_base64}" alt="Gráfico" />
+                </div>
+              </body>
+            </html>
+            """
+            pdf_bytes = WeasyHTML(string=html_content).write_pdf()
+            return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
+        except Exception as e:
+            logging.warning("No se pudo generar PDF para la figura del tab %s: %s", tab, e)
             return no_update
-        return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
 
     return no_update
 

@@ -56,6 +56,9 @@ def register_pdf_fonts():
 register_pdf_fonts()
 logging.basicConfig(level=logging.INFO)
 
+pdf_bytes = HTML(string=html_content).write_pdf()
+
+
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
 df["Date"] = pd.to_datetime(
@@ -3296,51 +3299,43 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
 
     return fig
 
-                    
+
+def crear_figura(dff, metricas, referencia):
+    metricas = metricas or ["Distance"]
+    metricas = [m for m in metricas if m in dff.columns]
+    if referencia not in dff.columns or not metricas:
+        return go.Figure()
+    return build_comparativas(dff, [], metricas, referencia)
+
 @app.callback(
-    Output("download-graph","data"),
-    Input("download-graph-png","n_clicks"),
-    Input("download-graph-pdf","n_clicks"),
-    State("tabs","value"),
-    State("categoria","value"),
-    State("metrica","value"),
-    State("referencia","value"),
-    State("jugador","value"),
-    State("athlete","value"),
-    State("gametag","value"),
-    State("periodtag","value"),
-    State("fecha-actividad","date"),
-    State("jugador_1","value"),
-    State("jugador_2","value"),
-    State("game_tags","value"),
-    State("period_tags","value"),
+    Output("download-graph", "data"),
+    Input("download-graph-png", "n_clicks"),
+    Input("download-graph-pdf", "n_clicks"),
+    State("categoria", "value"),
+    State("jugador", "value"),
+    State("athlete", "value"),
+    State("gametag", "value"),
+    State("periodtag", "value"),
+    State("metrica", "value"),
+    State("referencia", "value"),
     prevent_initial_call=True
 )
-def descargar_grafico(_n_png, _n_pdf,
-                      tab, categorias, metricas, referencia,
-                      jugadores, athlete, gametags, periodtags, fecha_actividad,
-                      jugador_1, jugador_2, game_tags, period_tags):
-    # Estos valores solo están presentes para que Dash pase los inputs del botón,
-    # el callback determina cuál botón disparó usando callback_context.
-    del _n_png, _n_pdf
+def descargar_grafico(n_clicks_png, n_clicks_pdf,
+                      categoria, jugador, athlete,
+                      gametags, periodtags, metricas, referencia):
 
-    # Detectar qué botón disparó
     ctx = dash.callback_context
     if not ctx.triggered:
         return no_update
+
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
-    if trigger_id not in ["download-graph-png", "download-graph-pdf"]:
-        return no_update
-
-    fmt = "png" if trigger_id == "download-graph-png" else "pdf"
-
-    # Filtrar dataframe
+    # Filtrar dataframe según tus dropdowns
     dff = df.copy()
-    if categorias:
-        dff = dff[dff["Category"].isin(categorias)]
-    if jugadores:
-        dff = dff[dff["Player Name"].isin(jugadores)]
+    if categoria:
+        dff = dff[dff["Category"].isin(categoria)]
+    if jugador:
+        dff = dff[dff["Player Name"].isin(jugador)]
     if athlete:
         dff = dff[dff["Athlete Tags"].isin(athlete)]
     if gametags:
@@ -3351,69 +3346,48 @@ def descargar_grafico(_n_png, _n_pdf,
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
 
-    # Construir figura según tab
-    if tab == "actividad":
-        fig = build_actividad_report_fig(dff, fecha_actividad)
-    elif tab == "actividad_comparativa":
-        fig = build_actividad_comparativa_report_fig(dff, fecha_actividad)
-    elif tab == "actividad_promedios":
-        fig = build_actividad_promedios_report_fig(dff, fecha_actividad)
-    elif tab == "acwr":
-        fig = build_acwr_report_fig(dff)
-    elif tab == "plyr_vs_plyr":
-        fig = build_plyr_vs_plyr(dff, jugador_1, jugador_2, game_tags, period_tags)
-    elif tab == "comparativas":
-        fig = build_comparativas(dff, categorias, metricas, referencia)
-    elif tab == "cronologico":
-        fig = build_cronologico(dff, categorias, metricas, referencia)
-    else:
-        return no_update
+    # Crear figura
+    fig = crear_figura(dff, metricas, referencia)
 
-    if fig is None or not getattr(fig, "data", None):
-        logging.warning("No hay figura disponible para exportar en el tab %s", tab)
-        return no_update
-
-    tab_name = tab_titles.get(tab, tab).replace(" ", "_")
-    filename = f"grafico_{tab_name}.{fmt}"
-
-    if fmt == "png":
+    if trigger_id == "download-graph-png":
         try:
             png_bytes = fig.to_image(format="png", width=1200, height=800, scale=2)
-            return dcc.send_bytes(lambda buf: buf.write(png_bytes), filename)
+            return dcc.send_bytes(lambda buf: buf.write(png_bytes), "grafico.png")
         except Exception as e:
-            logging.warning("No se pudo generar PNG para la figura del tab %s: %s", tab, e)
+            logging.warning("No se pudo generar PNG: %s", e)
             return no_update
 
-    if fmt == "pdf":
+    elif trigger_id == "download-graph-pdf":
         try:
+            # Exportar figura a PNG en memoria
             png_bytes = fig.to_image(format="png", width=1200, height=800, scale=2)
             png_base64 = base64.b64encode(png_bytes).decode("utf-8")
+
+            # Incrustar en HTML
             html_content = f"""
             <html>
               <head>
                 <style>
-                  body {{ font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #ffffff; }}
-                  .container {{ max-width: 1100px; margin: 0 auto; }}
-                  h1 {{ text-align: center; color: #222; font-size: 22px; margin-bottom: 20px; }}
-                  img {{ display: block; margin: 0 auto; max-width: 100%; height: auto; }}
+                  body {{ font-family: Arial; }}
+                  h1 {{ text-align: center; }}
+                  img {{ display: block; margin: auto; }}
                 </style>
               </head>
               <body>
-                <div class="container">
-                  <h1>Gráfico generado</h1>
-                  <img src="data:image/png;base64,{png_base64}" alt="Gráfico" />
-                </div>
+                <h1>Gráfico generado</h1>
+                <img src="data:image/png;base64,{png_base64}" />
               </body>
             </html>
             """
-            pdf_bytes = WeasyHTML(string=html_content).write_pdf()
-            return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
+
+            # Convertir HTML a PDF con WeasyPrint
+            pdf_bytes = HTML(string=html_content).write_pdf()
+            return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), "grafico.pdf")
         except Exception as e:
-            logging.warning("No se pudo generar PDF para la figura del tab %s: %s", tab, e)
+            logging.warning("No se pudo generar PDF: %s", e)
             return no_update
 
-    return no_update
-
+    return no_update 
 
 @app.callback(
     Output("download-table","data"),

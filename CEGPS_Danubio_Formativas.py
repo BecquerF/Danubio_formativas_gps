@@ -3718,23 +3718,44 @@ def descargar_tabla(
     # --- PDF (tabla incrustada en PDF) ---
     if trigger_id == "download-table-pdf":
         try:
-            import plotly.figure_factory as ff
-            fig = ff.create_table(df_export)
-            height = max(400, 40 + 20 * len(df_export))
-            png_bytes = fig_to_png_bytes(fig, width=1200, height=height, scale=2)
+        # Determinar la figura que se muestra en la UI para esta pestaña
+        # Para pestañas que muestran tablas, usamos la función que construye la figura de tabla
+            if tab in ["actividad", "actividad_comparativa", "actividad_promedios", "acwr"]:
+                fig_to_export = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
+            else:
+                # Para pestañas que muestran gráficos
+                fig_to_export = build_section_report_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
+
+            if fig_to_export is None or not getattr(fig_to_export, "data", None):
+                logging.warning("No hay figura disponible para generar PDF en la pestaña %s", tab)
+                return no_update
+
+            # Convertir la figura Plotly a PNG con Kaleido (equivalente a un 'print screen' de la figura)
+            # Ajustar altura según contenido (tablas largas necesitan más alto)
+            height = 800
+            if tab in ["actividad", "actividad_comparativa", "actividad_promedios", "acwr"]:
+                # calcular altura aproximada según filas
+                try:
+                    filas = len(df_export) if hasattr(df_export, "__len__") else 0
+                    height = max(600, 40 + 20 * filas)
+                except Exception:
+                    height = 800
+
+            png_bytes = fig_to_png_bytes(fig_to_export, width=1200, height=height, scale=2)
             if not png_bytes:
-                logging.warning("No se pudo generar PNG para la tabla %s", tab_name)
+                logging.warning("No se pudo generar PNG intermedio para la pestaña %s", tab_name)
                 return no_update
-            pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)
+
+            # Incrustar el PNG en un PDF (la imagen queda como contenido del PDF)
+            pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}" if tab in ["actividad", "actividad_comparativa", "actividad_promedios", "acwr"] else f"Gráfico {tab_name}", png_bytes)
             if not pdf_bytes:
-                logging.warning("No se pudo generar PDF para la tabla %s", tab_name)
+                logging.warning("No se pudo generar PDF para la pestaña %s", tab_name)
                 return no_update
+
             return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"tabla_{tab_name}.pdf")
         except Exception as e:
-            logging.exception("Error generando PDF para la tabla %s: %s", tab_name, e)
+            logging.exception("Error generando PDF para la pestaña %s: %s", tab_name, e)
             return no_update
-
-    return no_update
 
 
 if __name__ == "__main__":

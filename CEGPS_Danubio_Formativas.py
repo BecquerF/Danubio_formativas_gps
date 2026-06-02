@@ -3400,6 +3400,12 @@ def _create_tab_graph_figure(
         )
         return fig
 
+    if tab == "actividad_promedios":
+        if not fecha_actividad:
+            return None
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize()
+        return build_actividad_promedios_report_fig(dff, fecha_dt)
+
     if tab == "plyr_vs_plyr":
         return build_plyr_vs_plyr(
             dff,
@@ -3484,10 +3490,6 @@ def descargar_grafico(
         return no_update
 
     dff = _filter_graph_dataframe(categoria, jugador, athlete, gametags, periodtags)
-    if fecha_actividad:
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize()
-        dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
-
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
 

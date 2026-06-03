@@ -11,6 +11,28 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 from dash import dcc, no_update
+from selenium import webdriver
+import selenium
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+
+driver = selenium.webdriver.chrome(ChromeDriverManager().install())
+driver.get("https://www.python.org")
+print(driver.title)
+driver.quit()
+
+
+
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+driver = selenium.webdriver.Chrome(ChromeDriverManager().install(), options=options)
+
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+
 import dash
 try:
     import dash_auth
@@ -37,6 +59,8 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
+import os
+import time
 
 BASE_DIR = Path(__file__).resolve().parent
 FONT_DIR = BASE_DIR / "assets" / "fonts"
@@ -838,15 +862,72 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
     return None
 
 
-def fig_to_png_bytes(fig, width=1200, height=900, scale=2):
+def fig_to_png_bytes(fig, width=1200, height=900, scale=2, timeout=10):
     """Convierte una figura Plotly en PNG usando Kaleido."""
     if fig is None or not getattr(fig, "data", None):
         return None
+
+    # 1) Kaleido (preferido)
     try:
-        return pio.to_image(fig, format="png", width=width, height=height, scale=scale)
+        import plotly.io as pio
+        png = pio.to_image(fig, format="png", width=width, height=height, scale=scale)
+        if png:
+            return png
     except Exception as e:
-        logging.warning("No se pudo generar PNG con Kaleido: %s", e)
-        return None
+        logging.debug("Kaleido falló: %s", e)
+
+    # 2) WeasyPrint: renderizar HTML de la figura y convertir a PNG vía PDF intermedio
+    try:
+        if WeasyHTML is not None:
+            html_str = fig.to_html(full_html=False, include_plotlyjs="cdn")
+            # envolver en un HTML simple para WeasyPrint
+            wrapper = f"""
+            <html><head><meta charset="utf-8"></head>
+            <body style="background:white;margin:0;padding:0;">
+            {html_str}
+            </body></html>
+            """
+            # WeasyPrint puede generar PDF; para PNG generamos PDF y luego lo convertimos con Pillow
+            pdf_bytes = WeasyHTML(string=wrapper).write_pdf()
+            # convertir primera página del PDF a PNG con Pillow (si Pillow soporta)
+            try:
+                from pdf2image import convert_from_bytes
+                pages = convert_from_bytes(pdf_bytes)
+                buf = io.BytesIO()
+                pages[0].save(buf, format="PNG")
+                return buf.getvalue()
+            except Exception:
+                # si no está pdf2image, devolver el PDF bytes (caller puede usar build_graph_pdf_bytes)
+                logging.debug("pdf2image no disponible para convertir PDF->PNG")
+    except Exception as e:
+        logging.debug("WeasyPrint fallback falló: %s", e)
+
+    # 3) Selenium screenshot (solo si la app es accesible y Selenium está instalado)
+    try:
+        
+        chrome_options = Options()
+        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        driver = selenium.webdriver.Chrome(options=chrome_options)
+        try:
+            # Debés exponer la app (ej: http://127.0.0.1:8050) y conocer el selector del div del gráfico
+            app_url = os.environ.get("APP_URL", "http://127.0.0.1:8050")
+            graph_selector = os.environ.get("GRAPH_SELECTOR", "#report_figures_preview .tab-graph")  # ajustar
+            driver.set_page_load_timeout(timeout)
+            driver.get(app_url)
+            time.sleep(1.0)
+            el = driver.find_element(By.CSS_SELECTOR, graph_selector)
+            png = el.screenshot_as_png
+            return png
+        finally:
+            driver.quit()
+    except Exception as e:
+        logging.debug("Selenium fallback no disponible o falló: %s", e)
+
+    # Si todo falla
+    logging.warning("No se pudo generar PNG para la figura (todos los fallbacks fallaron).")
+    return None
 
 def build_graph_pdf_from_fig(fig, width=1200, height=900, scale=2):
 
@@ -2947,7 +3028,7 @@ def actualizar_tab(
             html.Div(id="report_figures_preview", style={"display":"grid","gridTemplateColumns":"repeat(auto-fit,minmax(320px,1fr))","gap":"20px","marginBottom":"24px"}),
             html.Div([
                 html.Button("Generar PDF", id="generate_report", n_clicks=0, style={"width":"100%","padding":"16px","borderRadius":"18px","border":"none","background":"#89bcef","color":"#0b0c0e","fontWeight":"700","cursor":"pointer"})
-            ], style={"maxWidth":"320px","margin":"0 auto"}),
+            ], style={"maxWidth":"320px","margin":"0 auto"}, style_selected={"background":"#48f788","color":"#0b0c0e"}),
             html.Div("Al hacer clic se generará un PDF con secciones seleccionadas, texto y gráficos incrustados.", style={"color":"#dcdcdc","fontSize":"12px","textAlign":"center","marginTop":"12px"})
         ], style={"padding":"24px","background":"#0b0c0e","border":"1px solid rgba(137,188,239,0.18)","borderRadius":"28px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)","maxWidth":"1180px","margin":"20px auto"})
 

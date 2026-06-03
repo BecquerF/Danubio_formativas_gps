@@ -1,4 +1,5 @@
 chromium-browser
+chromium-chromedriver
 fonts-liberation
 libasound2
 libatk-bridge2.0-0

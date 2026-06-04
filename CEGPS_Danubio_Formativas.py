@@ -83,10 +83,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
-df["Date"] = pd.to_datetime(
-    df["Date"],
-    errors="coerce"
-)
+df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d")
 
 if "Duration" in df.columns:
     if pd.api.types.is_numeric_dtype(df["Duration"]):
@@ -3907,5 +3904,7 @@ def descargar_tabla(
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8050))
+    app.run_server(host="0.0.0.0", port=port, debug=False)
     app.run(debug=True)
 

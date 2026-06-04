@@ -917,7 +917,8 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2, timeout=10):
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        driver = webdriver.Chrome(options=chrome_options)
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
         try:
             # Debés exponer la app (ej: http://127.0.0.1:8050) y conocer el selector del div del gráfico
             app_url = os.environ.get("APP_URL", "http://127.0.0.1:8050")

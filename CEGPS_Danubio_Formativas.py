@@ -14,9 +14,9 @@ from dash import dcc, no_update
 
 # Selenium y WebDriver Manager
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
 # Configuración de Selenium en modo headless (para Render/Docker)
@@ -87,7 +87,13 @@ logging.basicConfig(level=logging.INFO)
 
 # Leer datos
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
-df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d")
+df["Date"] = pd.to_datetime(
+    df["Date"],
+    format="%d-%m-%y",   # día-mes-año con dos dígitos
+    errors="coerce"
+)
+
+
 
 if "Duration" in df.columns:
     if pd.api.types.is_numeric_dtype(df["Duration"]):

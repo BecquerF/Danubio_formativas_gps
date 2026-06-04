@@ -11,50 +11,60 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 from dash import dcc, no_update
-from selenium import webdriver
-import selenium
+
+# Selenium y WebDriver Manager
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
 
+# Configuración de Selenium en modo headless (para Render/Docker)
 options = Options()
 options.add_argument("--headless")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
-driver = selenium.webdriver.Chrome(ChromeDriverManager().install(), options=options)
+driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+driver.get("https://www.python.org")
+print(driver.title)
+driver.quit()
 
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-
+# Dash y autenticación
 import dash
 try:
     import dash_auth
 except ImportError:
     dash_auth = None
+
+# WeasyPrint
 try:
     from weasyprint import HTML as WeasyHTML
 except Exception as e:
     logging.warning("WeasyPrint no está disponible: %s", e)
     WeasyHTML = None
+
+# Dash componentes
 from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
+
+# Excel y ReportLab
 from openpyxl.drawing.image import Image as ExcelImage
-from fileinput import filename
 from datetime import datetime
 try:
     from PIL import Image as PILImage
 except ImportError:
     PILImage = None
+
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4, inch
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
-import os
 import time
+
 
 BASE_DIR = Path(__file__).resolve().parent
 FONT_DIR = BASE_DIR / "assets" / "fonts"
@@ -259,6 +269,7 @@ def build_chart_title(tab, categorias, metricas, referencia):
     metrica_text = summarize_items(metricas, max_items=3)
 
     if tab == "comparativas":
+        
         title = f"Comparativo de {metrica_text} por {referencia}"
         if categorias:
             title += f" - Categoría(s): {categoria_text}"
@@ -900,7 +911,7 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2, timeout=10):
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        driver = selenium.webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(options=chrome_options)
         try:
             # Debés exponer la app (ej: http://127.0.0.1:8050) y conocer el selector del div del gráfico
             app_url = os.environ.get("APP_URL", "http://127.0.0.1:8050")
@@ -2187,64 +2198,32 @@ def toggle_actividad_fecha(tab):
     return {"display": "none"}
 
 @app.callback(
-    Output("contenido-tab","children"),
-
-    Input("tabs","value"),
-    Input("categoria","value"),
-    Input("metrica","value"),
-    Input("referencia","value"),
-    Input("jugador","value"),
-    Input("athlete","value"),
-    Input("gametag","value"),
-    Input("periodtag","value"),
-    Input("fecha-actividad","date")
+    Output("contenido-tab", "children"),
+    Input("tabs", "value"),
+    Input("categoria", "value"),
+    Input("metrica", "value"),
+    Input("referencia", "value"),
+    Input("jugador", "value"),
+    Input("athlete", "value"),
+    Input("gametag", "value"),
+    Input("periodtag", "value"),
+    Input("fecha-actividad", "date")
 )
+def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, gametags, periodtags, fecha_actividad):
+    dff = df.copy()
+    # Filtros dinámicos
+    if categorias: dff = dff[dff["Category"].isin(categorias)]
+    if jugadores: dff = dff[dff["Player Name"].isin(jugadores)]
+    if athlete: dff = dff[dff["Athlete Tags"].isin(athlete)]
+    if gametags: dff = dff[dff["Game Tags"].isin(gametags)]
+    if periodtags: dff = dff[dff["Period Tags"].isin(periodtags)]
 
-def actualizar_tab(
-
-    tab,
-    categorias,
-    metricas,
-    referencia,
-    jugadores,
-    athlete,
-    gametags,
-    periodtags,
-    fecha_actividad
-):
-
-    dff=df.copy()
-
-    if categorias:
-        dff=dff[
-            dff["Category"].isin(categorias)
-        ]
-
-    if jugadores:
-        dff=dff[
-            dff["Player Name"].isin(jugadores)
-        ]
-
-    if athlete:
-        dff=dff[
-            dff["Athlete Tags"].isin(athlete)
-        ]
-
-    if gametags:
-        dff=dff[
-            dff["Game Tags"].isin(gametags)
-        ]
-
-    if periodtags:
-        dff=dff[
-            dff["Period Tags"].isin(periodtags)
-        ]
-
+    # Defaults
     metricas = metricas or ["Distance"]
     metricas = [m for m in metricas if m in dff.columns]
     referencia = referencia or "Category"
-    title_text = build_chart_title(tab, categorias, metricas, referencia)
-
+    fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+    
     # COMPARATIVAS
     if tab == "comparativas":
         fig = build_comparativas(dff, categorias, metricas, referencia)
@@ -2836,25 +2815,25 @@ def actualizar_tab(
             "borderRadius": "24px",
             "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
 })
-
+    
         # CRONOLÓGICO
     elif tab == "cronologico": 
         cronologico = pd.melt(
         dff,
-        id_vars=["Date", "Category"],
-        value_vars=metricas,
-        var_name="Métrica",
-        value_name="Valor"
-        ) 
+            id_vars=["Date", "Category"],
+            value_vars=metricas,
+            var_name="Métrica",
+            value_name="Valor"
+            )  
         fig = px.scatter(
             cronologico,
-        x="Date",
-        y="Valor",
-        color="Category",
-        symbol="Métrica",
-        color_discrete_sequence=["#edf1f2", "#f1a3fd", "#a3e3d0", "#89bcef", "#48f788", "#f96e83"],
-        template="plotly_dark"
-    )
+            x="Date",
+            y="Valor",
+            color="Category",
+            symbol="Métrica",
+            color_discrete_sequence=["#edf1f2", "#f1a3fd", "#a3e3d0", "#89bcef", "#48f788", "#f96e83"],
+            template="plotly_dark"
+        )
 
         fig.update_traces(
             marker=dict(size=10, line=dict(width=1, color="#ffffff")),
@@ -2864,7 +2843,7 @@ def actualizar_tab(
 
         fig.update_layout(
             title={
-                "text": title_text,
+                "text": 'Cronológico',  # 👈 ahora sí existe
                 "font": {
                     "color": "#f5f5f5",
                     "family": "'Clash Display Semibold', 'Helvetica Neue'",
@@ -3228,7 +3207,7 @@ def generar_informe(
     if not n_clicks:
         return no_update
 
-    # Metadatos
+    # Metadatos básicos
     title = (title or "").strip() or build_auto_report_title(categorias, fecha_actividad)
     author = (author or "").strip() or "Desconocido"
     fecha_text = pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y") if fecha_actividad else datetime.now().strftime("%d/%m/%Y")
@@ -3253,43 +3232,26 @@ def generar_informe(
         "cronologico": texto_cronologico or ""
     }
 
-    filtros = []
-    if categorias:
-        filtros.append(f"Categorías: {', '.join(categorias)}")
-    filtros.append(f"Fecha: {fecha_text}")
-    filters_text = " | ".join(filtros)
+    filters_text = " | ".join(
+        ([f"Categorías: {', '.join(categorias)}"] if categorias else []) + [f"Fecha: {fecha_text}"]
+    )
 
-    # Construcción de report_sections con imágenes (PNG bytes) y textos
+    # Construcción de secciones
     report_sections = []
     image_bytes_for_png = []
 
     for section in selected_sections:
-        # Evitar intentar construir figura para una sección inválida como "informe"
         if section == "informe":
             continue
 
-        fig = None
-        table_fig = None
-        try:
-            fig = build_section_report_fig(section, dff, fecha_dt, categorias)
-        except Exception:
-            logging.exception("Error construyendo figura para sección %s", section)
-            fig = None
+        fig = build_section_report_fig(section, dff, fecha_dt, categorias)
+        table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
 
-        try:
-            table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
-        except Exception:
-            logging.exception("Error construyendo tabla para sección %s", section)
-            table_fig = None
-
-        # Generar PNGs intermedios (Kaleido) solo si hay figura/table con datos
         img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2) if fig and getattr(fig, "data", None) else None
         table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2) if table_fig and getattr(table_fig, "data", None) else None
 
-        if img_bytes:
-            image_bytes_for_png.append(img_bytes)
-        if table_bytes:
-            image_bytes_for_png.append(table_bytes)
+        if img_bytes: image_bytes_for_png.append(img_bytes)
+        if table_bytes: image_bytes_for_png.append(table_bytes)
 
         section_note = "" if (img_bytes or table_bytes) else "\nNota: no se generó ninguna imagen o tabla para esta sección."
 
@@ -3302,33 +3264,28 @@ def generar_informe(
             "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados."
         })
 
-    # Si no hay texto en ninguna sección, rellenar con texto automático
+    # Rellenar texto automático si no hay ninguno
     if not any(item["text"].strip() for item in report_sections):
         for item in report_sections:
             item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
 
     logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
 
-    # Si el usuario pidió PNG combinado
+    # Exportar como PNG combinado
     if (download_format or "pdf").lower() == "png":
         if not image_bytes_for_png:
             logging.warning("No hay imágenes para combinar en PNG.")
             return no_update
         combined_png = combine_image_bytes_vertically(image_bytes_for_png)
-        if combined_png is None:
+        if not combined_png:
             logging.warning("Fallo al combinar imágenes para PNG.")
             return no_update
         filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.png"
         return dcc.send_bytes(lambda buf: buf.write(combined_png), filename)
 
-    # Generar PDF multipágina: preferir HTML->PDF si existe, sino ReportLab multi
+    # Exportar como PDF multipágina
     try:
-        if 'build_report_html_pdf' in globals() and callable(build_report_html_pdf):
-            pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
-            if not pdf_bytes:
-                raise Exception("build_report_html_pdf devolvió None")
-        else:
-            raise Exception("WeasyPrint no disponible o no se desea usar")
+        pdf_bytes = build_report_html_pdf(title, author, logo_bytes, report_sections, fecha_text, filters_text)
     except Exception:
         try:
             pdf_bytes = build_report_pdf_multi(title, author, logo_bytes, report_sections, fecha_text, filters_text)
@@ -3389,19 +3346,23 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     colores = ["#48f788", "#89bcef"]
 
     for idx, row in radar_data_norm.iterrows():
+        hex_color = colores[idx % len(colores)]
+        rgb = tuple(int(hex_color[1+i:3+i], 16) for i in (0, 2, 4))
+        fill_rgba = f"rgba({rgb[0]},{rgb[1]},{rgb[2]},0.25)"
+
         fig.add_trace(go.Scatterpolar(
             r=row[metricas_radar].values.flatten().tolist(),
             theta=metricas_radar,
             fill="toself",
             name=row["Player Name"],
             mode="markers+lines",
-            marker=dict(size=6, color=colores[idx % len(colores)]),
-            line=dict(color=colores[idx % len(colores)], width=2),
-             fillcolor=f"rgba{tuple(int(colores[idx % len(colores)][1+i:3+i],16) for i in (0,2,4)) + (0.25,)}",
-            text=[f"{val:.2f}" for val in row[metricas_radar].values.flatten().tolist()], 
+            marker=dict(size=6, color=hex_color),
+            line=dict(color=hex_color, width=2),
+            fillcolor=fill_rgba,
+            text=[f"{val:.2f}" for val in row[metricas_radar].values.flatten().tolist()],
             textposition="top center",
             textfont=dict(size=10, color="#edf1f2")
-            ))
+        ))
 
     # Estilo
     fig.update_layout(
@@ -3479,19 +3440,19 @@ def _create_tab_graph_figure(
     metricas = metricas or ["Distance"]
     metricas = [m for m in metricas if m in dff.columns]
     referencia = referencia or "Category"
-
     if tab == "comparativas":
+        
         return build_comparativas(dff, categorias or [], metricas, referencia)
 
     if tab == "cronologico":
         title_text = build_chart_title(tab, categorias, metricas, referencia)
         cronologico = pd.melt(
-            dff,
-            id_vars=["Date", "Category"],
-            value_vars=metricas,
-            var_name="Métrica",
-            value_name="Valor",
-        )
+                dff,
+                id_vars=["Date", "Category"],
+                value_vars=metricas,
+                var_name="Métrica",
+                value_name="Valor"
+            ) 
         fig = px.scatter(
             cronologico,
             x="Date",
@@ -3499,26 +3460,31 @@ def _create_tab_graph_figure(
             color="Category",
             symbol="Métrica",
             color_discrete_sequence=["#edf1f2", "#f1a3fd", "#a3e3d0", "#89bcef", "#48f788", "#f96e83"],
-            template="plotly_dark",
+            template="plotly_dark"
         )
         fig.update_traces(
             marker=dict(size=10, line=dict(width=1, color="#ffffff")),
             selector=dict(mode="markers"),
             hoverlabel=dict(bgcolor="#011c24", font_size=12, font_color="#f5f5f5"),
         )
+
         fig.update_layout(
             title={
-                "text": title_text,
+                "text": title_text,  # 👈 ahora sí existe
                 "font": {
                     "color": "#f5f5f5",
                     "family": "'Clash Display Semibold', 'Helvetica Neue'",
-                    "size": 22,
-                },
+                    "size": 22
+                }
             },
             paper_bgcolor="#0b0c0e",
             plot_bgcolor="#0b0c0e",
             font={"color": "#f5f5f5"},
-            legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#89bcef", borderwidth=1),
+            legend=dict(
+                bgcolor="rgba(11,12,14,0.75)",
+                bordercolor="#89bcef",
+                borderwidth=1
+            )
         )
         if LOGO_BASE64:
             fig.add_layout_image(
@@ -3640,7 +3606,6 @@ def descargar_grafico(
     game_tags,
     period_tags,
 ):
-
     if not n_clicks_png:
         return no_update
 
@@ -3670,6 +3635,15 @@ def descargar_grafico(
     return _build_graph_download(fig, filename, "png") or no_update
 
 
+
+def _calc_table_height(df_export, base=400, row_height=20):
+    """Calcula altura dinámica para exportar tablas según número de filas."""
+    try:
+        filas = len(df_export) if hasattr(df_export, "__len__") else 0
+        return max(base, 40 + row_height * filas)
+    except Exception:
+        return base
+
 @app.callback(
     Output("download-table", "data"),
     Input("download-table-png", "n_clicks"),
@@ -3688,48 +3662,27 @@ def descargar_grafico(
     prevent_initial_call=True
 )
 def descargar_tabla(
-    _n_png,
-    _n_pdf,
-    _n_csv,
-    _n_xlsx,
-    tab,
-    categorias,
-    metricas,
-    referencia,
-    jugadores,
-    athlete,
-    gametags,
-    periodtags,
-    fecha_actividad
+    _n_png, _n_pdf, _n_csv, _n_xlsx,
+    tab, categorias, metricas, referencia,
+    jugadores, athlete, gametags, periodtags, fecha_actividad
 ):
-    """
-    Callback único para descargar tablas en CSV, XLSX, PNG o PDF.
-    - Detecta qué botón disparó el callback usando dash.callback_context.triggered.
-    - Construye df_export según la pestaña seleccionada (tab).
-    - Para PNG/PDF usa plotly.figure_factory.create_table + fig_to_png_bytes + build_graph_pdf_bytes.
-    """
-
-    triggered = dash.callback_context.triggered
-    if not triggered:
+    ctx = dash.callback_context
+    if not ctx.triggered:
         return no_update
-    trigger_id = triggered[0]["prop_id"].split(".")[0]
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
     # --- Construir dataframe filtrado ---
     dff = df.copy()
-    if categorias:
-        dff = dff[dff["Category"].isin(categorias)]
-    if jugadores:
-        dff = dff[dff["Player Name"].isin(jugadores)]
-    if athlete:
-        dff = dff[dff["Athlete Tags"].isin(athlete)]
-    if gametags:
-        dff = dff[dff["Game Tags"].isin(gametags)]
-    if periodtags:
-        dff = dff[dff["Period Tags"].isin(periodtags)]
+    if categorias: dff = dff[dff["Category"].isin(categorias)]
+    if jugadores: dff = dff[dff["Player Name"].isin(jugadores)]
+    if athlete: dff = dff[dff["Athlete Tags"].isin(athlete)]
+    if gametags: dff = dff[dff["Game Tags"].isin(gametags)]
+    if periodtags: dff = dff[dff["Period Tags"].isin(periodtags)]
 
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
     item_name, metadata, printed_at = build_download_metadata(tab, categorias, metricas, referencia)
+    tab_name = tab_titles.get(tab, tab)
 
     # --- Construir df_export según tab ---
     if tab == "comparativas":
@@ -3751,17 +3704,10 @@ def descargar_tabla(
         metricas_base = [m for m in metricas if m in dff.columns]
         resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].mean().reset_index()
         promedio_jugador = dff.groupby("Player Name")[metricas_base].mean().reset_index()
-        df_export = resumen_fecha.merge(
-            promedio_jugador,
-            on="Player Name",
-            how="outer",
-            suffixes=("", "_Promedio")
-        ).fillna(0)
+        df_export = resumen_fecha.merge(promedio_jugador, on="Player Name", how="outer", suffixes=("", "_Promedio")).fillna(0)
     elif tab == "acwr":
-        metricas_acwr = list(dict.fromkeys([
-            "Distance","Player Load","Acceleration Efforts","Sprint Distance",
-            "High Speed Distance","Sprint Efforts","High Speed Efforts","Impacts"
-        ]))
+        metricas_acwr = ["Distance","Player Load","Acceleration Efforts","Sprint Distance",
+                         "High Speed Distance","Sprint Efforts","High Speed Efforts","Impacts"]
         dff["Player Name"] = dff["Player Name"].astype(str).str.strip()
         ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
         ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
@@ -3775,16 +3721,7 @@ def descargar_tabla(
             tabla[m + "_ACWR"] = (tabla[f"{m}_7"] / tabla[f"{m}_21"]).round(2)
         df_export = tabla[["Player Name"] + [f"{m}_ACWR" for m in metricas_acwr]].fillna(0)
     else:
-        # por defecto: tabla "long" para series cronológicas u otras pestañas
-        df_export = pd.melt(
-            dff,
-            id_vars=["Date", "Category"],
-            value_vars=metricas,
-            var_name="Métrica",
-            value_name="Valor"
-        )
-
-    tab_name = tab_titles.get(tab, tab)
+        df_export = pd.melt(dff, id_vars=["Date", "Category"], value_vars=metricas, var_name="Métrica", value_name="Valor")
 
     # --- CSV ---
     if trigger_id == "download-table-csv":
@@ -3801,7 +3738,6 @@ def descargar_tabla(
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             worksheet_name = "Datos"
             df_export.to_excel(writer, sheet_name=worksheet_name, index=False, startrow=7)
-            workbook = writer.book
             worksheet = writer.sheets[worksheet_name]
             worksheet.cell(row=1, column=1, value="Danubio Formativas 2026")
             worksheet.cell(row=2, column=1, value=f"Tabla: {item_name}")
@@ -3819,83 +3755,33 @@ def descargar_tabla(
         buffer.seek(0)
         return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.xlsx")
 
-    # --- PNG (tabla como imagen con Plotly) ---
+    # --- PNG ---
     if trigger_id == "download-table-png":
-        try:
-            # Para tablas que ya tenés como figura: usar la función que construye la figura de la sección
-            # Si la pestaña es una tabla (actividad, actividad_comparativa, actividad_promedios, acwr)
-            if tab in ["actividad", "actividad_comparativa", "actividad_promedios", "acwr"]:
-                # build_section_report_table_fig devuelve una figura Plotly (o None)
-                fig_table = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
-                if fig_table is None or not getattr(fig_table, "data", None):
-                    logging.warning("No hay figura de tabla para la pestaña %s", tab)
-                    return no_update
-                # Exportar la figura a PNG con Kaleido (equivalente a un 'print screen' de la figura)
-                height = max(400, 40 + 20 * len(df_export))
-                png_bytes = fig_to_png_bytes(fig_table, width=1200, height=height, scale=2)
-                if not png_bytes:
-                    logging.warning("No se pudo generar PNG para la figura de la tabla %s", tab_name)
-                    return no_update
-                return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
-
-            else:
-                # Para otras pestañas que muestran gráficos (comparativas, cronologico, plyr_vs_plyr)
-                fig = build_section_report_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
-                if fig is None or not getattr(fig, "data", None):
-                    logging.warning("No hay figura disponible para la pestaña %s", tab)
-                    return no_update
-                png_bytes = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
-                if not png_bytes:
-                    logging.warning("No se pudo generar PNG para la figura %s", tab_name)
-                    return no_update
-                return dcc.send_bytes(lambda b: b.write(png_bytes), f"{tab_name}.png")
-
-        except Exception as e:
-            logging.exception("Error generando PNG (Kaleido) para la pestaña %s: %s", tab, e)
+        fig_table = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
+        if fig_table is None or not getattr(fig_table, "data", None):
+            logging.warning("No hay figura de tabla para la pestaña %s", tab)
             return no_update
+        height = _calc_table_height(df_export)
+        png_bytes = fig_to_png_bytes(fig_table, width=1200, height=height, scale=2)
+        if not png_bytes:
+            return no_update
+        return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
 
-    # --- PDF (tabla incrustada en PDF) ---
+    # --- PDF ---
     if trigger_id == "download-table-pdf":
-        try:
-        # Determinar la figura que se muestra en la UI para esta pestaña
-        # Para pestañas que muestran tablas, usamos la función que construye la figura de tabla
-            if tab in ["actividad", "actividad_comparativa", "actividad_promedios", "acwr"]:
-                fig_to_export = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
-            else:
-                # Para pestañas que muestran gráficos
-                fig_to_export = build_section_report_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
-
-            if fig_to_export is None or not getattr(fig_to_export, "data", None):
-                logging.warning("No hay figura disponible para generar PDF en la pestaña %s", tab)
-                return no_update
-
-            # Convertir la figura Plotly a PNG con Kaleido (equivalente a un 'print screen' de la figura)
-            # Ajustar altura según contenido (tablas largas necesitan más alto)
-            height = 800
-            if tab in ["actividad", "actividad_comparativa", "actividad_promedios", "acwr"]:
-                # calcular altura aproximada según filas
-                try:
-                    filas = len(df_export) if hasattr(df_export, "__len__") else 0
-                    height = max(600, 40 + 20 * filas)
-                except Exception:
-                    height = 800
-
-            png_bytes = fig_to_png_bytes(fig_to_export, width=1200, height=height, scale=2)
-            if not png_bytes:
-                logging.warning("No se pudo generar PNG intermedio para la pestaña %s", tab_name)
-                return no_update
-
-            # Incrustar el PNG en un PDF (la imagen queda como contenido del PDF)
-            pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}" if tab in ["actividad", "actividad_comparativa", "actividad_promedios", "acwr"] else f"Gráfico {tab_name}", png_bytes)
-            if not pdf_bytes:
-                logging.warning("No se pudo generar PDF para la pestaña %s", tab_name)
-                return no_update
-
-            return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"tabla_{tab_name}.pdf")
-        except Exception as e:
-            logging.exception("Error generando PDF para la pestaña %s: %s", tab_name, e)
+        fig_to_export = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
+        if fig_to_export is None or not getattr(fig_to_export, "data", None):
             return no_update
+        height = _calc_table_height(df_export, base=800)
+        png_bytes = fig_to_png_bytes(fig_to_export, width=1200, height=height, scale=2)
+        if not png_bytes:
+            return no_update
+        pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)
+        if not pdf_bytes:
+            return no_update
+        return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"tabla_{tab_name}.pdf")
 
+    return no_update
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8050))

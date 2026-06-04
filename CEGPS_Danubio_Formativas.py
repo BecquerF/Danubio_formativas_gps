@@ -13,14 +13,19 @@ import plotly.io as pio
 from dash import dcc, no_update
 from selenium import webdriver
 import selenium
-from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 
-driver = selenium.webdriver.chrome(ChromeDriverManager().install())
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 driver.get("https://www.python.org")
 print(driver.title)
 driver.quit()
-
 
 
 options = Options()

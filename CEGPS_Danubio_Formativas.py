@@ -22,17 +22,6 @@ options.add_argument("--headless")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-driver.get("https://www.python.org")
-print(driver.title)
-driver.quit()
-
-
-options = Options()
-options.add_argument("--headless")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
-
 driver = selenium.webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
 from selenium.webdriver.chrome.service import Service

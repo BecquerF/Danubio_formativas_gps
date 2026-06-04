@@ -1,4 +1,5 @@
 chromium-browser
+chromium-driver
 chromium-chromedriver
 fonts-liberation
 libasound2

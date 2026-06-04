@@ -13,20 +13,25 @@ import plotly.io as pio
 from dash import dcc, no_update
 
 # Selenium y WebDriver Manager
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 
-# Configuración de Selenium en modo headless (para Render/Docker)
-chrome_options = Options()
-chrome_options.add_argument("--headless=new")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
+options = Options()
+# Detectar automáticamente la ruta
+if os.path.exists("/usr/bin/chromium-browser"):
+    options.binary_location = "/usr/bin/chromium-browser"
+elif os.path.exists("/usr/bin/chromium"):
+    options.binary_location = "/usr/bin/chromium"
+
+options.add_argument("--headless=new")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
 
 service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service, options=chrome_options)
+driver = webdriver.Chrome(service=service, options=options)
 driver.get("https://www.python.org")
 print(driver.title)
 driver.quit()
@@ -913,7 +918,8 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2, timeout=10):
 
     # 3) Selenium screenshot (solo si la app es accesible y Selenium está instalado)
     try:
-        
+        from selenium.webdriver.common.by import By
+
         chrome_options = Options()
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")

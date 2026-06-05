@@ -1,40 +1,49 @@
 import logging
-import os
 import io
 import base64
 import textwrap
 import html as html_module
 import tempfile
 from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 from dash import dcc, no_update
 
-# Selenium y WebDriver Manager
+# Selenium and WebDriver Manager imports
 import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
+# Set up Chrome options
 options = Options()
 if os.path.exists("/usr/bin/chromium"):
     options.binary_location = "/usr/bin/chromium"
 
-options.add_argument("--headless=new")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--headless=new")  # Use the new headless mode
+options.add_argument("--no-sandbox")     # Required for running headless in certain environments
+options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
 
+# Set up the ChromeDriver service
 service = Service(ChromeDriverManager().install())
+
+# Initialize the Chrome WebDriver
 driver = webdriver.Chrome(service=service, options=options)
 
+# Navigate to the Python website
 driver.get("https://www.python.org")
+
+# Print the title of the page
 print(driver.title)
+
+# Close the browser
 driver.quit()
 
+logging.basicConfig(level=logging.INFO)
 
 # Dash y autenticación
 import dash

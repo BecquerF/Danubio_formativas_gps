@@ -21,9 +21,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 options = Options()
-if os.path.exists("/usr/bin/chromium-browser"):
-    options.binary_location = "/usr/bin/chromium-browser"
-elif os.path.exists("/usr/bin/chromium"):
+if os.path.exists("/usr/bin/chromium"):
     options.binary_location = "/usr/bin/chromium"
 
 options.add_argument("--headless=new")
@@ -36,6 +34,7 @@ driver = webdriver.Chrome(service=service, options=options)
 driver.get("https://www.python.org")
 print(driver.title)
 driver.quit()
+
 
 # Dash y autenticación
 import dash

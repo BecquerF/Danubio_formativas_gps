@@ -17,10 +17,10 @@ import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 options = Options()
-# Detectar automáticamente la ruta
 if os.path.exists("/usr/bin/chromium-browser"):
     options.binary_location = "/usr/bin/chromium-browser"
 elif os.path.exists("/usr/bin/chromium"):
@@ -32,6 +32,7 @@ options.add_argument("--disable-dev-shm-usage")
 
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=options)
+
 driver.get("https://www.python.org")
 print(driver.title)
 driver.quit()

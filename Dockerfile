@@ -6,10 +6,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     gnupg2 \
     fonts-liberation \
-    libappindicator3-1 \
     libasound2 \
     libatk-bridge2.0-0 \
-    libatk1.0-0 \
     libcups2 \
     libdbus-1-3 \
     libgdk-pixbuf2.0-0 \
@@ -21,6 +19,8 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     ca-certificates \
     curl \
+    chromium \
+    chromium-driver \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 

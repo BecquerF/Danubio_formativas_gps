@@ -62,7 +62,8 @@ except Exception as e:
 
 # Dash imports
 import dash
-from dash import Dash, dash_auth, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
+from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
+import dash_auth
 
 # ReportLab imports
 try:

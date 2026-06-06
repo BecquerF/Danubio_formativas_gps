@@ -2,12 +2,23 @@ FROM python:3.9-bullseye
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    wget unzip gnupg2 fonts-liberation \
-    libasound2 libatk-bridge2.0-0 libcups2 libdbus-1-3 \
-    libfontconfig1 libfreetype6 libnspr4 libnss3 \
-    libx11-6 libx11-xcb1 libxcomposite1 libxdamage1 \
-    libxext6 libxrandr2 libxrender1 libxss1 libxtst6 \
-    ca-certificates curl \
+    wget \
+    unzip \
+    gnupg2 \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libgdk-pixbuf-xlib-2.0-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    ca-certificates \
+    curl \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 

@@ -1,4 +1,4 @@
-FROM python:3.9-bullseye
+FROM python:3.11-bullseye
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \

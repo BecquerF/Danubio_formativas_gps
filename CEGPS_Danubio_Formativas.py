@@ -23,7 +23,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 options = Options()
 if os.path.exists("/usr/bin/chromium"):
     options.binary_location = "/usr/bin/chromium"
-
+elif os.path.exists("/usr/bin/google-chrome"):
+    options.binary_location = "/usr/bin/google-chrome"
+    
 options.add_argument("--headless=new")  # Use the new headless mode
 options.add_argument("--no-sandbox")     # Required for running headless in certain environments
 options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems

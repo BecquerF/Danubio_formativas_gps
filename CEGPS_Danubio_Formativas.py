@@ -45,26 +45,24 @@ driver.quit()
 
 logging.basicConfig(level=logging.INFO)
 
-# Dash y autenticación
-import dash
-try:
-    import dash_auth
-except ImportError:
-    dash_auth = None
+import logging
+import pandas as pd
+from openpyxl.drawing.image import Image as ExcelImage
+from datetime import datetime
+from pathlib import Path
 
-# WeasyPrint
+# WeasyPrint setup
 try:
     from weasyprint import HTML as WeasyHTML
 except Exception as e:
     logging.warning("WeasyPrint no está disponible: %s", e)
     WeasyHTML = None
 
-# Dash componentes
-from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
+# Dash imports
+import dash
+from dash import Dash, dash_auth, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
 
-# Excel y ReportLab
-from openpyxl.drawing.image import Image as ExcelImage
-from datetime import datetime
+# ReportLab imports
 try:
     from PIL import Image as PILImage
 except ImportError:
@@ -80,10 +78,9 @@ from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 import time
 
-
+# Base directory and font directory
 BASE_DIR = Path(__file__).resolve().parent
 FONT_DIR = BASE_DIR / "assets" / "fonts"
-
 
 def register_pdf_fonts():
     try:
@@ -95,33 +92,29 @@ def register_pdf_fonts():
     except Exception:
         pass
 
-
+# Register fonts
 register_pdf_fonts()
 logging.basicConfig(level=logging.INFO)
 
-
-# Leer datos
+# Load data from Excel
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
-df["Date"] = pd.to_datetime(
-    df["Date"],
-    format="%d-%m-%y",   # día-mes-año con dos dígitos
-    errors="coerce"
-)
 
+# Convert Date column to datetime
+df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%y", errors="coerce")
 
-
+# Process Duration column
 if "Duration" in df.columns:
     if pd.api.types.is_numeric_dtype(df["Duration"]):
         df["Duration"] = pd.to_timedelta(df["Duration"], unit="D", errors="coerce").dt.total_seconds() / 60.0
     else:
         df["Duration"] = pd.to_timedelta(df["Duration"], errors="coerce").dt.total_seconds() / 60.0
 
+# Date calculations
 fecha_max = df["Date"].max()
-
 ultimos21 = fecha_max - pd.Timedelta(days=21)
 ultimos7 = fecha_max - pd.Timedelta(days=7)
 
-# Eliminar columnas innecesarias
+# Drop unnecessary columns
 columnas_eliminar = [
     "Period Number",
     "Work/Rest Ratio",
@@ -150,22 +143,25 @@ df = df.drop(columns=columnas_eliminar, errors="ignore")
 app = Dash(__name__)
 app.config.suppress_callback_exceptions = True
 server = app.server
-# Configurar una clave secreta para las sesiones desde la variable de entorno SECRET_KEY
+
+# Set secret key for session management
 SECRET_KEY = os.environ["SECRET_KEY"]
 server.secret_key = SECRET_KEY
+
+# Define valid username and password pairs for authentication
 VALID_USERNAME_PASSWORD_PAIRS = {
     "Danubioformativas": "formativas2026"
 }
 
+# Setup basic authentication if dash_auth is available
 if dash_auth is not None:
-    auth = dash_auth.BasicAuth(
-        app,
-        VALID_USERNAME_PASSWORD_PAIRS
-    )
+    auth = dash_auth.BasicAuth(app, VALID_USERNAME_PASSWORD_PAIRS)
 else:
     auth = None
+
 app.title = "DATA LOAD - Sports Performance Platform"
 
+# Define the metrics related to sports performance
 metricas = [
     "Distance",
     "Meterage Per Minute",
@@ -183,6 +179,7 @@ metricas = [
     "Impacts"
 ]
 
+# Define radar metrics for specific visualizations
 metricas_radar = [
     "Meterage Per Minute",
     "Accel + Decel Efforts Per Minute",
@@ -192,51 +189,52 @@ metricas_radar = [
     "Sprint Efforts"
 ]
 
+# Combine radar metrics with additional metrics for averages
 metricas_promedios = metricas_radar + ["Max Velocity", "Duration"]
-
 
 # ======================================================
 # ACTIVIDAD COMPARATIVA INDIVIDUAL
 # ======================================================
 
+# Copy base metrics
 metricas_base = metricas.copy()
 
-# Promedios por jugador
+# Calculate average metrics per player
 df_promedios = (
     df.groupby("Player Name")[metricas_base]
-      .mean()
-      .reset_index()
+    .mean()
+    .reset_index()
 )
 
-# Renombrar columnas de promedio
+# Rename columns to indicate they are averages
 df_promedios.rename(
     columns={col: f"{col} Prom" for col in metricas_base},
     inplace=True
 )
 
-# Acumulados por jugador
+# Calculate cumulative metrics per player
 df_acumulados = (
     df.groupby("Player Name")[metricas_base]
-      .sum()
-      .reset_index()
+    .sum()
+    .reset_index()
 )
 
-# Unir ambos DataFrames
 df_Actividad_Comparativa_Individual = pd.merge(
     df_acumulados,
     df_promedios,
     on="Player Name"
 )
 
-# Ordenar columnas
+# Order columns
 orden = ["Player Name"]
 for m in metricas_base:
     orden.extend([m, f"{m} Prom"])
 
+# Reorganize the DataFrame according to the specified order
 df_Actividad_Comparativa_Individual = df_Actividad_Comparativa_Individual[orden]
 
 # ======================================================
-
+# Configure references and tab titles
 referencias = [
     "Category",
     "Player Name",
@@ -256,6 +254,7 @@ tab_titles = {
     "informe": "Informe"
 }
 
+# Define sections for the report
 informe_sections = [
     {"label": "Actividad", "value": "actividad"},
     {"label": "Actividad Comparativa Individual", "value": "actividad_comparativa"},
@@ -266,87 +265,75 @@ informe_sections = [
     {"label": "Cronológico", "value": "cronologico"}
 ]
 
+# Handle logo image
 LOGO_PATH = Path("assets/logo_dataload_2.png")
 LOGO_BASE64 = ""
+
 if LOGO_PATH.exists():
     with open(LOGO_PATH, "rb") as logo_file:
         LOGO_BASE64 = base64.b64encode(logo_file.read()).decode("ascii")
 
-from datetime import datetime, timedelta
-
+# ------------------------------------------------------
+# Define utility functions
 def summarize_items(items, max_items=3, default="todas"):
     if not items:
         return default
     labels = [str(item) for item in items if item is not None]
+
     if len(labels) == 0:
         return default
     if len(labels) <= max_items:
         return " / ".join(labels)
+
     return " / ".join(labels[:max_items]) + f" +{len(labels)-max_items}"
 
-
 def build_chart_title(tab, categorias, metricas, referencia):
+    # Generate summarized text for categories and metrics
     categoria_text = summarize_items(categorias, max_items=3)
     metrica_text = summarize_items(metricas, max_items=3)
 
+    # Default title format
+    title = tab_titles.get(tab, tab)  # Get default title based on tab
+
+    # Construct titles based on the selected tab
     if tab == "comparativas":
-        
         title = f"Comparativo de {metrica_text} por {referencia}"
-        if categorias:
-            title += f" - Categoría(s): {categoria_text}"
-        return title
-
-    if tab == "cronologico":
+    elif tab == "cronologico":
         title = f"Evolución cronológica de {metrica_text}"
-        if categorias:
-            title += f" - Categoría(s): {categoria_text}"
-        return title
-
-    if tab == "actividad":
+    elif tab == "actividad":
         title = "Actividad por jugador"
-        if categorias:
-            title += f" - Categoría(s): {categoria_text}"
-        return title
-
-    if tab == "acwr":
+    elif tab == "acwr":
         title = "ACWR - Últimos 7 días vs 21 días"
-        if categorias:
-            title += f" - Categoría(s): {categoria_text}"
-        return title
-    
-    if tab == "actividad_comparativa":
+    elif tab == "actividad_comparativa":
         title = "Actividad comparativa individual"
-        if categorias:
-            title += f" - Categoría(s): {categoria_text}"
-        return title
-
-    if tab == "actividad_promedios":
+    elif tab == "actividad_promedios":
         title = "Actividad / Promedios"
-        if categorias:
-            title += f" - Categoría(s): {categoria_text}"
-        return title
-
-    if tab == "plyr_vs_plyr":
+    elif tab == "plyr_vs_plyr":
         title = "Comparativa Jugador vs Jugador"
-        if categorias:
-            title += f" - Categoría(s): {categoria_text}"
-        return title
 
-    return tab_titles.get(tab, tab)
+    # Add category info if available
+    if categorias:
+        title += f" - Categoría(s): {categoria_text}"
 
-
+    return title
 
 def build_download_metadata(tab, categorias, metricas, referencia):
+    # Get the item name based on the selected tab
     item_name = tab_titles.get(tab, tab)
+    
+    # If item_name is None, default to tab
     if item_name is None:
         item_name = tab
+        
     category_text = summarize_items(categorias, max_items=5)
     metric_text = summarize_items(metricas, max_items=5)
     printed_at = datetime.now().strftime("%d/%m/%Y %H:%M")
 
+    # Adjust item name for player vs player comparison
     if tab == "plyr_vs_plyr":
         item_name = "Comparativa Jugador vs Jugador"
 
+    # Construct the metadata message
     metadata = (
         f"Descargado: {item_name}\n"
         f"Impresión: {printed_at}\n"
@@ -354,107 +341,126 @@ def build_download_metadata(tab, categorias, metricas, referencia):
         f"Métricas: {metric_text}\n"
         f"Comparar por: {referencia}\n"
     )
+
     return item_name, metadata, printed_at
 
-
 def build_plyr_vs_plyr(dff, jugador_1, jugador_2, game_tag=None, period_tag=None, metricas=None):
+    # Prepare the metrics to use for the radar chart
     metricas = metricas_radar.copy()
     metricas = [m for m in metricas if m in dff.columns]
 
+    # Filter the DataFrame based on game and period tags
     dff_filtrado = dff.copy()
     if game_tag:
         dff_filtrado = dff_filtrado[dff_filtrado["Game Tags"] == game_tag]
     if period_tag:
         dff_filtrado = dff_filtrado[dff_filtrado["Period Tags"] == period_tag]
 
+    # Validate both players are specified
     if not jugador_1 or not jugador_2:
         return go.Figure()
 
+    # Filter for the selected players
     jugadores = [jugador_1, jugador_2]
     dff_jugadores = dff_filtrado[dff_filtrado["Player Name"].isin(jugadores)]
+
     if dff_jugadores.empty:
         return go.Figure()
 
+    # Calculate average metrics for the selected players
     radar_data = (
         dff_jugadores.groupby("Player Name")[metricas]
         .mean()
         .reset_index()
     )
 
+    # Normalize the radar data
     radar_data_norm = radar_data.copy()
-    for m in metricas:
-        col_min = radar_data[m].min()
-        col_max = radar_data[m].max()
-        if col_max > col_min:
-            radar_data_norm[m] = (radar_data[m] - col_min) / (col_max - col_min)
 
+    for m in metricas:
+            col_min = radar_data[m].min()
+            col_max = radar_data[m].max()
+            
+            # Normalize only if max > min
+            if col_max > col_min:
+                radar_data_norm[m] = (radar_data[m] - col_min) / (col_max - col_min)
+
+        # Create the radar chart
     fig = go.Figure()
     colores = ["#48f788", "#89bcef"]
-    for idx, row in radar_data_norm.iterrows():
-        rgb = tuple(int(colores[idx % len(colores)][1+i:3+i], 16) for i in (0, 2, 4))
-        fig.add_trace(go.Scatterpolar(
-            r=row[metricas].values.flatten().tolist(),
-            theta=metricas,
-            fill="toself",
-            name=row["Player Name"],
-            mode="markers+lines",
-            marker=dict(size=6, color=colores[idx % len(colores)]),
-            line=dict(color=colores[idx % len(colores)], width=2),
-            fillcolor=f"rgba({rgb[0]},{rgb[1]},{rgb[2]},0.25)",
-            text=[f"{val:.2f}" for val in row[metricas].values.flatten().tolist()],
-            textposition="top center",
-            textfont=dict(size=10, color="#edf1f2")
-        ))
 
-    fig.update_layout(
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                showline=True,
-                linewidth=1,
-                gridcolor="rgba(200,200,200,0.25)",
-                gridwidth=0.8,
-                tickfont=dict(size=12, color="#edf1f2")
+    for idx, row in radar_data_norm.iterrows():
+            rgb = tuple(int(colores[idx % len(colores)][1 + i:3 + i], 16) for i in (0, 2, 4))
+            
+            fig.add_trace(go.Scatterpolar(
+                r=row[metricas].values.flatten().tolist(),
+                theta=metricas,
+                fill="toself",
+                name=row["Player Name"],
+                mode="markers+lines",
+                marker=dict(size=6, color=colores[idx % len(colores)]),
+                line=dict(color=colores[idx % len(colores)], width=2),
+                fillcolor=f"rgba({rgb[0]},{rgb[1]},{rgb[2]},0.25)",
+                text=[f"{val:.2f}" for val in row[metricas].values.flatten().tolist()],
+                textposition="top center",
+                textfont=dict(size=10, color="#edf1f2")
+            ))
+
+        # Update the layout for the radar chart
+            fig.update_layout(
+            polar=dict(
+                radialaxis=dict(
+                    visible=True,
+                    showline=True,
+                    linewidth=1,
+                    gridcolor="rgba(200,200,200,0.25)",
+                    gridwidth=0.8,
+                    tickfont=dict(size=12, color="#edf1f2")
+                ),
+                angularaxis=dict(
+                    tickfont=dict(size=12, color="#edf1f2")
+                )
             ),
-            angularaxis=dict(
-                tickfont=dict(size=12, color="#edf1f2")
+            showlegend=True,
+            template="plotly_dark",
+            title=dict(
+                text=f"{jugador_1}  ||  {jugador_2}",
+                font=dict(size=20, color="#a3e3d0", family="Manrope Light"),
+                x=0.5
+            ),
+            legend=dict(
+                font=dict(size=13, color="#edf1f2"),
+                orientation="h",
+                yanchor="bottom",
+                y=-0.25,
+                xanchor="center",
+                x=0.5,
+                bgcolor="rgba(0,0,0,0.4)",
+                bordercolor="rgba(137,188,239,0.25)",
+                borderwidth=1
             )
-        ),
-        showlegend=True,
-        template="plotly_dark",
-        title=dict(
-            text=f"{jugador_1}  ||  {jugador_2}",
-            font=dict(size=20, color="#a3e3d0", family="Manrope Light"),
-            x=0.5
-        ),
-        legend=dict(
-            font=dict(size=13, color="#edf1f2"),
-            orientation="h",
-            yanchor="bottom",
-            y=-0.25,
-            xanchor="center",
-            x=0.5,
-            bgcolor="rgba(0,0,0,0.4)",
-            bordercolor="rgba(137,188,239,0.25)",
-            borderwidth=1
         )
-    )
 
     return fig
 
-
 def build_comparativas(dff, categorias, metricas, referencia):
+    # Handle default metrics if none are provided
     metricas = metricas or ["Distance"]
+    # Filter metrics to ensure they exist in the DataFrame
     metricas = [m for m in metricas if m in dff.columns]
+
+    # Check if referencia is valid and there are provided metrics
     if referencia not in dff.columns or not metricas:
         return go.Figure()
 
+    # Calculate the average metrics grouped by the reference column
     promedio = (
         dff.groupby(referencia)[metricas]
         .mean()
         .reset_index()
     )
 
+    # Melt the DataFrame to format it for Plotly Express
     promedio_melt = pd.melt(
         promedio,
         id_vars=[referencia],
@@ -463,6 +469,7 @@ def build_comparativas(dff, categorias, metricas, referencia):
         value_name="Valor"
     )
 
+    # Create a horizontal bar chart
     fig = px.bar(
         promedio_melt,
         x="Valor",
@@ -471,20 +478,32 @@ def build_comparativas(dff, categorias, metricas, referencia):
         orientation="h",
         barmode="group",
         template="plotly_dark",
-        color_discrete_sequence=["#edf1f2", "#f1a3fd", "#a3e3d0", "#89bcef", "#48f788", "#f96e83"]
+        color_discrete_sequence=[
+            "#edf1f2", "#f1a3fd", "#a3e3d0", "#89bcef", "#48f788", "#f96e83"
+        ]
     )
 
+    # Update layout for the chart
     fig.update_layout(
         title={
             "text": f"Comparativo de métricas por {referencia}",
-            "font": {"color": "#f5f5f5", "family": "'Clash Display Semibold', 'Helvetica Neue'", "size": 22}
+            "font": {
+                "color": "#f5f5f5",
+                "family": "'Clash Display Semibold', 'Helvetica Neue'",
+                "size": 22
+            }
         },
         paper_bgcolor="#0b0c0e",
         plot_bgcolor="#0b0c0e",
         font={"color": "#f5f5f5"},
-        legend=dict(bgcolor="rgba(11,12,14,0.75)", bordercolor="#89bcef", borderwidth=1)
+        legend=dict(
+            bgcolor="rgba(11,12,14,0.75)",
+            bordercolor="#89bcef",
+            borderwidth=1
+        )
     )
 
+    # Update the x-axis properties
     fig.update_xaxes(
         showgrid=True,
         gridcolor="rgba(137,188,239,0.18)",
@@ -494,6 +513,7 @@ def build_comparativas(dff, categorias, metricas, referencia):
         title_font_color="#a3e3d0"
     )
 
+    # Update the y-axis properties
     fig.update_yaxes(
         showgrid=True,
         gridcolor="rgba(137,188,239,0.18)",
@@ -504,7 +524,6 @@ def build_comparativas(dff, categorias, metricas, referencia):
     )
 
     return fig
-
 
 def build_cronologico(dff, categorias, metricas, referencia):
     metricas = metricas or ["Distance"]
@@ -1389,19 +1408,29 @@ def build_graph_html_pdf(title, fig_png, table_png=None, filters_text=None, logo
     return WeasyHTML(string=html_content).write_pdf()
 
 
+import tempfile
+from pathlib import Path
+from datetime import datetime, timedelta
+
 def save_pdf_bytes_to_temp_file(pdf_bytes, filename=None):
-    """Guarda pdf_bytes en un archivo temporal y devuelve la ruta del archivo."""
+    """Save PDF bytes to a temporary file and return the file path."""
+    
+    # Default filename if none is provided
     if filename is None:
         filename = "reporte_temporal.pdf"
+    
+    # Create a path for the temporary file
     temp_path = Path(tempfile.gettempdir()) / filename
+    
+    # Write the bytes to the temporary file
     temp_path.write_bytes(pdf_bytes)
+    
     return temp_path
 
+# Get the last update timestamp, formatted for display
 ultima_actualizacion = (
     datetime.now() - timedelta(hours=3)
-).strftime(
-    "%d/%m/%Y - %H:%M"
-)
+).strftime("%d/%m/%Y - %H:%M")
 
 app.layout = html.Div([
 

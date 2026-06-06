@@ -5,12 +5,11 @@ import textwrap
 import html as html_module
 import tempfile
 from pathlib import Path
-
+import dash
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
-from dash import dcc, no_update
 
 # Selenium and WebDriver Manager imports
 import os
@@ -61,7 +60,6 @@ except Exception as e:
     WeasyHTML = None
 
 # Dash imports
-import dash
 from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
 import dash_auth
 

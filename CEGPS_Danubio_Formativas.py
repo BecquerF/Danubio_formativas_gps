@@ -834,7 +834,7 @@ def build_plotly_table(header, rows, title):
     ])
     fig.update_layout(
         title={"text": title, "font": {"color": "#f5f5f5", "size": 16}, "x": 0.01},
-        width=1200,
+        width=1600,
         height=900,
         margin=dict(l=10, r=10, t=40, b=10),
         paper_bgcolor="#0b0c0e"
@@ -911,7 +911,7 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
     return None
 
 
-def fig_to_png_bytes(fig, width=1200, height=900, scale=2, timeout=10):
+def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=10):
     """Convierte una figura Plotly en PNG usando Kaleido."""
     if fig is None or not getattr(fig, "data", None):
         return None
@@ -980,7 +980,7 @@ def fig_to_png_bytes(fig, width=1200, height=900, scale=2, timeout=10):
     logging.warning("No se pudo generar PNG para la figura (todos los fallbacks fallaron).")
     return None
 
-def build_graph_pdf_from_fig(fig, width=1200, height=900, scale=2):
+def build_graph_pdf_from_fig(fig, width=1600, height=900, scale=2):
 
     png_bytes = fig_to_png_bytes(fig, width=width, height=height, scale=scale)
     if png_bytes is None:
@@ -3039,7 +3039,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             "borderRadius":"28px",
             "boxShadow":"0 12px 30px rgba(0,0,0,0.35)",
             "margin":"20px auto",
-            "maxWidth":"900px"
+            "maxWidth":"1600px"
         })
 
     else:
@@ -3309,7 +3309,7 @@ def generar_informe(
             if fig and getattr(fig, "data", None):
                 img_bytes = fig_to_png_bytes(
                     fig,
-                    width=1200,
+                    width=1600,
                     height=900,
                     scale=2
                 )
@@ -3322,7 +3322,7 @@ def generar_informe(
             if table_fig and getattr(table_fig, "data", None):
                 table_bytes = fig_to_png_bytes(
                     table_fig,
-                    width=1200,
+                    width=1600,
                     height=900,
                     scale=2
                 )
@@ -3693,9 +3693,9 @@ def _build_graph_download(fig, filename, format):
         return None
 
     if format == "png":
-        content = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
+        content = fig_to_png_bytes(fig, width=1600, height=900, scale=2)
     elif format == "pdf":
-        png_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
+        png_bytes = fig_to_png_bytes(fig, width=1600, height=900, scale=2)
         if png_bytes:
             content = build_graph_pdf_bytes(filename, png_bytes)
         else:
@@ -3941,7 +3941,7 @@ def descargar_tabla(
         "No hay datos para exportar."
     )
             return no_update
-        png_bytes = fig_to_png_bytes(fig_table, width=1200, height=900, scale=2)
+        png_bytes = fig_to_png_bytes(fig_table, width=1600, height=900, scale=2)
         if not png_bytes:
             return no_update
         return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
@@ -3952,7 +3952,7 @@ def descargar_tabla(
         if fig_to_export is None or not getattr(fig_to_export, "data", None):
             return no_update
         height = _calc_table_height(df_export, base=800)
-        png_bytes = fig_to_png_bytes(fig_to_export, width=1200, height=900, scale=2)
+        png_bytes = fig_to_png_bytes(fig_to_export, width=1600, height=900, scale=2)
         if not png_bytes:
             return no_update
         pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)

@@ -3774,7 +3774,7 @@ def descargar_grafico(
 
 
 
-def _calc_table_height(df_export, base=900, row_height=20):
+def _calc_table_height(df_export, base=400, row_height=20):
     """Calcula altura dinámica para exportar tablas según número de filas."""
     try:
         filas = len(df_export) if hasattr(df_export, "__len__") else 0

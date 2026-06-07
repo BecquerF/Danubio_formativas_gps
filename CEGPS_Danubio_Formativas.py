@@ -1783,7 +1783,7 @@ app.layout = html.Div([
             html.Div(    id="contenido-tab",
     className="tab-content",
     style={
-        "displey":"flex",
+        "display":"flex",
         "flex":"1",
         "padding":"24px",
         "gap":"18px",
@@ -1836,11 +1836,6 @@ app.layout = html.Div([
         className="download-btn",
         n_clicks=0
     ),
-
-    # Componentes que reciben el archivo para descarga
-    dcc.Download(id="download-graph"),
-    dcc.Download(id="download-table"),
-    dcc.Download(id="download-report")
 ],
 style={
     "display":"flex",

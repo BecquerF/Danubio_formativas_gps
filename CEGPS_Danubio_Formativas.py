@@ -108,15 +108,13 @@ df["Date"] = pd.to_datetime(
     errors="coerce"      # valores inválidos se convierten en NaT
 )
 
-# Ahora todas las fechas quedan en formato estándar
-df["Date"] = df["Date"].dt.strftime("%d/%m/%Y")
-
 # Process Duration column
 if "Duration" in df.columns:
     if pd.api.types.is_numeric_dtype(df["Duration"]):
         df["Duration"] = pd.to_timedelta(df["Duration"], unit="D", errors="coerce").dt.total_seconds() / 60.0
     else:
         df["Duration"] = pd.to_timedelta(df["Duration"], errors="coerce").dt.total_seconds() / 60.0
+
 
 # Date calculations
 fecha_max = df["Date"].max()

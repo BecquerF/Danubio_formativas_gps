@@ -1229,8 +1229,8 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
 
         # Insertar imágenes: primero figura principal, luego tabla si existe
         for img_key, caption_key, max_h_default in [
-            ("img", "caption", 420),
-            ("table_img", "table_caption", 360)
+            ("img", "caption", 900),
+            ("table_img", "table_caption", 900)
         ]:
             img_bytes = section.get(img_key)
             caption = section.get(caption_key, "")

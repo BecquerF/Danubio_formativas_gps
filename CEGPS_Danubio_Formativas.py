@@ -3323,7 +3323,7 @@ def generar_informe(
                 table_bytes = fig_to_png_bytes(
                     table_fig,
                     width=1200,
-                    height=520,
+                    height=900,
                     scale=2
                 )
         except Exception:
@@ -3693,9 +3693,9 @@ def _build_graph_download(fig, filename, format):
         return None
 
     if format == "png":
-        content = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+        content = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
     elif format == "pdf":
-        png_bytes = fig_to_png_bytes(fig, width=1200, height=800, scale=2)
+        png_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2)
         if png_bytes:
             content = build_graph_pdf_bytes(filename, png_bytes)
         else:

@@ -1788,8 +1788,8 @@ app.layout = html.Div([
         "padding":"24px",
         "gap":"18px",
         "width":"100%",
-        "maxWidth":"1000px",
-        "minWidth":"1000px",
+        "maxWidth":"1400px",
+        "minWidth":"1400px",
         "height":"600px",
 
         "overflowX":"hidden",

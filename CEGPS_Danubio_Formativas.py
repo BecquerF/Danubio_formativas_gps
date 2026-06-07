@@ -3130,8 +3130,8 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
                     dcc.Graph(
                         className="tab-graph",
                         figure=fig,
-                        config={"displayModeBar": False},
-                        style={"height": "320px", "width": "100%"}
+                        config={"displayModeBar": False, "responsive": True},
+                        style={"height": "600px", "width": "100%"}
                     )
                 ],
                 style={

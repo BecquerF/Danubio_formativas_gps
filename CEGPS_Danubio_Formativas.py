@@ -835,7 +835,7 @@ def build_plotly_table(header, rows, title):
     fig.update_layout(
         title={"text": title, "font": {"color": "#f5f5f5", "size": 16}, "x": 0.01},
         width=1200,
-        height=max(340, 40 + 20 * len(rows)),
+        height=900,
         margin=dict(l=10, r=10, t=40, b=10),
         paper_bgcolor="#0b0c0e"
     )

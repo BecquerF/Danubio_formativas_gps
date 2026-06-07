@@ -3941,7 +3941,7 @@ def descargar_tabla(
         "No hay datos para exportar."
     )
             return no_update
-        png_bytes = fig_to_png_bytes(fig_table, width=1200, height=height, scale=2)
+        png_bytes = fig_to_png_bytes(fig_table, width=1200, height=900, scale=2)
         if not png_bytes:
             return no_update
         return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
@@ -3952,7 +3952,7 @@ def descargar_tabla(
         if fig_to_export is None or not getattr(fig_to_export, "data", None):
             return no_update
         height = _calc_table_height(df_export, base=800)
-        png_bytes = fig_to_png_bytes(fig_to_export, width=1200, height=height, scale=2)
+        png_bytes = fig_to_png_bytes(fig_to_export, width=1200, height=900, scale=2)
         if not png_bytes:
             return no_update
         pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)

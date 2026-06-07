@@ -101,7 +101,15 @@ logging.basicConfig(level=logging.INFO)
 df = pd.read_excel("GPS_Formativas_2026.xlsx")
 
 # Convert Date column to datetime
-df["Date"] = pd.to_datetime(df["Date"], format="%d/%m/%y", errors="coerce")
+# Supongamos que tu columna se llama 'Date'
+df["Date"] = pd.to_datetime(
+    df["Date"],
+    dayfirst=True,       # porque tus fechas son dd/mm/yy
+    errors="coerce"      # valores inválidos se convierten en NaT
+)
+
+# Ahora todas las fechas quedan en formato estándar
+df["Date"] = df["Date"].dt.strftime("%d/%m/%Y")
 
 # Process Duration column
 if "Duration" in df.columns:

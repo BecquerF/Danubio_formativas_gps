@@ -3031,7 +3031,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
             # Gráfico
-            dcc.Graph(id="radar_chart", className="tab-graph", style={"height":"600px"})
+            dcc.Graph(id="radar_chart", className="tab-graph", style={"height":"900px"})
         ], style={
             "padding":"28px",
             "background":"linear-gradient(145deg, #0b0c0e, #1a1c1f)",
@@ -3162,7 +3162,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     State("report_text_cronologico", "value"),
     State("categoria", "value"),
     State("report_fecha_actividad", "date"),
-    State("download_format", "value"),  # 'pdf' o 'png'
+    State("download_format", "value"),
     prevent_initial_call=True
 )
 def generar_informe(
@@ -3181,24 +3181,75 @@ def generar_informe(
     fecha_actividad,
     download_format
 ):
+
     if not n_clicks:
         return no_update
 
-    # Metadatos básicos
-    title = (title or "").strip() or build_auto_report_title(categorias, fecha_actividad)
-    author = (author or "").strip() or "Desconocido"
-    fecha_text = pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y") if fecha_actividad else datetime.now().strftime("%d/%m/%Y")
-    selected_sections = sections or ["actividad", "actividad_promedios", "acwr"]
+    # Asegurar lista de categorías
+    if categorias and isinstance(categorias, str):
+        categorias = [categorias]
 
-    # Filtrar dataframe
+    title = (title or "").strip() or build_auto_report_title(
+        categorias,
+        fecha_actividad
+    )
+
+    author = (author or "").strip() or "Desconocido"
+
+    fecha_text = (
+        pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y")
+        if fecha_actividad
+        else datetime.now().strftime("%d/%m/%Y")
+    )
+
+    selected_sections = sections or [
+        "actividad",
+        "actividad_promedios",
+        "acwr"
+    ]
+
+    if not selected_sections:
+        return no_update
+
+    # Copia del dataframe
     dff = df.copy()
+
+    # Garantizar datetime
+    if "Date" in dff.columns:
+        dff["Date"] = pd.to_datetime(
+            dff["Date"],
+            errors="coerce"
+        )
+
+    # Filtrar categorías
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
-    fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else (dff["Date"].max().normalize() if "Date" in dff.columns else None)
-    if fecha_dt is not None and "Date" in dff.columns:
-        dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
 
-    # Textos por sección
+    # Fecha de corte
+    if fecha_actividad:
+        fecha_dt = pd.to_datetime(
+            fecha_actividad,
+            errors="coerce"
+        )
+
+        if pd.notna(fecha_dt):
+            fecha_dt = fecha_dt.normalize()
+    else:
+        fecha_dt = (
+            dff["Date"].max().normalize()
+            if (
+                "Date" in dff.columns
+                and not dff.empty
+                and dff["Date"].notna().any()
+            )
+            else None
+        )
+
+    if fecha_dt is not None and "Date" in dff.columns:
+        dff = dff[
+            dff["Date"].dt.normalize() <= fecha_dt
+        ]
+
     section_texts = {
         "actividad": texto_actividad or "",
         "actividad_comparativa": texto_actividad_comparativa or "",
@@ -3209,23 +3260,76 @@ def generar_informe(
         "cronologico": texto_cronologico or ""
     }
 
-    filters_text = " | ".join(
-        ([f"Categorías: {', '.join(categorias)}"] if categorias else []) + [f"Fecha: {fecha_text}"]
+    filters_parts = []
+
+    if categorias:
+        filters_parts.append(
+            f"Categorías: {', '.join(categorias)}"
+        )
+
+    filters_parts.append(
+        f"Fecha: {fecha_text}"
     )
 
-    # Construcción de secciones
+    filters_text = " | ".join(filters_parts)
+
     report_sections = []
     image_bytes_for_png = []
 
     for section in selected_sections:
+
         if section == "informe":
             continue
 
-        fig = build_section_report_fig(section, dff, fecha_dt, categorias)
-        table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
+        try:
+            fig = build_section_report_fig(
+                section,
+                dff,
+                fecha_dt,
+                categorias
+            )
 
-        img_bytes = fig_to_png_bytes(fig, width=1200, height=900, scale=2) if fig and getattr(fig, "data", None) else None
-        table_bytes = fig_to_png_bytes(table_fig, width=1200, height=520, scale=2) if table_fig and getattr(table_fig, "data", None) else None
+            table_fig = build_section_report_table_fig(
+                section,
+                dff,
+                fecha_dt,
+                categorias
+            )
+
+        except Exception:
+            logging.exception(
+                f"Error generando figuras para {section}"
+            )
+            continue
+
+        img_bytes = None
+        table_bytes = None
+
+        try:
+            if fig and getattr(fig, "data", None):
+                img_bytes = fig_to_png_bytes(
+                    fig,
+                    width=1200,
+                    height=900,
+                    scale=2
+                )
+        except Exception:
+            logging.exception(
+                f"Error exportando gráfico {section}"
+            )
+
+        try:
+            if table_fig and getattr(table_fig, "data", None):
+                table_bytes = fig_to_png_bytes(
+                    table_fig,
+                    width=1200,
+                    height=520,
+                    scale=2
+                )
+        except Exception:
+            logging.exception(
+                f"Error exportando tabla {section}"
+            )
 
         if img_bytes:
             image_bytes_for_png.append(img_bytes)
@@ -3233,37 +3337,78 @@ def generar_informe(
         if table_bytes:
             image_bytes_for_png.append(table_bytes)
 
-        section_note = "" if (img_bytes or table_bytes) else "\nNota: no se generó ninguna imagen o tabla para esta sección."
+        section_note = (
+            ""
+            if (img_bytes or table_bytes)
+            else "\nNota: no se generó ninguna imagen o tabla para esta sección."
+        )
 
         report_sections.append({
             "title": section_title(section),
-            "text": truncate_to_n_words(section_texts.get(section, ""), 500) + section_note,
+            "text": truncate_to_n_words(
+                section_texts.get(section, ""),
+                500
+            ) + section_note,
             "img": img_bytes,
             "table_img": table_bytes,
-            "caption": f"Figura: {section_title(section)} con los filtros seleccionados.",
-            "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados."
+            "caption": (
+                f"Figura: {section_title(section)} "
+                f"con los filtros seleccionados."
+            ),
+            "table_caption": (
+                f"Tabla: {section_title(section)} "
+                f"con los filtros seleccionados."
+            )
         })
 
-    # Rellenar texto automático si no hay ninguno
-    if not any(item["text"].strip() for item in report_sections):
+    if not report_sections:
+        logging.warning(
+            "No se generó ninguna sección para el informe."
+        )
+        return no_update
+
+    if not any(
+        item["text"].strip()
+        for item in report_sections
+    ):
         for item in report_sections:
-            item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
+            item["text"] = (
+                f"Informe de la sección "
+                f"{item['title']} "
+                f"generado automáticamente."
+            )
 
-    logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
+    logo_bytes = (
+        base64.b64decode(LOGO_BASE64)
+        if LOGO_BASE64
+        else None
+    )
 
-    # Exportar como PNG combinado
     if (download_format or "pdf").lower() == "png":
-        if not image_bytes_for_png:
-            logging.warning("No hay imágenes para combinar en PNG.")
-            return no_update
-        combined_png = combine_image_bytes_vertically(image_bytes_for_png)
-        if not combined_png:
-            logging.warning("Fallo al combinar imágenes para PNG.")
-            return no_update
-        filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.png"
-        return dcc.send_bytes(lambda buf: buf.write(combined_png), filename)
 
-    # Exportar como PDF multipágina
+        if not image_bytes_for_png:
+            logging.warning(
+                "No hay imágenes para combinar en PNG."
+            )
+            return no_update
+
+        combined_png = combine_image_bytes_vertically(
+            image_bytes_for_png
+        )
+
+        if not combined_png:
+            return no_update
+
+        filename = (
+            f"{title.replace(' ', '_')}_"
+            f"{fecha_text.replace('/', '-')}.png"
+        )
+
+        return dcc.send_bytes(
+            lambda buf: buf.write(combined_png),
+            filename
+        )
+
     try:
         pdf_bytes = build_report_pdf_multi(
             title=title,
@@ -3273,20 +3418,26 @@ def generar_informe(
             fecha_text=fecha_text,
             filters_text=filters_text
         )
+
     except Exception:
-        logging.exception("Error generando PDF con ReportLab")
+        logging.exception(
+            "Error generando PDF con ReportLab"
+        )
         return no_update
 
     if not pdf_bytes:
-        logging.warning("No se pudo generar el PDF final.")
         return no_update
 
-    filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.pdf"
+    filename = (
+        f"{title.replace(' ', '_')}_"
+        f"{fecha_text.replace('/', '-')}.pdf"
+    )
 
     return dcc.send_bytes(
         lambda buf: buf.write(pdf_bytes),
         filename
-)
+    )
+    
 @app.callback(
     Output("radar_chart", "figure"),
     [
@@ -3657,6 +3808,28 @@ def descargar_tabla(
     if not ctx.triggered:
         return no_update
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    
+    # Normalización de filtros
+
+    if categorias and isinstance(categorias, str):
+        categorias = [categorias]
+
+    if jugadores and isinstance(jugadores, str):
+        jugadores = [jugadores]
+
+    if athlete and isinstance(athlete, str):
+        athlete = [athlete]
+
+    if gametags and isinstance(gametags, str):
+        gametags = [gametags]
+
+    if periodtags and isinstance(periodtags, str):
+        periodtags = [periodtags]
+
+    metricas = metricas or ["Distance"]
+
+    if isinstance(metricas, str):
+        metricas = [metricas]
 
     # --- Construir dataframe filtrado ---
     dff = df.copy()
@@ -3708,8 +3881,22 @@ def descargar_tabla(
             tabla[m + "_ACWR"] = (tabla[f"{m}_7"] / tabla[f"{m}_21"]).round(2)
         df_export = tabla[["Player Name"] + [f"{m}_ACWR" for m in metricas_acwr]].fillna(0)
     else:
-        df_export = pd.melt(dff, id_vars=["Date", "Category"], value_vars=metricas, var_name="Métrica", value_name="Valor")
+            metricas_validas = [
+        m
+        for m in metricas
+        if m in dff.columns
+    ]
 
+    if not metricas_validas:
+        return no_update
+
+    df_export = pd.melt(
+        dff,
+        id_vars=["Date", "Category"],
+        value_vars=metricas_validas,
+        var_name="Métrica",
+        value_name="Valor"
+    )
     # --- CSV ---
     if trigger_id == "download-table-csv":
         buffer = io.BytesIO()
@@ -3749,6 +3936,11 @@ def descargar_tabla(
             logging.warning("No hay figura de tabla para la pestaña %s", tab)
             return no_update
         height = _calc_table_height(df_export)
+        if df_export.empty:
+            logging.warning(
+        "No hay datos para exportar."
+    )
+            return no_update
         png_bytes = fig_to_png_bytes(fig_table, width=1200, height=height, scale=2)
         if not png_bytes:
             return no_update
@@ -3772,6 +3964,9 @@ def descargar_tabla(
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8050))
-    app.run_server(host="0.0.0.0", port=port, debug=False)
-    app.run(debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=False
+    )
 

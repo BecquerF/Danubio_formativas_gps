@@ -2397,16 +2397,16 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 html.Div([
                     html.Div(m, style={"color": "#a3e3d0",
             "fontSize": "12px",
-            "marginBottom": "2px",
-            "marginTop": "2px",
-            "textAlign": "center",
+            "marginTop": "1px",
+            "textAlign": "left",
             "lineHeight": "1.2"}),
                     html.Div(f"{valor:.2f}", style={"color": "#edf1f2",
             "fontSize": "30px",
             "fontWeight": "700",
-            "letterSpacing": "1px",  
+            "letterSpacing": "1px",
+            "marginTop": "2px",  
             "marginBottom": "2px",
-            "textAlign": "center",   
+            "textAlign": "left",   
             "lineHeight": "1.2"})
                 ], style={
                     "padding": "20px",

@@ -83,8 +83,8 @@ h4,
     height: auto;
 }
 
-#download-graph-png::after,
-#download-graph-pdf::after,
+#download-table-png::after,
+#download-table-pdf::after,
 #download-table-csv::after,
 #download-table-xlsx::after {
     content: "";
@@ -94,11 +94,11 @@ h4,
     letter-spacing: 0.02em;
 }
 
-#download-graph-png::after {
+#download-table-png::after {
     content: "PNG";
 }
 
-#download-graph-pdf::after {
+#download-table-pdf::after {
     content: "PDF";
 }
 

@@ -2249,7 +2249,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     rango = max_val - min_val if max_val != min_val else 1
                     
                     estilos_condicionales.append({
-                        "if": {"column_id": "Player Name"},  # primera columna
+                        "if": {"column_id": "Player Name"}, 
                         "minWidth": "100px",
                         "width": "100px",
                         "maxWidth": "100px",

@@ -2906,8 +2906,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 className="tab-graph",
                 figure=fig,
                 style={"width": "100%", "height": "100%", "minHeight": "600px",
+                       "maxHeight": "600px",
                             "minWidth": "1000px",
-                            "width": "100%",
                             "maxWidth": "1000px"}
             ),
                 style={"padding": "22px", "background": "#0b0c0e",
@@ -3025,6 +3025,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                     "fontWeight":"600",
                     "minHeight": "600px",
+                    "maxHeight": "600px",
                                 "minWidth": "1000px",
                                 "width": "100%",
                                 "maxWidth": "1000px"

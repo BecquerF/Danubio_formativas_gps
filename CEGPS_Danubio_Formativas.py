@@ -2623,10 +2623,11 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                             "minWidth":"80px",
                             "width":"80px",
                             "maxWidth":"80px",
+                            "height":"15px",
                             "whiteSpace":"normal"
                         },
                         style_data_conditional=[
-                            {
+                            {"lineHeight": "15px",
                                 "if": {
                                     "filter_query": "{Distance_ACWR} < 0.8",
                                     "column_id": "Distance_ACWR"
@@ -2816,10 +2817,12 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                     "column_id": "Impacts_ACWR"
                                 },
                                 "backgroundColor": "#ff5e5e",
-                                "color": "white"
+                                "color": "white",
+                                
                             }
                         ],
-                        page_size=20
+                        page_size=20 
+                        
                             )
                         ]
                     )
@@ -2863,7 +2866,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
 
         fig.update_layout(
             title={
-                "text": 'Cronológico',  # 👈 ahora sí existe
+                "text": 'Cronológico',
                 "font": {
                     "color": "#f5f5f5",
                     "family": "'Clash Display Semibold', 'Helvetica Neue'",
@@ -3036,6 +3039,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 style={
                     "color":"white",
                     "textAlign":"center",
+                    "fontSize":"22px",
                     "marginBottom":"20px",
                     "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
                     "fontWeight":"600"

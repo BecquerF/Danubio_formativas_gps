@@ -2283,16 +2283,15 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                               "minHeight":"25px","height":"25px","maxHeight":"25px",
                                   "minWidht":"80px","width":"80px","maxWidth":"80px",
                                               "color":"white","fontWeight":"bold","position":"sticky","top":0},
-                                style_cell={
-                                             "backgroundColor":"#1a1a1a","color":"white",
+                                style_cell={ "backgroundColor":"#1a1a1a","color":"white",
                                                                         "textAlign": "center", 
                                                                         "fontSize":"11px",
                                                                         "minWidth":"80px",
                                                                         "width":"80px",
                                                                         "maxWidth":"80px",
-                                                                        "height":"15px",
+                                                                        "height":"25px",
                                                                         "whiteSpace":"normal",
-                                                                        "lineHeight":"15px"
+                                                                        "lineHeight":"25px"
                                                                     },
                                 style_data_conditional=estilos_condicionales
                             )
@@ -2388,9 +2387,9 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                                 "minWidth":"80px",
                                                 "width":"80px",
                                                 "maxWidth":"80px",
-                                                "height":"15px",
+                                                "height":"25px",
                                                 "whiteSpace":"normal",
-                                                "lineHeight":"15px"
+                                                "lineHeight":"25px"
                                             },
                     style_data_conditional=estilos_condicionales
                 )

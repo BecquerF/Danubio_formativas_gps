@@ -2431,7 +2431,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             ], style={"marginBottom": "10px"}),
             html.Div(
                 cards if cards else [html.Div("No hay datos para la fecha seleccionada.", style={"color": "#edf1f2", "textAlign": "center", "padding": "24px"})],
-                style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(200px, 1fr))", "gap": "20px"}
+                style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(200px, 1fr))", "flexWrap":"wrap" ,"gap": "2px"}
             )
         ], style={"padding": "28px", "background": "linear-gradient(145deg, #0b0c0e, #1a1c1f)",
                     "border": "1px solid rgba(137,188,239,0.25)", "borderRadius": "28px",

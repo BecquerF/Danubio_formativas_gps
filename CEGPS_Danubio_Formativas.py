@@ -2282,15 +2282,13 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                 style_header={"backgroundColor":"#000000",
                                              "color":"white","fontWeight":"bold","position":"sticky","top":0,
                                               "textOverflow": "ellipsis"},
-                                style_cell={ "backgroundColor":"#1a1a1a","color":"white",
-                                                                        "textAlign": "center", 
-                                                                        "fontSize":"11px",
-                                                                        "minWidth":"100px",
-                                                                        "width":"100px",
-                                                                        "maxWidth":"100px",
-                                                                        "height":"25px",
-                                                                        "whiteSpace":"normal",
-                                                                        "lineHeight":"25px"
+                                style_cell={  "backgroundColor":"#1a1a1a","color":"white",
+                                                            "fontSize":"11px","textAlign":"center",
+                                                            "minWidth":"100px",
+                                                            "width":"100px",
+                                                            "maxWidth":"100px",
+                                                            "height":"15px",
+                                                            "whiteSpace":"normal"
                                                                     },
                                 style_data_conditional=estilos_condicionales
                             )
@@ -2344,21 +2342,21 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
 
                     estilos_condicionales.append({
                         "if": {"filter_query": f"{{{m}}} > {umbral_alto}", "column_id": m},
-                        "backgroundColor": "#017351", "color": "white"
+                        "backgroundColor": "#017351", "color": "white", "lineHeight": "15px"
                     })
                     estilos_condicionales.append({
                         "if": {"filter_query": f"{{{m}}} >= {umbral_bajo} && {{{m}}} <= {umbral_alto}", "column_id": m},
-                        "backgroundColor": "#e6c200", "color": "black"
+                        "backgroundColor": "#e6c200", "color": "black", "lineHeight": "15px"
                     })
                     estilos_condicionales.append({
                         "if": {"filter_query": f"{{{m}}} < {umbral_bajo}", "column_id": m},
-                        "backgroundColor": "#b22222", "color": "white"
+                        "backgroundColor": "#b22222", "color": "white", "lineHeight": "15px"
                     })
 
             # Diferenciar columna Prom
             estilos_condicionales.append({
                 "if": {"column_id": f"{m} Prom"},
-                "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold"
+                "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold", "lineHeight": "15px"
             })
 
         return html.Div([
@@ -2381,16 +2379,13 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                 "minWidth":"100px","width":"100px","maxWidth":"100px",
                                 "fontWeight": "bold", "position": "sticky", "top": 0,
                                 "textOverflow": "ellipsis"},
-                    style_cell={"backgroundColor":"#1a1a1a","color":"white",
-                                                "textAlign": "center", 
+                    style_cell={ "backgroundColor":"#1a1a1a","color":"white",
                                                 "fontSize":"11px","textAlign":"center",
                                                 "minWidth":"100px",
                                                 "width":"100px",
                                                 "maxWidth":"100px",
-                                                "height":"25px",
-                                                "whiteSpace":"normal",
-                                                "lineHeight":"25px"
-                                            },
+                                                "height":"15px",
+                                                "whiteSpace":"normal"            },
                     style_data_conditional=estilos_condicionales
                 )
             )

@@ -2584,7 +2584,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                         for col in ratio_columns
 
                     ],
-                        filter_action="native",
+                        filter_action="none",
                         sort_action="native",
                         fixed_columns={"headers": True, "data": 1},
                         style_table={
@@ -2599,8 +2599,12 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                         },
                         style_cell={
                             "backgroundColor":"#1a1a1a","color":"white",
+                            "textAligne": "center", 
                             "fontSize":"11px","textAlign":"center",
-                            "minWidth":"100px","whiteSpace":"normal"
+                            "minWidth":"80px",
+                            "width":"80px",
+                            "maxWidth":"80px",
+                            "whiteSpace":"normal"
                         },
                         style_data_conditional=[
                             {
@@ -2802,13 +2806,14 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     )
                 )
             ],style={
-            "padding": "22px",
+            "padding": "18px",
             "background": "#0b0c0e",
             "border": "1px solid rgba(137,188,239,0.18)",
             "borderRadius": "24px",
             "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
             "minHeight": "600px",
-            "minWidth": "900px",
+            "minWidth": "100px",
+            "width": "100%",
             "maxWidth": "1000px"
 })
     

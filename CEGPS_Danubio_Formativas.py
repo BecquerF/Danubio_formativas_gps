@@ -3089,8 +3089,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             "minWidth": "600px",
             "minHeight": "600px",
             "width": "100%"
-        }, 
-        style="minWidth: 600px; maxWidth: 600px; margin: 20px auto; padding: 28px; background: linear-gradient(145deg, #0b0c0e, #1a1c1f); border: 1px solid rgba(137,188,239,0.25); border-radius: 28px; box-shadow: 0 12px 30px rgba(0,0,0,0.35); min-height: 600px; width: 100%;")
+        })
 
     else:
         return no_update

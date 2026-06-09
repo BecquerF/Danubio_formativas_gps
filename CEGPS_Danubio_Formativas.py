@@ -2290,8 +2290,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                                                         "height":"15px",
                                                                         "whiteSpace":"normal"
                                                                     },
-                                style_data_conditional=estilos_condicionales + 
-                                    {"lineHeight": "15px"},
+                                style_data_conditional=estilos_condicionales + [
+                                    {"lineHeight": "15px"}]
                             )
                         ]
                     )

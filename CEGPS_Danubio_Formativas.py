@@ -2431,16 +2431,16 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 html.Div([
                     html.Div([html.Div("Fecha de actividad", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
                               html.Div(fecha_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
-                             style={"minWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
+                             style={"minWidth": "180px", "maxWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
                     html.Div([html.Div("Game Tags", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
                               html.Div(gametag_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
-                             style={"minWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
+                             style={"minWidth": "180px", "maxWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
                     html.Div([html.Div("Period Tags", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
                               html.Div(periodtag_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
-                             style={"minWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
+                             style={"minWidth": "180px", "maxWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
                     html.Div([html.Div("Category", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
                               html.Div(categoria_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
-                             style={"minWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"})
+                             style={"minWidth": "180px", "maxWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"})
                 ], style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(180px, 1fr))", "gap": "16px", "marginBottom": "24px"})
             ], style={"marginBottom": "10px", "padding": "10px 10px"}),
             html.Div(

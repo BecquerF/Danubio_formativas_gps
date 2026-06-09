@@ -2356,7 +2356,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 dash_table.DataTable(
                     data=tabla_comparativa.to_dict("records"),
                     columns=columnas_comparativa,
-                    filter_action="native",
+                    filter_action="none",
                     sort_action="native",
                     fixed_columns={"headers": True, "data": 1},
                     page_size=20,
@@ -2365,15 +2365,25 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                 "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
                     style_header={"backgroundColor": "#000000", "color": "white",
                                 "fontWeight": "bold", "position": "sticky", "top": 0},
-                    style_cell={"backgroundColor": "#1a1a1a", "color": "white",
-                                "fontSize": "11px", "textAlign": "center",
-                                "minWidth": "100px", "whiteSpace": "normal"},
+                    style_cell={
+                                                "backgroundColor":"#1a1a1a","color":"white",
+                                                "textAligne": "center", 
+                                                "fontSize":"11px","textAlign":"center",
+                                                "minWidth":"80px",
+                                                "width":"80px",
+                                                "maxWidth":"80px",
+                                                "whiteSpace":"normal"
+                                            },
                     style_data_conditional=estilos_condicionales
                 )
             )
         ], style={"padding": "22px", "background": "#0b0c0e",
                 "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
-                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
+                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+                "minWidth": "1000px", "overflowX": "auto",
+                "maxWidth": "1000px",
+                "maxHeight": "600px", "overflowY": "auto"
+                })
 
     elif tab == "actividad_promedios":
         fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
@@ -2907,7 +2917,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
                     "minHeight": "600px",
                                 "minWidth": "1000px",
-                                "width": "100%",
+                                "width": "85%",
                                 "maxWidth": "1000px"})
 
     elif tab == "informe":

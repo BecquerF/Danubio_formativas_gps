@@ -2301,8 +2301,9 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "border": "1px solid rgba(137,188,239,0.18)",
                     "borderRadius": "24px",
                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+                    "maxHeight":"600px",
                     "minWidth": "1000px",
-                    "width": "1000px",
+                    "width": "100%",
                     "maxWidth": "1000px"
                 })
                         

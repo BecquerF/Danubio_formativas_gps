@@ -2905,14 +2905,15 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             dcc.Graph(
                 className="tab-graph",
                 figure=fig,
-                style={"width": "100%", "height": "100%", "minHeight": "600px",
-                       "maxHeight": "600px",
-                            "minWidth": "1000px",
-                            "maxWidth": "1000px"}
+                style={"width": "100%", "height": "100%"}
             ),
                 style={"padding": "22px", "background": "#0b0c0e",
                     "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
-                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"})
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+                    "minHeight": "600px",
+                                "minWidth": "1000px",
+                                "width": "100%",
+                                "maxWidth": "1000px"})
 
     elif tab == "informe":
         return html.Div([
@@ -3026,9 +3027,9 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "fontWeight":"600",
                     "minHeight": "600px",
                     "maxHeight": "600px",
-                                "minWidth": "1000px",
+                                "minWidth": "600px",
                                 "width": "100%",
-                                "maxWidth": "1000px"
+                                "maxWidth": "600px"
                 }
             ),
 

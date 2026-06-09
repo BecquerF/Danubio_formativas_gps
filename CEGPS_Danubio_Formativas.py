@@ -2806,7 +2806,10 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             "background": "#0b0c0e",
             "border": "1px solid rgba(137,188,239,0.18)",
             "borderRadius": "24px",
-            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+            "minHeight": "600px",
+            "minWidth": "900px",
+            "maxWidth": "1000px"
 })
     
         # CRONOLÓGICO

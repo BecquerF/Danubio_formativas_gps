@@ -2281,7 +2281,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                             "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"},
                                 style_header={"backgroundColor":"#000000",
                                              "color":"white","fontWeight":"bold","position":"sticky","top":0,
-                                              "textOverflow": "ellipsis"},
+                                              "textOverflow": "ellipsis", "height":"25px","maxHeight":"25px"},
                                 style_cell={  "backgroundColor":"#1a1a1a","color":"white",
                                                             "fontSize":"11px","textAlign":"center",
                                                             "minWidth":"100px",

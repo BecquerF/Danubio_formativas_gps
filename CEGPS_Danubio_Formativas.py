@@ -2288,10 +2288,10 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                                                         "width":"80px",
                                                                         "maxWidth":"80px",
                                                                         "height":"15px",
-                                                                        "whiteSpace":"normal"
+                                                                        "whiteSpace":"normal",
+                                                                        "lineHeight":"15px"
                                                                     },
-                                style_data_conditional=estilos_condicionales + [
-                                    {"lineHeight": "15px"}]
+                                style_data_conditional=estilos_condicionales
                             )
                         ]
                     )
@@ -2378,15 +2378,16 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     style_header={"backgroundColor": "#000000", "color": "white",
                                 "fontWeight": "bold", "position": "sticky", "top": 0},
                     style_cell={"backgroundColor":"#1a1a1a","color":"white",
-                                                "textAligne": "center", 
+                                                "textAlign": "center", 
                                                 "fontSize":"11px","textAlign":"center",
                                                 "minWidth":"80px",
                                                 "width":"80px",
                                                 "maxWidth":"80px",
                                                 "height":"15px",
-                                                "whiteSpace":"normal"
+                                                "whiteSpace":"normal",
+                                                "lineHeight":"15px"
                                             },
-                    style_data_conditional=estilos_condicionales + [{"lineHeight": "15px"}]
+                    style_data_conditional=estilos_condicionales
                 )
             )
         ], style={"padding": "22px", "background": "#0b0c0e",

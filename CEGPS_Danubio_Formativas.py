@@ -2247,6 +2247,15 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     max_val = dff_fecha[col].max()
                     min_val = dff_fecha[col].min()
                     rango = max_val - min_val if max_val != min_val else 1
+                    
+                    estilos_condicionales.append({
+                        "if": {"column_id": "Player Name"},  # primera columna
+                        "minWidth": "100px",
+                        "width": "100px",
+                        "maxWidth": "100px",
+                        "height": "15px",
+                        "lineHeight": "15px"
+                    })
 
                     estilos_condicionales.append({
                         "if": {"filter_query": f"{{{col}}} >= {max_val * 0.8}", "column_id": col},

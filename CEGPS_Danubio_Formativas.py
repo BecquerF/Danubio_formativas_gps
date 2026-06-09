@@ -2858,13 +2858,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 bgcolor="rgba(11,12,14,0.75)",
                 bordercolor="#89bcef",
                 borderwidth=1
-            ),
-            style= {"minHeight": "600px",
-                        "minWidth": "1000px",
-                        "width": "100%",
-                        "maxWidth": "1000px"
-        })
-
+            ))
+            
         if LOGO_BASE64:
             fig.add_layout_image(
                 dict(
@@ -3068,7 +3063,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
             # Gráfico
-            dcc.Graph(id="radar_chart", className="tab-graph", style={"height":"900px"})
+            dcc.Graph(id="radar_chart", className="tab-graph", style={"height":"600px"})
         ], style={
             "padding":"28px",
             "background":"linear-gradient(145deg, #0b0c0e, #1a1c1f)",
@@ -3076,8 +3071,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             "borderRadius":"28px",
             "boxShadow":"0 12px 30px rgba(0,0,0,0.35)",
             "margin":"20px auto",
-            "maxWidth":"1000px",
-            "minWidth": "1000px",
+            "maxWidth":"600px",
+            "minWidth": "600px",
             "minHeight": "600px",
             "width": "100%"
         })

@@ -2812,7 +2812,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             "borderRadius": "24px",
             "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
             "minHeight": "600px",
-            "minWidth": "100px",
+            "minWidth": "1000px",
             "width": "100%",
             "maxWidth": "1000px"
 })
@@ -2858,8 +2858,12 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 bgcolor="rgba(11,12,14,0.75)",
                 bordercolor="#89bcef",
                 borderwidth=1
-            )
-        )
+            ),
+            style= {"minHeight": "600px",
+                        "minWidth": "1000px",
+                        "width": "100%",
+                        "maxWidth": "1000px"
+        })
 
         if LOGO_BASE64:
             fig.add_layout_image(
@@ -3016,7 +3020,11 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "textAlign":"center",
                     "marginBottom":"20px",
                     "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
-                    "fontWeight":"600"
+                    "fontWeight":"600",
+                    "minHeight": "600px",
+                                "minWidth": "1000px",
+                                "width": "100%",
+                                "maxWidth": "1000px"
                 }
             ),
 
@@ -3063,7 +3071,10 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             "borderRadius":"28px",
             "boxShadow":"0 12px 30px rgba(0,0,0,0.35)",
             "margin":"20px auto",
-            "maxWidth":"1600px"
+            "maxWidth":"1000px",
+            "minWidth": "1000px",
+            "minHeight": "600px",
+            "width": "100%"
         })
 
     else:

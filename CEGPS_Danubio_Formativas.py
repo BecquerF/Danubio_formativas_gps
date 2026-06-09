@@ -2220,7 +2220,10 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 "0 0 50px rgba(137,188,239,0.08), "
                 "0 18px 40px rgba(0,0,0,0.35)"
             ),
-            "padding":"10px"
+            "padding":"10px",
+            "minWidth":"1000px",
+            "width":"85%",
+            "maxWidth":"1000px"
         })
 
         # ACTIVIDAD POR JUGADOR
@@ -2270,7 +2273,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                             dash_table.DataTable(
                                 data=dff_fecha[columnas_presentes].to_dict("records") if columnas_presentes else [],
                                 columns=columnas_actividad,
-                                filter_action="native",
+                                filter_action="none",
                                 sort_action="native",
                                 fixed_columns={"headers": True, "data": 1},
                                 page_size=20,
@@ -2278,10 +2281,14 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                             "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"},
                                 style_header={"backgroundColor":"#000000","color":"white","fontWeight":"bold","position":"sticky","top":0},
                                 style_cell={
-                                            "backgroundColor":"#1a1a1a","color":"white",
-                                            "fontSize":"11px","textAlign":"center",
-                                            "minWidth":"100px","whiteSpace":"normal"
-                                            },
+                                             "backgroundColor":"#1a1a1a","color":"white",
+                                                                        "textAligne": "center", 
+                                                                        "fontSize":"11px","textAlign":"center",
+                                                                        "minWidth":"80px",
+                                                                        "width":"80px",
+                                                                        "maxWidth":"80px",
+                                                                        "whiteSpace":"normal"
+                                                                    },
                                 style_data_conditional=estilos_condicionales
                             )
                         ]
@@ -2292,7 +2299,10 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "background": "#0b0c0e",
                     "border": "1px solid rgba(137,188,239,0.18)",
                     "borderRadius": "24px",
-                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+                    "minWidth": "1000px",
+                    "width": "1000px",
+                    "maxWidth": "1000px"
                 })
                         
   
@@ -2365,8 +2375,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                 "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
                     style_header={"backgroundColor": "#000000", "color": "white",
                                 "fontWeight": "bold", "position": "sticky", "top": 0},
-                    style_cell={
-                                                "backgroundColor":"#1a1a1a","color":"white",
+                    style_cell={"backgroundColor":"#1a1a1a","color":"white",
                                                 "textAligne": "center", 
                                                 "fontSize":"11px","textAlign":"center",
                                                 "minWidth":"80px",
@@ -3029,12 +3038,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "textAlign":"center",
                     "marginBottom":"20px",
                     "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
-                    "fontWeight":"600",
-                    "minHeight": "600px",
-                    "maxHeight": "600px",
-                                "minWidth": "600px",
-                                "width": "50%",
-                                "maxWidth": "600px"
+                    "fontWeight":"600"
                 }
             ),
 
@@ -3085,7 +3089,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             "minWidth": "600px",
             "minHeight": "600px",
             "width": "100%"
-        })
+        }, 
+        style="minWidth: 600px; maxWidth: 600px; margin: 20px auto; padding: 28px; background: linear-gradient(145deg, #0b0c0e, #1a1c1f); border: 1px solid rgba(137,188,239,0.25); border-radius: 28px; box-shadow: 0 12px 30px rgba(0,0,0,0.35); min-height: 600px; width: 100%;")
 
     else:
         return no_update

@@ -2396,7 +2396,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             cards.append(
                 html.Div([
                     html.Div(m, style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "6px"}),
-                    html.Div(f"{valor:.2f}", style={"color": "#edf1f2", "fontSize": "30px", "fontWeight": "700", "letterspacing": "1px"})
+                    html.Div(f"{valor:.2f}", style={"color": "#edf1f2", "fontSize": "30px", "fontWeight": "700", "letterspacing": "1px","marginBottom":"4px"})
                 ], style={
                     "padding": "20px",
                     "background": "#0b0c0e",

@@ -2291,7 +2291,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                                                         "whiteSpace":"normal",
                                                                         "lineHeight":"15px"
                                                                     },
-                                style_data_conditional=estilos_condicionales
+                                style_data_conditional=estilos_condicionales,
+                                style_data_conditional= {"lineHeight":"15px"}
                             )
                         ]
                     )
@@ -2622,7 +2623,6 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                         },
                         style_cell={
                             "backgroundColor":"#1a1a1a","color":"white",
-                            "textAligne": "center", 
                             "fontSize":"11px","textAlign":"center",
                             "minWidth":"80px",
                             "width":"80px",

@@ -2285,6 +2285,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                 filter_action="none",
                                 sort_action="native",
                                 fixed_columns={"headers": True, "data": 1},
+                                                              
                                 page_size=20,
                                 style_table={"overflowX":"auto","minWidth":"100%","border":"1px solid rgba(137,188,239,0.18)",
                                             "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"},
@@ -2299,6 +2300,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                                             "height":"15px",
                                                             "whiteSpace":"normal"
                                                                     },
+                                style_cell_conditional= {"height":"15px",
+                                                         "lineHeight":"15px"},
                                 style_data_conditional=estilos_condicionales
                             )
                         ]
@@ -2396,6 +2399,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                                 "maxWidth":"100px",
                                                 "height":"15px",
                                                 "whiteSpace":"normal"            },
+                    style_cell_conditional= {"height":"15px",
+                                                                             "lineHeight":"15px"},
                     style_data_conditional=estilos_condicionales
                 )
             )

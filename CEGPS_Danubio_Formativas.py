@@ -3023,7 +3023,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "minHeight": "600px",
                     "maxHeight": "600px",
                                 "minWidth": "600px",
-                                "width": "100%",
+                                "width": "50%",
                                 "maxWidth": "600px"
                 }
             ),

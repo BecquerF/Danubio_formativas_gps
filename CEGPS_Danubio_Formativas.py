@@ -2396,17 +2396,19 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             cards.append(
                 html.Div([
                     html.Div(m, style={"color": "#a3e3d0", "fontSize": "13px", "marginBottom": "8px"}),
-                    html.Div(f"{valor:.2f}", style={"color": "#edf1f2", "fontSize": "28px", "fontWeight": "700", "letterspacing": "1px"})
+                    html.Div(f"{valor:.2f}", style={"color": "#edf1f2", "fontSize": "32px", "fontWeight": "700", "letterspacing": "1px"})
                 ], style={
                     "padding": "20px",
                     "background": "#0b0c0e",
                     "border": "1px solid rgba(137,188,239,0.18)",
                     "borderRadius": "20px",
                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
-                    "minWidth": "190px",
+                    "minWidth": "180px",
+                    "maxWidth": "180px",
                     "flex": "1",
                     "flexWrap": "wrap",
-                    "gap": "2px"
+                    "gap": "16px",
+                    "padding": "16px"
                 })
             )
 
@@ -2428,7 +2430,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                               html.Div(categoria_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
                              style={"minWidth": "180px", "padding": "14px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"})
                 ], style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(180px, 1fr))", "gap": "16px", "marginBottom": "24px"})
-            ], style={"marginBottom": "10px"}),
+            ], style={"marginBottom": "10px", "padding": "10px 10px"}),
             html.Div(
                 cards if cards else [html.Div("No hay datos para la fecha seleccionada.", style={"color": "#edf1f2", "textAlign": "center", "padding": "24px"})],
                 style={"minWidth":"180px", "display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(180px, 1fr))", "flexWrap":"wrap" ,"gap": "16px", "marginBottom":"24px"}

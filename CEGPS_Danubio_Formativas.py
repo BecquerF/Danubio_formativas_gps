@@ -2283,10 +2283,10 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                              "color":"white","fontWeight":"bold","position":"sticky","top":0,
                                               "textOverflow": "ellipsis", "height":"25px","maxHeight":"25px"},
                                 style_cell={  "backgroundColor":"#1a1a1a","color":"white",
-                                                            "fontSize":"11px","textAlign":"center",
-                                                            "minWidth":"100px",
-                                                            "width":"100px",
-                                                            "maxWidth":"100px",
+                                                            "fontSize":"9px","textAlign":"center",
+                                                            "minWidth":"90px",
+                                                            "width":"90px",
+                                                            "maxWidth":"90px",
                                                             "height":"15px",
                                                             "whiteSpace":"normal"
                                                                     },
@@ -2302,9 +2302,9 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "borderRadius": "24px",
                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
                     "maxHeight":"600px",
-                    "minWidth": "900px",
+                    "minWidth": "950px",
                     "width": "100%",
-                    "maxWidth": "900px"
+                    "maxWidth": "950px"
                 })
                         
   

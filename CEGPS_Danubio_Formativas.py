@@ -2338,91 +2338,83 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
         for m in metricas_base:
             columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
             columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
+
+        for _, row in tabla_comparativa.iterrows():
+            prom_val = row[f"{m} Prom"]
+            if prom_val > 0:
+                umbral_alto = 1.3 * prom_val
+                umbral_bajo = 0.8 * prom_val
+                estilos_condicionales += [
+                    {"if": {"filter_query": f"{{{m}}} > {umbral_alto}", "column_id": m}, "backgroundColor": "#017351", "color": "white"},
+                    {"if": {"filter_query": f"{{{m}}} >= {umbral_bajo} && {{{m}}} <= {umbral_alto}", "column_id": m}, "backgroundColor": "#e6c200", "color": "black"},
+                    {"if": {"filter_query": f"{{{m}}} < {umbral_bajo}", "column_id": m}, "backgroundColor": "#b22222", "color": "white"}
+                ]
+
+        estilos_condicionales.append({
+            "if": {"column_id": f"{m} Prom"},
+            "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold"
+        })
+        
+                # Métricas de máximo
         for m in metricas_max:
             columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
-            columnas_comparativa.append({"name": f"{m} Max", "id": f"{m} Max", "type": "numeric", "format": {"specifier": ".2f"}})  
+            columnas_comparativa.append({"name": f"{m} Max", "id": f"{m} Max", "type": "numeric", "format": {"specifier": ".2f"}})
 
-            # Calcular umbrales en Python
-            for _, row in tabla_comparativa.iterrows():
-                prom_val = row[f"{m} Prom"]
-                if prom_val > 0:
-                    umbral_alto = 1.3 * prom_val
-                    umbral_bajo = 0.8 * prom_val
-
-                    estilos_condicionales.append({
-                        "if": {"filter_query": f"{{{m}}} > {umbral_alto}", "column_id": m},
-                        "backgroundColor": "#017351", "color": "white", "lineHeight": "15px"
-                    })
-                    estilos_condicionales.append({
-                        "if": {"filter_query": f"{{{m}}} >= {umbral_bajo} && {{{m}}} <= {umbral_alto}", "column_id": m},
-                        "backgroundColor": "#e6c200", "color": "black", "lineHeight": "15px"
-                    })
-                    estilos_condicionales.append({
-                        "if": {"filter_query": f"{{{m}}} < {umbral_bajo}", "column_id": m},
-                        "backgroundColor": "#b22222", "color": "white", "lineHeight": "15px"
-                    })
-
-            # Diferenciar columna Prom
-            estilos_condicionales.append({
-                "if": {"column_id": f"{m} Prom"},
-                "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold", "lineHeight": "15px"
-            })
-             # Condicionales basados en máximo
             for _, row in tabla_comparativa.iterrows():
                 max_val = row[f"{m} Max"]
                 if max_val > 0:
-                    estilos_condicionales.append({
-                        "if": {"filter_query": f"{{{m}}} >= {max_val}", "column_id": m},
-                        "backgroundColor": "#017351", "color": "white"
-                    })
-                    estilos_condicionales.append({
-                        "if": {"filter_query": f"{{{m}}} < {max_val}", "column_id": m},
-                        "backgroundColor": "#b22222", "color": "white"
-                    })
+                    estilos_condicionales += [
+                        {"if": {"filter_query": f"{{{m}}} >= {max_val}", "column_id": m}, "backgroundColor": "#017351", "color": "white"},
+                        {"if": {"filter_query": f"{{{m}}} < {max_val}", "column_id": m}, "backgroundColor": "#b22222", "color": "white"}
+                    ]
 
-            # Diferenciar columna Max
             estilos_condicionales.append({
                 "if": {"column_id": f"{m} Max"},
                 "backgroundColor": "#444444", "color": "#f0f0f0", "fontWeight": "bold"
             })
-
+            
         return html.Div([
             html.H4("Comparativo última ACTIVIDAD vs PROMEDIO",
                     style={"color":"white","textAlign":"center","marginBottom":"10px",
-                                                        "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
+                        "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
             dcc.Loading(
                 dash_table.DataTable(
                     data=tabla_comparativa.to_dict("records"),
                     columns=columnas_comparativa,
                     filter_action="none",
                     sort_action="native",
-                    fixed_columns={"headers": True, "data": 0},
+                    fixed_columns={"headers": True, "data": 1},  # fija primera columna
                     page_size=20,
-                    style_table={"overflowX": "auto", "minWidth": "100%",
-                                "border": "1px solid rgba(137,188,239,0.18)",
-                                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"},
-                    style_header={"backgroundColor": "#000000", "color": "white",
-                                "height":"25px","maxHeight":"25px",
-                                "minWidth":"100px","width":"100px","maxWidth":"100px",
-                                "fontWeight": "bold", "position": "sticky", "top": 0,
-                                "textOverflow": "ellipsis"},
-                    style_cell={ "backgroundColor":"#1a1a1a","color":"white",
-                                                "fontSize":"11px","textAlign":"center",
-                                                "minWidth":"100px",
-                                                "width":"100px",
-                                                "maxWidth":"100px",
-                                                "height":"15px",
-                                                "whiteSpace":"normal"            },
+                    style_table={
+                        "overflowX": "auto", "minWidth": "100%",
+                        "border": "1px solid rgba(137,188,239,0.18)",
+                        "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                    },
+                    style_header={
+                        "backgroundColor": "#000000", "color": "white",
+                        "height":"20px","lineHeight":"20px",
+                        "minWidth":"100px","width":"100px","maxWidth":"100px",
+                        "fontWeight": "bold", "position": "sticky", "top": 0,
+                        "textOverflow": "ellipsis"
+                    },
+                    style_cell={
+                        "backgroundColor":"#1a1a1a","color":"white",
+                        "fontSize":"11px","textAlign":"center",
+                        "minWidth":"100px","width":"100px","maxWidth":"100px",
+                        "height":"20px","lineHeight":"20px",
+                        "whiteSpace":"normal"
+                    },
                     style_data_conditional=estilos_condicionales
                 )
             )
-        ], style={"padding": "22px", "background": "#0b0c0e",
-                "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
-                "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
-                "minWidth": "1000px", "overflowX": "auto",
-                "maxWidth": "1000px",
-                "maxHeight": "600px", "overflowY": "auto"
-                })
+        ], style={
+            "padding": "22px", "background": "#0b0c0e",
+            "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "24px",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+            "minWidth": "1000px", "overflowX": "auto",
+            "maxWidth": "1000px",
+            "maxHeight": "600px", "overflowY": "auto"
+        })
 
     elif tab == "actividad_promedios":
         fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()

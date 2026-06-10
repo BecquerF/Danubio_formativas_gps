@@ -2318,7 +2318,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             "Distance","Meterage Per Minute","Player Load","Player Load Per Minute",
             "Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
             "High Speed Distance","High Speed Distance Per Minute","High Speed Efforts",
-            "Sprint Distance","Sprint Dist Per Min","Sprint Efforts","Impacts", "Player Name"
+            "Sprint Distance","Sprint Dist Per Min","Sprint Efforts","Impacts"
         ]
         metricas_max = ["Max Velocity"]
 

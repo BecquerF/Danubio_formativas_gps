@@ -2335,27 +2335,29 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
         columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
         estilos_condicionales = []
 
+        # Métricas de promedio
         for m in metricas_base:
             columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
             columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
 
-        for _, row in tabla_comparativa.iterrows():
-            prom_val = row[f"{m} Prom"]
-            if prom_val > 0:
-                umbral_alto = 1.3 * prom_val
-                umbral_bajo = 0.8 * prom_val
-                estilos_condicionales += [
-                    {"if": {"filter_query": f"{{{m}}} > {umbral_alto}", "column_id": m}, "backgroundColor": "#017351", "color": "white"},
-                    {"if": {"filter_query": f"{{{m}}} >= {umbral_bajo} && {{{m}}} <= {umbral_alto}", "column_id": m}, "backgroundColor": "#e6c200", "color": "black"},
-                    {"if": {"filter_query": f"{{{m}}} < {umbral_bajo}", "column_id": m}, "backgroundColor": "#b22222", "color": "white"}
-                ]
+            for _, row in tabla_comparativa.iterrows():
+                prom_val = row[f"{m} Prom"]
+                if prom_val > 0:
+                    umbral_alto = 1.3 * prom_val
+                    umbral_bajo = 0.8 * prom_val
+                    estilos_condicionales += [
+                        {"if": {"filter_query": f"{{{m}}} > {umbral_alto}", "column_id": m}, "backgroundColor": "#017351", "color": "white"},
+                        {"if": {"filter_query": f"{{{m}}} >= {umbral_bajo} && {{{m}}} <= {umbral_alto}", "column_id": m}, "backgroundColor": "#e6c200", "color": "black"},
+                        {"if": {"filter_query": f"{{{m}}} < {umbral_bajo}", "column_id": m}, "backgroundColor": "#b22222", "color": "white"}
+                    ]
 
-        estilos_condicionales.append({
-            "if": {"column_id": f"{m} Prom"},
-            "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold"
-        })
-        
-                # Métricas de máximo
+            estilos_condicionales.append({
+                "if": {"column_id": f"{m} Prom"},
+                "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold"
+            })
+
+
+        # Métricas de máximo
         for m in metricas_max:
             columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
             columnas_comparativa.append({"name": f"{m} Max", "id": f"{m} Max", "type": "numeric", "format": {"specifier": ".2f"}})
@@ -2372,6 +2374,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 "if": {"column_id": f"{m} Max"},
                 "backgroundColor": "#444444", "color": "#f0f0f0", "fontWeight": "bold"
             })
+
             
         return html.Div([
             html.H4("Comparativo última ACTIVIDAD vs PROMEDIO",

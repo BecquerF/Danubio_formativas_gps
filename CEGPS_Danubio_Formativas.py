@@ -2290,9 +2290,6 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                                             "height":"15px",
                                                             "whiteSpace":"normal"
                                                                     },
-                                style_cell_conditional= {"if": {"column_id": "Player Name"},
-                                                            "height": "15px",
-                                                            "lineHeight": "15px"},
                                 style_data_conditional=estilos_condicionales
                             )
                         ]
@@ -2390,9 +2387,6 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                                 "maxWidth":"100px",
                                                 "height":"15px",
                                                 "whiteSpace":"normal"            },
-                    style_cell_conditional= {"if": {"column_id": "Player Name"},
-                                                                                "height": "15px",
-                                                                                "lineHeight": "15px"},
                     style_data_conditional=estilos_condicionales
                 )
             )

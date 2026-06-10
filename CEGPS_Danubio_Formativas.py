@@ -2323,6 +2323,11 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
         metricas_max = ["Max Velocity"]
 
         resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].sum().reset_index()
+        resumen_max = dff_fecha.groupby("Player Name")[metricas_max].max().reset_index()
+
+        # Unir ambos
+        resumen_fecha = resumen_fecha.merge(resumen_max, on="Player Name", how="left")
+        
         dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
         promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
         promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
@@ -2386,7 +2391,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     columns=columnas_comparativa,
                     filter_action="none",
                     sort_action="native",
-                    fixed_columns={"headers": True, "data": 1},  # fija primera columna
+                    fixed_columns={"headers": True, "data": 0},  # fija primera columna
                     page_size=20,
                     style_table={
                         "overflowX": "auto", "minWidth": "100%",

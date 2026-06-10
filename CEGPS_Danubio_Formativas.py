@@ -2235,7 +2235,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 "Player Name","Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
                 "Distance","Player Load","Max Velocity","Meterage Per Minute",
                 "Player Load Per Minute","Sprint Distance","Sprint Efforts","Sprint Dist Per Min",
-                "High Speed Distance","High Speed Efforts","High Speed Distance Per Minute","Impacts"
+                "High Speed Distance","High Speed Efforts","High Speed Distance Per Minute","Impacts",
+                "Player Name"
             ]
 
             columnas_presentes = [c for c in columnas_requeridas if c in dff_fecha.columns]
@@ -2315,17 +2316,21 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
 
         metricas_base = [
             "Distance","Meterage Per Minute","Player Load","Player Load Per Minute",
-            "Max Velocity","Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
+            "Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
             "High Speed Distance","High Speed Distance Per Minute","High Speed Efforts",
-            "Sprint Distance","Sprint Dist Per Min","Sprint Efforts","Impacts"
+            "Sprint Distance","Sprint Dist Per Min","Sprint Efforts","Impacts", "Player Name"
         ]
+        metricas_max = ["Max Velocity"]
 
         resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].sum().reset_index()
         dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
         promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
         promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
+        maximo_jugador = dff_acumulado.groupby("Player Name")[metricas_max].max().reset_index()
+        maximo_jugador = maximo_jugador.rename(columns={m: f"{m} Max" for m in metricas_max})
 
         tabla_comparativa = resumen_fecha.merge(promedio_jugador, on="Player Name", how="left").fillna(0)
+        tabla_comparativa = tabla_comparativa.merge(maximo_jugador, on="Player Name", how="left").fillna(0)
 
         columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
         estilos_condicionales = []
@@ -2333,6 +2338,9 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
         for m in metricas_base:
             columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
             columnas_comparativa.append({"name": f"{m} Prom", "id": f"{m} Prom", "type": "numeric", "format": {"specifier": ".2f"}})
+        for m in metricas_max:
+            columnas_comparativa.append({"name": m, "id": m, "type": "numeric", "format": {"specifier": ".2f"}})
+            columnas_comparativa.append({"name": f"{m} Max", "id": f"{m} Max", "type": "numeric", "format": {"specifier": ".2f"}})  
 
             # Calcular umbrales en Python
             for _, row in tabla_comparativa.iterrows():
@@ -2358,6 +2366,24 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
             estilos_condicionales.append({
                 "if": {"column_id": f"{m} Prom"},
                 "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold", "lineHeight": "15px"
+            })
+             # Condicionales basados en máximo
+            for _, row in tabla_comparativa.iterrows():
+                max_val = row[f"{m} Max"]
+                if max_val > 0:
+                    estilos_condicionales.append({
+                        "if": {"filter_query": f"{{{m}}} >= {max_val}", "column_id": m},
+                        "backgroundColor": "#017351", "color": "white"
+                    })
+                    estilos_condicionales.append({
+                        "if": {"filter_query": f"{{{m}}} < {max_val}", "column_id": m},
+                        "backgroundColor": "#b22222", "color": "white"
+                    })
+
+            # Diferenciar columna Max
+            estilos_condicionales.append({
+                "if": {"column_id": f"{m} Max"},
+                "backgroundColor": "#444444", "color": "#f0f0f0", "fontWeight": "bold"
             })
 
         return html.Div([

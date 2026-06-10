@@ -2275,7 +2275,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                                 columns=columnas_actividad,
                                 filter_action="none",
                                 sort_action="native",
-                                fixed_columns={"headers": True, "data": 1},                   
+                                fixed_columns={"headers": True, "data": 0},                   
                                 page_size=20,
                                 style_table={"overflowX":"auto","minWidth":"100%","border":"1px solid rgba(137,188,239,0.18)",
                                             "boxShadow":"0 18px 40px rgba(0,0,0,0.25)"},
@@ -2302,9 +2302,9 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     "borderRadius": "24px",
                     "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
                     "maxHeight":"600px",
-                    "minWidth": "1000px",
+                    "minWidth": "900px",
                     "width": "100%",
-                    "maxWidth": "1000px"
+                    "maxWidth": "900px"
                 })
                         
   

@@ -2370,7 +2370,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                     columns=columnas_comparativa,
                     filter_action="none",
                     sort_action="native",
-                    fixed_columns={"headers": True, "data": 1, "lineHeight": "15px"},
+                    fixed_columns={"headers": True, "data": 1, "lineHeight": "15px", "height": "15px"},
                     page_size=20,
                     style_table={"overflowX": "auto", "minWidth": "100%",
                                 "border": "1px solid rgba(137,188,239,0.18)",

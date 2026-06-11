@@ -2322,26 +2322,24 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
         ]
         metricas_max = ["Max Velocity"]
 
-        # actividad del día
-        resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].sum().reset_index()
-        resumen_max = dff_fecha.groupby("Player Name")[metricas_max].max().reset_index()
-        resumen_fecha = resumen_fecha.merge(resumen_max, on="Player Name", how="left")
+        # Actividad del día: valores directos
+        resumen_fecha = dff_fecha[["Player Name"] + metricas_base + metricas_max].reset_index(drop=True)
 
-        # acumulado
+        # Acumulado para promedios y máximos
         dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
         promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
         promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
         maximo_jugador = dff_acumulado.groupby("Player Name")[metricas_max].max().reset_index()
         maximo_jugador = maximo_jugador.rename(columns={m: f"{m} Max" for m in metricas_max})
 
-        # tabla final
+        # Tabla final
         tabla_comparativa = resumen_fecha.merge(promedio_jugador, on="Player Name", how="left").fillna(0)
         tabla_comparativa = tabla_comparativa.merge(maximo_jugador, on="Player Name", how="left").fillna(0)
 
         columnas_comparativa = [{"name": "Player Name", "id": "Player Name"}]
         estilos_condicionales = []
 
-        # columnas y estilos para métricas de promedio
+        # Columnas y estilos para métricas de promedio
         for m in metricas_base:
             columnas_comparativa += [
                 {"name": f"{m} (Actual)", "id": m, "type": "numeric", "format": {"specifier": ".2f"}},
@@ -2362,7 +2360,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                 "backgroundColor": "#2f2f2f", "color": "#d0d0d0", "fontWeight": "bold"
             })
 
-        # columnas y estilos para métricas de máximo
+        # Columnas y estilos para métricas de máximo
         for m in metricas_max:
             columnas_comparativa += [
                 {"name": f"{m} (Actual)", "id": m, "type": "numeric", "format": {"specifier": ".2f"}},

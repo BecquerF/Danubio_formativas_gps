@@ -1926,7 +1926,8 @@ style={
                         style={
                             "display": "none",
                             "padding":"8px 8px",
-                            "marginBottom":"2px"
+                            "marginBottom":"2px",
+                            "color":"#011c24"
                         }
                     ),
                     html.Div(

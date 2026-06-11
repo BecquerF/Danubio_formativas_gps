@@ -1914,7 +1914,7 @@ style={
                                 style={
                                     "width": "100%",
                                     "backgroundColor": "#011c24",
-                                    "color": "#f5f5f5",
+                                    "color": "#002351",
                                     "border": "1px solid rgba(137,188,239,0.22)",
                                     "borderRadius": "8px",
                                     "padding": "8px 8px"
@@ -2142,6 +2142,7 @@ style={
                     "boxShadow": "0 18px 48px rgba(0,0,0,0.35)",
                     "position": "relative",
                     "top": "10px",
+                    "gap": "16px",
                     "maxHeight": "200vh",
                     "overflowY": "auto"
                 }

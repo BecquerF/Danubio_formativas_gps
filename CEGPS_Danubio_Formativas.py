@@ -1912,7 +1912,7 @@ style={
                                 date=fecha_max.date(),
                                 min_date_allowed=df["Date"].min().date(),
                                 max_date_allowed=df["Date"].max().date(),
-                                display_format="dd/mm/YYYY",
+                                display_format="D/M/YYYY",
                                 style={
                                     "width": "100%",
                                     "backgroundColor": "#011c24",
@@ -2984,7 +2984,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                         date=fecha_max.date(),
                         min_date_allowed=df["Date"].min().date(),
                         max_date_allowed=df["Date"].max().date(),
-                        display_format="dd/mm/YYYY",
+                        display_format="D/M/YYYY",
                         style={
                             "width": "100%",
                             "backgroundColor": "#011c24",

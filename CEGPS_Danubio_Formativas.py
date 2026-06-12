@@ -2203,7 +2203,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
     metricas = metricas or ["Distance"]
     metricas = [m for m in metricas if m in dff.columns]
     referencia = referencia or "Category"
-    fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+    fecha_dt = pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else dff["Date"].max().normalize()
     
     # COMPARATIVAS
     if tab == "comparativas":
@@ -2232,8 +2232,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
 
         # ACTIVIDAD POR JUGADOR
     elif tab == "actividad":
-            fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
-            dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+            fecha_dt = pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else dff["Date"].max().normalize(format="%d-%m-%y")
+            dff_fecha = dff[dff["Date"].dt.normalize(format="%d-%m-%y") == fecha_dt]
 
             columnas_requeridas = [
                 "Player Name","Accel + Decel Efforts","Accel + Decel Efforts Per Minute",
@@ -2315,8 +2315,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
   
 # ACTIVIDAD COMPARATIVA INDIVIDUAL
     elif tab == "actividad_comparativa":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
-        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else dff["Date"].max().normalize(format="%d-%m-%y")
+        dff_fecha = dff[dff["Date"].dt.normalize(format="%d-%m-%y") == fecha_dt]
 
         metricas_base = [
             "Distance","Meterage Per Minute","Player Load","Player Load Per Minute",
@@ -2330,7 +2330,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
         resumen_fecha = dff_fecha[["Player Name"] + metricas_base + metricas_max].reset_index(drop=True)
 
         # Acumulado para promedios y máximos
-        dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
+        dff_acumulado = dff[dff["Date"].dt.normalize(format="%d-%m-%y") <= fecha_dt]
         promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
         promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
         maximo_jugador = dff_acumulado.groupby("Player Name")[metricas_max].max().reset_index()
@@ -2427,8 +2427,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
         })
 
     elif tab == "actividad_promedios":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
-        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else dff["Date"].max().normalize(format="%d-%m-%y")
+        dff_fecha = dff[dff["Date"].dt.normalize(format="%d-%m-%y") == fecha_dt]
 
         metricas_promedios_validas = [m for m in metricas_promedios if m in dff_fecha.columns]
         resumen = dff_fecha[metricas_promedios_validas].mean().round(2).to_dict() if not dff_fecha.empty else {}
@@ -3141,8 +3141,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
 def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias):
     dff = df.copy()
     if fecha_actividad:
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize()
-        dff = dff[dff["Date"].dt.normalize() == fecha_dt]
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y")
+        dff = dff[dff["Date"].dt.normalize(format="%d-%m-%y") == fecha_dt]
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
 
@@ -3178,7 +3178,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
 
-    fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+    fecha_dt = pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else dff["Date"].max().normalize(format="%d-%m-%y")
     if fecha_dt is not None:
         dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
 
@@ -3302,6 +3302,7 @@ def generar_informe(
     if "Date" in dff.columns:
         dff["Date"] = pd.to_datetime(
             dff["Date"],
+            format="%d-%m-%y",
             errors="coerce"
         )
 
@@ -3313,14 +3314,15 @@ def generar_informe(
     if fecha_actividad:
         fecha_dt = pd.to_datetime(
             fecha_actividad,
+            format="%d-%m-%y",
             errors="coerce"
         )
 
         if pd.notna(fecha_dt):
-            fecha_dt = fecha_dt.normalize()
+            fecha_dt = fecha_dt.normalize(format="%d-%m-%y")
     else:
         fecha_dt = (
-            dff["Date"].max().normalize()
+            dff["Date"].max().normalize(format="%d-%m-%y")
             if (
                 "Date" in dff.columns
                 and not dff.empty
@@ -3331,7 +3333,7 @@ def generar_informe(
 
     if fecha_dt is not None and "Date" in dff.columns:
         dff = dff[
-            dff["Date"].dt.normalize() <= fecha_dt
+            dff["Date"].dt.normalize(format="%d-%m-%y") <= fecha_dt
         ]
 
     section_texts = {
@@ -3746,7 +3748,7 @@ def _create_tab_graph_figure(
     if tab == "actividad_promedios":
         if not fecha_actividad:
             return None
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize()
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y")
         return build_actividad_promedios_report_fig(dff, fecha_dt)
 
     if tab == "plyr_vs_plyr":
@@ -3932,8 +3934,8 @@ def descargar_tabla(
     if tab == "comparativas":
         df_export = dff.groupby(referencia)[metricas].mean().reset_index()
     elif tab == "actividad":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
-        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else dff["Date"].max().normalize(format="%d-%m-%y")
+        dff_fecha = dff[dff["Date"].dt.normalize(format="%d-%m-%y") == fecha_dt]
         columnas_requeridas = [
             "Player Name","Accel + Decel Efforts","Accel + Decel Efforts Per Minute","Distance",
             "Player Load","Max Velocity","Meterage Per Minute","Player Load Per Minute",
@@ -3943,8 +3945,8 @@ def descargar_tabla(
         columnas_presentes = [c for c in columnas_requeridas if c in dff_fecha.columns]
         df_export = dff_fecha[columnas_presentes]
     elif tab == "actividad_comparativa":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
-        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else dff["Date"].max().normalize(format="%d-%m-%y")
+        dff_fecha = dff[dff["Date"].dt.normalize(format="%d-%m-%y") == fecha_dt]
         metricas_base = [m for m in metricas if m in dff.columns]
         resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].mean().reset_index()
         promedio_jugador = dff.groupby("Player Name")[metricas_base].mean().reset_index()
@@ -3953,8 +3955,8 @@ def descargar_tabla(
         metricas_acwr = ["Distance","Player Load","Acceleration Efforts","Sprint Distance",
                          "High Speed Distance","Sprint Efforts","High Speed Efforts","Impacts"]
         dff["Player Name"] = dff["Player Name"].astype(str).str.strip()
-        ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
-        ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
+        ultimos21 = dff["Date"].max().normalize(format="%d-%m-%y") - pd.Timedelta(days=21)
+        ultimos7 = dff["Date"].max().normalize(format="%d-%m-%y") - pd.Timedelta(days=7)
         df21 = dff[dff["Date"] >= ultimos21]
         df7 = dff[dff["Date"] >= ultimos7]
         cronica = df21.groupby("Player Name")[metricas_acwr].mean().reset_index()
@@ -4015,7 +4017,7 @@ def descargar_tabla(
 
     # --- PNG ---
     if trigger_id == "download-table-png":
-        fig_table = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
+        fig_table = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else None, categorias)
         if fig_table is None or not getattr(fig_table, "data", None):
             logging.warning("No hay figura de tabla para la pestaña %s", tab)
             return no_update
@@ -4032,7 +4034,7 @@ def descargar_tabla(
 
     # --- PDF ---
     if trigger_id == "download-table-pdf":
-        fig_to_export = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
+        fig_to_export = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else None, categorias)
         if fig_to_export is None or not getattr(fig_to_export, "data", None):
             return no_update
         height = _calc_table_height(df_export, base=800)

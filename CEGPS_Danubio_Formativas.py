@@ -105,9 +105,12 @@ df = pd.read_excel("GPS_Formativas_2026.xlsx")
 df["Date"] = pd.to_datetime(
     df["Date"],
     format="%d-%m-%y",  # ajusta el formato según tus datos
+    infer_datetime_format=True, 
     dayfirst=True,       # porque tus fechas son dd/mm/yy
     errors="coerce"      # valores inválidos se convierten en NaT
 )
+df["Date"] = df["Date"].dt.normalize()
+
 
 # Process Duration column
 if "Duration" in df.columns:

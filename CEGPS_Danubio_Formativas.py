@@ -97,17 +97,28 @@ def register_pdf_fonts():
 register_pdf_fonts()
 logging.basicConfig(level=logging.INFO)
 
-# Load data from Excel
-df = pd.read_excel("GPS_Formativas_2026.xlsx", encoding="utf-8")
+import pandas as pd
 
-# Convert Date column to datetime
-# Supongamos que tu columna se llama 'Date'
-df["Date"] = pd.to_datetime(
-    df["Date"],
-    format="%d-%m-%Y",  # ajusta el formato según tus datos
-    dayfirst=True,       # porque tus fechas son dd/mm/yy
-    errors="coerce"      # valores inválidos se convierten en NaT
-)
+# Leer Excel o CSV
+df = pd.read_excel("GPS_Formativas_2026.xlsx")  # o pd.read_csv("GPS_Formativas_2026.csv")
+
+# Normalizar la columna Date
+def parse_fecha(x):
+    try:
+        # Intentar primero con año en 4 dígitos
+        return pd.to_datetime(x, format="%d/%m/%Y")
+    except:
+        try:
+            # Si falla, probar con año en 2 dígitos
+            return pd.to_datetime(x, format="%d/%m/%y")
+        except:
+            return pd.NaT
+
+df["Date"] = df["Date"].apply(parse_fecha)
+
+# Quitar horas, dejar solo fecha
+df["Date"] = df["Date"].dt.normalize()
+
 
 
 # Process Duration column

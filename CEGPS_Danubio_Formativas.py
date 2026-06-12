@@ -1914,7 +1914,6 @@ style={
                                 style={
                                     "width": "100%",
                                     "backgroundColor": "#011c24",
-                                    "color": "#002351",
                                     "border": "1px solid rgba(137,188,239,0.22)",
                                     "borderRadius": "8px",
                                     "padding": "8px 8px"
@@ -2152,13 +2151,14 @@ style={
             "display": "flex",
             "alignItems": "flex-start",
             "gap": "18px",
+            "padding": "8px 8px",
             "width": "100%",
             "maxHeight": "calc(100vh - 100px)"
         }
     )
 ],
 style={
-    "color": "#ffffff",
+    "color": "#5797f6",
     "padding": "28px 24px 36px",
     "fontFamily": "'Clash Display Semibold', 'Segoe UI', sans-serif",
     "margin": "0",

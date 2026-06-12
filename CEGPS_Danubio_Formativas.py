@@ -109,7 +109,6 @@ df["Date"] = pd.to_datetime(
     dayfirst=True,       # porque tus fechas son dd/mm/yy
     errors="coerce"      # valores inválidos se convierten en NaT
 )
-df["Date"] = df["Date"].dt.normalize()
 
 
 # Process Duration column

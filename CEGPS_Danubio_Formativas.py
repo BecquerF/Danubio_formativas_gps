@@ -1912,7 +1912,7 @@ style={
                                 date=fecha_max.date(),
                                 min_date_allowed=df["Date"].min().date(),
                                 max_date_allowed=df["Date"].max().date(),
-                                display_format="D/M/YYYY",
+                                display_format="dd/mm/YYYY",
                                 style={
                                     "width": "100%",
                                     "backgroundColor": "#011c24",
@@ -2331,7 +2331,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
         resumen_fecha = dff_fecha[["Player Name"] + metricas_base + metricas_max].reset_index(drop=True)
 
         # Acumulado para promedios y máximos
-        dff_acumulado = dff[dff["Date"].dt.normalize(format="%d-%m-%y") <= fecha_dt]
+        dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
         promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
         promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
         maximo_jugador = dff_acumulado.groupby("Player Name")[metricas_max].max().reset_index()
@@ -2984,7 +2984,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
                         date=fecha_max.date(),
                         min_date_allowed=df["Date"].min().date(),
                         max_date_allowed=df["Date"].max().date(),
-                        display_format="DD/MM/YYYY",
+                        display_format="dd/mm/YYYY",
                         style={
                             "width": "100%",
                             "backgroundColor": "#011c24",
@@ -3304,6 +3304,7 @@ def generar_informe(
         dff["Date"] = pd.to_datetime(
             dff["Date"],
             format="%d-%m-%y",
+            dayfirst=True,
             errors="coerce"
         )
 
@@ -3316,6 +3317,7 @@ def generar_informe(
         fecha_dt = pd.to_datetime(
             fecha_actividad,
             format="%d-%m-%y",
+            dayfirst=True,
             errors="coerce"
         )
 
@@ -3935,7 +3937,7 @@ def descargar_tabla(
     if tab == "comparativas":
         df_export = dff.groupby(referencia)[metricas].mean().reset_index()
     elif tab == "actividad":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize(format="%d-%m-%y")
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
         columnas_requeridas = [
             "Player Name","Accel + Decel Efforts","Accel + Decel Efforts Per Minute","Distance",
@@ -3946,7 +3948,7 @@ def descargar_tabla(
         columnas_presentes = [c for c in columnas_requeridas if c in dff_fecha.columns]
         df_export = dff_fecha[columnas_presentes]
     elif tab == "actividad_comparativa":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize(format="%d-%m-%y")
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
         metricas_base = [m for m in metricas if m in dff.columns]
         resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].mean().reset_index()
@@ -4018,7 +4020,7 @@ def descargar_tabla(
 
     # --- PNG ---
     if trigger_id == "download-table-png":
-        fig_table = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else None, categorias)
+        fig_table = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
         if fig_table is None or not getattr(fig_table, "data", None):
             logging.warning("No hay figura de tabla para la pestaña %s", tab)
             return no_update
@@ -4035,7 +4037,7 @@ def descargar_tabla(
 
     # --- PDF ---
     if trigger_id == "download-table-pdf":
-        fig_to_export = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize(format="%d-%m-%y") if fecha_actividad else None, categorias)
+        fig_to_export = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
         if fig_to_export is None or not getattr(fig_to_export, "data", None):
             return no_update
         height = _calc_table_height(df_export, base=800)

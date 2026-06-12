@@ -1914,6 +1914,7 @@ style={
                                 style={
                                     "width": "100%",
                                     "backgroundColor": "#011c24",
+                                    "color":"#ffffff",
                                     "border": "1px solid rgba(137,188,239,0.22)",
                                     "borderRadius": "8px",
                                     "padding": "8px 8px"
@@ -2158,7 +2159,7 @@ style={
     )
 ],
 style={
-    "color": "#5797f6",
+    "color": "#02122a",
     "padding": "28px 24px 36px",
     "fontFamily": "'Clash Display Semibold', 'Segoe UI', sans-serif",
     "margin": "0",

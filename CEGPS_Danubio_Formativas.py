@@ -2135,7 +2135,7 @@ style={
                     "flex": "0 0 auto",
                     "width": "180px",
                     "minWidth": "180px",
-                    "padding": "24px",
+                    "padding": "8px 8px",
                     "backgroundColor": "#011c24",
                     "borderRadius": "24px",
                     "border": "1px solid rgba(137, 188, 239, 0.16)",
@@ -2164,6 +2164,7 @@ style={
     "fontFamily": "'Clash Display Semibold', 'Segoe UI', sans-serif",
     "margin": "0",
     "maxHeight": "calc(100vh - 100px)",
+    "padding": "8px 8px",
     "overflow": "auto"
 }
 )

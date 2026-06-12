@@ -104,8 +104,7 @@ df = pd.read_excel("GPS_Formativas_2026.xlsx")
 # Supongamos que tu columna se llama 'Date'
 df["Date"] = pd.to_datetime(
     df["Date"],
-    format="%d-%m-%y",  # ajusta el formato según tus datos
-    infer_datetime_format=True, 
+    format="%d-%m-%Y",  # ajusta el formato según tus datos
     dayfirst=True,       # porque tus fechas son dd/mm/yy
     errors="coerce"      # valores inválidos se convierten en NaT
 )

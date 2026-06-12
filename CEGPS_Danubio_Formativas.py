@@ -2122,13 +2122,13 @@ style={
                                 ],
                                 className="filter-card",
                                 style={
-                                    "padding": "16px"
+                                    "padding": "10px"
                                 }
                             )
                         ],
                         className="filter-card",
                         style={
-                            "padding": "16px"
+                            "padding": "10px"
                         }
                     )
                 ],
@@ -2137,14 +2137,14 @@ style={
                     "flex": "0 0 auto",
                     "width": "180px",
                     "minWidth": "180px",
-                    "padding": "8px 8px",
+                    "padding": "2px 2px",
                     "backgroundColor": "#011c24",
                     "borderRadius": "24px",
                     "border": "1px solid rgba(137, 188, 239, 0.16)",
                     "boxShadow": "0 18px 48px rgba(0,0,0,0.35)",
                     "position": "relative",
                     "top": "10px",
-                    "gap": "16px",
+                    "gap": "10px",
                     "maxHeight": "200vh",
                     "overflowY": "auto"
                 }
@@ -2153,8 +2153,8 @@ style={
         style={
             "display": "flex",
             "alignItems": "flex-start",
-            "gap": "18px",
-            "padding": "8px 8px",
+            "gap": "8px",
+            "padding": "2px 2px",
             "width": "100%",
             "maxHeight": "calc(100vh - 100px)"
         }

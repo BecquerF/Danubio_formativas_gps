@@ -98,7 +98,7 @@ register_pdf_fonts()
 logging.basicConfig(level=logging.INFO)
 
 # Load data from Excel
-df = pd.read_excel("GPS_Formativas_2026.xlsx")
+df = pd.read_csv("GPS_Formativas_2026.csv")
 
 # Convert Date column to datetime
 # Supongamos que tu columna se llama 'Date'

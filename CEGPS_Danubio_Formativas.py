@@ -319,6 +319,31 @@ def summarize_items(items, max_items=3, default="todas"):
 
     return " / ".join(labels[:max_items]) + f" +{len(labels)-max_items}"
 
+def merge_filter_values(*values):
+    merged = []
+    for value in values:
+        if not value:
+            continue
+        if isinstance(value, str):
+            merged.append(value)
+        else:
+            merged.extend(value)
+    return list(dict.fromkeys(merged))
+
+def apply_rango_dias_filter(dff, rango_dias):
+    if not rango_dias or "Date" not in dff.columns or dff.empty:
+        return dff
+    rango_dias = merge_filter_values(rango_dias)
+    if "ultimos21" in rango_dias:
+        dias = 21
+    elif "ultimos7" in rango_dias:
+        dias = 7
+    else:
+        return dff
+    fecha_ref = dff["Date"].max().normalize()
+    fecha_inicio = fecha_ref - pd.Timedelta(days=dias)
+    return dff[dff["Date"].dt.normalize() >= fecha_inicio]
+
 def build_chart_title(tab, categorias, metricas, referencia):
     # Generate summarized text for categories and metrics
     categoria_text = summarize_items(categorias, max_items=3)
@@ -1803,6 +1828,38 @@ app.layout = html.Div([
             dcc.Download(id="download-table"),
             dcc.Download(id="download-report"),
 
+            html.Div(
+                [
+                    html.P(
+                        "Activity Tags",
+                        style={
+                            "color": "#a3e3d0",
+                            "fontSize": "11px",
+                            "fontWeight": "600",
+                            "marginBottom": "6px"
+                        }
+                    ),
+                    dcc.Dropdown(
+                        id="activitytag-central",
+                        options=[
+                            {"label": x, "value": x}
+                            for x in sorted(df["Activity Tags"].dropna().unique())
+                        ],
+                        multi=True,
+                        placeholder="Seleccionar actividad"
+                    )
+                ],
+                className="filter-card",
+                style={
+                    "padding": "10px 12px",
+                    "backgroundColor": "#011c24",
+                    "border": "1px solid rgba(137,188,239,0.18)",
+                    "borderRadius": "12px",
+                    "maxWidth": "1000px",
+                    "minWidth": "1000px"
+                }
+            ),
+
             # GRÁFICO
 
             html.Div(    id="contenido-tab",
@@ -2033,6 +2090,44 @@ style={
                     html.Div(
                         [
                             html.H4(
+                                "Rango de datos",
+                                style={
+                                    "color":"#a3e3d0",
+                                    "fontSize":"13px",
+                                    "fontWeight":"600",
+                                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'",
+                                    "marginBottom":"12px"
+                                }
+                            ),
+                            dcc.Checklist(
+                                id="rango-dias",
+                                options=[
+                                    {"label": "Ultimos 7 dias", "value": "ultimos7"},
+                                    {"label": "Ultimos 21 dias", "value": "ultimos21"}
+                                ],
+                                value=[],
+                                inline=False,
+                                style={
+                                    "display": "grid",
+                                    "gridTemplateColumns": "1fr",
+                                    "gap": "8px"
+                                },
+                                labelStyle={
+                                    "color":"white",
+                                    "fontSize":"10px",
+                                    "marginBottom":"2px"
+                                }
+                            )
+                        ],
+                        className="filter-card",
+                        style={
+                            "padding":"16px",
+                            "marginBottom":"12px"
+                        }
+                    ),
+                    html.Div(
+                        [
+                            html.H4(
                                 "Filtrar por",
                                 style={
                                     "color":"#a3e3d0",
@@ -2086,6 +2181,31 @@ style={
                                                     {"label": x, "value": x}
                                                     for x in sorted(
                                                         df["Athlete Tags"]
+                                                        .dropna()
+                                                        .unique()
+                                                    )
+                                                ],
+                                                multi=True
+                                            )
+                                        ]
+                                    ),
+
+                                    html.Div(
+                                        [
+                                            html.P(
+                                                "Activity Tags",
+                                                style={
+                                                    "color":"#f5f5f5",
+                                                    "fontSize":"10px",
+                                                    "marginBottom":"6px"
+                                                }
+                                            ),
+                                            dcc.Dropdown(
+                                                id="activitytag",
+                                                options=[
+                                                    {"label": x, "value": x}
+                                                    for x in sorted(
+                                                        df["Activity Tags"]
                                                         .dropna()
                                                         .unique()
                                                     )
@@ -2211,18 +2331,24 @@ def toggle_actividad_fecha(tab):
     Input("categoria", "value"),
     Input("metrica", "value"),
     Input("referencia", "value"),
+    Input("rango-dias", "value"),
     Input("jugador", "value"),
     Input("athlete", "value"),
+    Input("activitytag-central", "value"),
+    Input("activitytag", "value"),
     Input("gametag", "value"),
     Input("periodtag", "value"),
     Input("fecha-actividad", "date")
 )
-def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, gametags, periodtags, fecha_actividad):
+def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores, athlete, activitytags_central, activitytags, gametags, periodtags, fecha_actividad):
     dff = df.copy()
+    activitytags = merge_filter_values(activitytags_central, activitytags)
     # Filtros dinámicos
     if categorias: dff = dff[dff["Category"].isin(categorias)]
+    dff = apply_rango_dias_filter(dff, rango_dias)
     if jugadores: dff = dff[dff["Player Name"].isin(jugadores)]
     if athlete: dff = dff[dff["Athlete Tags"].isin(athlete)]
+    if activitytags: dff = dff[dff["Activity Tags"].isin(activitytags)]
     if gametags: dff = dff[dff["Game Tags"].isin(gametags)]
     if periodtags: dff = dff[dff["Period Tags"].isin(periodtags)]
 
@@ -2461,11 +2587,16 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
         resumen = dff_fecha[metricas_promedios_validas].mean().round(2).to_dict() if not dff_fecha.empty else {}
 
         categoria_text = summarize_items(categorias, max_items=10, default="Todas")
+        activitytag_text = summarize_items(activitytags, max_items=10, default="Todas")
         gametag_text = summarize_items(gametags, max_items=10, default="Todos")
         periodtag_text = summarize_items(periodtags, max_items=10, default="Todos")
         fecha_text = fecha_dt.strftime("%d/%m/%Y")
         grafico_titulo = (
             f"Actividad {fecha_text}  |  Dinámica: {gametag_text}  |  Microciclo: {periodtag_text}  |  Plantel: {categoria_text}"
+        )
+
+        grafico_titulo = (
+            f"Actividad {fecha_text}  |  Activity Tags: {activitytag_text}  |  Game Tags: {gametag_text}  |  Period Tags: {periodtag_text}  |  Plantel: {categoria_text}"
         )
 
         cards = []
@@ -3158,28 +3289,34 @@ def actualizar_tab(tab, categorias, metricas, referencia, jugadores, athlete, ga
 
 
 @app.callback(
+    Output("activitytag-central", "options"),
+    Output("activitytag", "options"),
     Output("gametag", "options"),
     Output("gametag", "value"),
     Output("periodtag", "options"),
     Output("periodtag", "value"),
     Input("fecha-actividad", "date"),
-    Input("categoria", "value")
+    Input("categoria", "value"),
+    Input("rango-dias", "value")
 )
-def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias):
+def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias, rango_dias):
     dff = df.copy()
     if fecha_actividad:
         fecha_dt = pd.to_datetime(fecha_actividad).normalize()
         dff = dff[dff["Date"].dt.normalize() == fecha_dt]
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
+    dff = apply_rango_dias_filter(dff, rango_dias)
 
+    activitytag_vals = sorted(dff["Activity Tags"].dropna().unique())
     gametag_vals = sorted(dff["Game Tags"].dropna().unique())
     periodtag_vals = sorted(dff["Period Tags"].dropna().unique())
 
+    activitytag_options = [{"label": x, "value": x} for x in activitytag_vals]
     gametag_options = [{"label": x, "value": x} for x in gametag_vals]
     periodtag_options = [{"label": x, "value": x} for x in periodtag_vals]
 
-    return gametag_options, gametag_vals, periodtag_options, periodtag_vals
+    return activitytag_options, activitytag_options, gametag_options, gametag_vals, periodtag_options, periodtag_vals
 
 @app.callback(
     Output("report_figures_preview", "children"),
@@ -3663,14 +3800,17 @@ def crear_figura(dff, metricas, referencia):
     return build_comparativas(dff, [], metricas, referencia)
 
 
-def _filter_graph_dataframe(categoria, jugador, athlete, gametags, periodtags):
+def _filter_graph_dataframe(categoria, rango_dias, jugador, athlete, activitytags, gametags, periodtags):
     dff = df.copy()
     if categoria:
         dff = dff[dff["Category"].isin(categoria)]
+    dff = apply_rango_dias_filter(dff, rango_dias)
     if jugador:
         dff = dff[dff["Player Name"].isin(jugador)]
     if athlete:
         dff = dff[dff["Athlete Tags"].isin(athlete)]
+    if activitytags:
+        dff = dff[dff["Activity Tags"].isin(activitytags)]
     if gametags:
         dff = dff[dff["Game Tags"].isin(gametags)]
     if periodtags:
@@ -3830,8 +3970,11 @@ def _build_graph_download(fig, filename, format):
     Input("download-graph-png", "n_clicks"),
     State("tabs", "value"),
     State("categoria", "value"),
+    State("rango-dias", "value"),
     State("jugador", "value"),
     State("athlete", "value"),
+    State("activitytag-central", "value"),
+    State("activitytag", "value"),
     State("gametag", "value"),
     State("periodtag", "value"),
     State("fecha-actividad", "date"),
@@ -3847,8 +3990,11 @@ def descargar_grafico(
     n_clicks_png,
     tab,
     categoria,
+    rango_dias,
     jugador,
     athlete,
+    activitytags_central,
+    activitytags,
     gametags,
     periodtags,
     fecha_actividad,
@@ -3862,7 +4008,8 @@ def descargar_grafico(
     if not n_clicks_png:
         return no_update
 
-    dff = _filter_graph_dataframe(categoria, jugador, athlete, gametags, periodtags)
+    activitytags = merge_filter_values(activitytags_central, activitytags)
+    dff = _filter_graph_dataframe(categoria, rango_dias, jugador, athlete, activitytags, gametags, periodtags)
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
 
@@ -3907,8 +4054,11 @@ def _calc_table_height(df_export, base=400, row_height=20):
     State("categoria", "value"),
     State("metrica", "value"),
     State("referencia", "value"),
+    State("rango-dias", "value"),
     State("jugador", "value"),
     State("athlete", "value"),
+    State("activitytag-central", "value"),
+    State("activitytag", "value"),
     State("gametag", "value"),
     State("periodtag", "value"),
     State("fecha-actividad", "date"),
@@ -3917,7 +4067,7 @@ def _calc_table_height(df_export, base=400, row_height=20):
 def descargar_tabla(
     _n_png, _n_pdf, _n_csv, _n_xlsx,
     tab, categorias, metricas, referencia,
-    jugadores, athlete, gametags, periodtags, fecha_actividad
+    rango_dias, jugadores, athlete, activitytags_central, activitytags, gametags, periodtags, fecha_actividad
 ):
     ctx = dash.callback_context
     if not ctx.triggered:
@@ -3935,6 +4085,8 @@ def descargar_tabla(
     if athlete and isinstance(athlete, str):
         athlete = [athlete]
 
+    activitytags = merge_filter_values(activitytags_central, activitytags)
+
     if gametags and isinstance(gametags, str):
         gametags = [gametags]
 
@@ -3949,8 +4101,10 @@ def descargar_tabla(
     # --- Construir dataframe filtrado ---
     dff = df.copy()
     if categorias: dff = dff[dff["Category"].isin(categorias)]
+    dff = apply_rango_dias_filter(dff, rango_dias)
     if jugadores: dff = dff[dff["Player Name"].isin(jugadores)]
     if athlete: dff = dff[dff["Athlete Tags"].isin(athlete)]
+    if activitytags: dff = dff[dff["Activity Tags"].isin(activitytags)]
     if gametags: dff = dff[dff["Game Tags"].isin(gametags)]
     if periodtags: dff = dff[dff["Period Tags"].isin(periodtags)]
 

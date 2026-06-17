@@ -1951,7 +1951,7 @@ style={
                         style={
                             "display": "none",
                             "padding":"8px 8px",
-                            "marginBottom":"2px",
+                            "marginBottom":"12px",
                             "color":"#011c24"
                         }
                     ),
@@ -1989,7 +1989,8 @@ style={
                         ],
                         className="filter-card",
                         style={
-                            "padding":"14px"
+                            "padding":"14px",
+                            "marginBottom":"12px"
                         }
                     ),
                     html.Div(
@@ -2025,7 +2026,8 @@ style={
                         ],
                         className="filter-card",
                         style={
-                            "padding":"16px"
+                            "padding":"16px",
+                            "marginBottom":"12px"
                         }
                     ),
                     html.Div(
@@ -2151,7 +2153,8 @@ style={
                         ],
                         className="filter-card",
                         style={
-                            "padding": "10px"
+                            "padding": "10px",
+                            "marginBottom": "12px"
                         }
                     )
                 ],

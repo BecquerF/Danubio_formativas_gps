@@ -102,17 +102,29 @@ import pandas as pd
 # Leer Excel o CSV
 df = pd.read_excel("GPS_Formativas_2026.xlsx")  # o pd.read_csv("GPS_Formativas_2026.csv")
 
-# Normalizar la columna Date
+# Normalizar la columna Date.
+# En el Excel hay fechas mezcladas: algunas vienen como texto "18/5/2026"
+# y otras Excel ya las convirtio cruzando dia/mes, por ejemplo 1/6/2026 -> 2026-01-06.
 def parse_fecha(x):
-    try:
-        # Intentar primero con año en 4 dígitos
-        return pd.to_datetime(x, format="%d/%m/%Y")
-    except:
-        try:
-            # Si falla, probar con año en 2 dígitos
-            return pd.to_datetime(x, format="%d/%m/%y")
-        except:
-            return pd.NaT
+    if pd.isna(x):
+        return pd.NaT
+
+    if isinstance(x, (pd.Timestamp, datetime)):
+        fecha = pd.Timestamp(x)
+        if fecha.day <= 12 and fecha.month <= 12:
+            return pd.Timestamp(year=fecha.year, month=fecha.day, day=fecha.month)
+        return fecha
+
+    texto = str(x).strip()
+    fecha = pd.to_datetime(texto, dayfirst=True, errors="coerce")
+    if pd.isna(fecha):
+        return pd.NaT
+
+    # Si llego como texto ISO desde una fecha mal convertida por Excel, corregirlo tambien.
+    if "-" in texto and fecha.day <= 12 and fecha.month <= 12:
+        return pd.Timestamp(year=fecha.year, month=fecha.day, day=fecha.month)
+
+    return fecha
 
 df["Date"] = df["Date"].apply(parse_fecha)
 
@@ -2165,7 +2177,7 @@ style={
             "display": "flex",
             "alignItems": "flex-start",
             "gap": "8px",
-            "padding": "2px 2px",
+            "padding": "8px 8px",
             "width": "100%",
             "maxHeight": "calc(100vh - 100px)"
         }

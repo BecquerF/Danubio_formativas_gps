@@ -2160,7 +2160,7 @@ style={
                     "flex": "0 0 auto",
                     "width": "180px",
                     "minWidth": "180px",
-                    "padding": "2px 2px",
+                    "padding": "8px 8px",
                     "backgroundColor": "#011c24",
                     "borderRadius": "24px",
                     "border": "1px solid rgba(137, 188, 239, 0.16)",

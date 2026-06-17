@@ -1828,37 +1828,6 @@ app.layout = html.Div([
             dcc.Download(id="download-table"),
             dcc.Download(id="download-report"),
 
-            html.Div(
-                [
-                    html.P(
-                        "Activity Tags",
-                        style={
-                            "color": "#a3e3d0",
-                            "fontSize": "11px",
-                            "fontWeight": "600",
-                            "marginBottom": "6px"
-                        }
-                    ),
-                    dcc.Dropdown(
-                        id="activitytag-central",
-                        options=[
-                            {"label": x, "value": x}
-                            for x in sorted(df["Activity Tags"].dropna().unique())
-                        ],
-                        multi=True,
-                        placeholder="Seleccionar actividad"
-                    )
-                ],
-                className="filter-card",
-                style={
-                    "padding": "10px 12px",
-                    "backgroundColor": "#011c24",
-                    "border": "1px solid rgba(137,188,239,0.18)",
-                    "borderRadius": "12px",
-                    "maxWidth": "1000px",
-                    "minWidth": "1000px"
-                }
-            ),
 
             # GRÁFICO
 
@@ -1950,23 +1919,14 @@ style={
                                     "marginBottom":"12px"
                                 }
                             ),
-                            dcc.Checklist(
+                            dcc.Dropdown(
                                 id="categoria",
                                 options=[
                                     {"label":c, "value":c}
                                     for c in sorted(df["Category"].dropna().unique())
                                 ],
-                                inline=False,
-                                style={
-                                    "display": "grid",
-                                    "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
-                                    "gap": "8px"
-                                },
-                                labelStyle={
-                                    "color":"white",
-                                    "fontSize":"10px",
-                                    "marginBottom":"6px"
-                                }
+                                multi=True,
+                                placeholder="Seleccionar categorias"
                             )
                         ],
                         className="filter-card",
@@ -2024,24 +1984,15 @@ style={
                                     "marginBottom":"12px"
                                 }
                             ),
-                            dcc.Checklist(
+                            dcc.Dropdown(
                                 id="metrica",
                                 options=[
                                     {"label":m, "value":m}
                                     for m in metricas
                                 ],
                                 value=["Distance"],
-                                inline=False,
-                                style={
-                                    "display": "grid",
-                                    "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
-                                    "gap": "5px"
-                                },
-                                labelStyle={
-                                    "color":"white",
-                                    "fontSize":"10px",
-                                    "marginBottom":"2px"
-                                }
+                                multi=True,
+                                placeholder="Seleccionar metricas"
                             )
                         ],
                         className="filter-card",
@@ -2062,23 +2013,15 @@ style={
                                     "marginBottom":"12px"
                                 }
                             ),
-                            dcc.RadioItems(
+                            dcc.Dropdown(
                                 id="referencia",
                                 options=[
                                     {"label":r, "value":r}
                                     for r in referencias
                                 ],
                                 value="Category",
-                                style={
-                                    "display": "grid",
-                                    "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
-                                    "gap": "10px"
-                                },
-                                labelStyle={
-                                    "color":"white",
-                                    "fontSize":"10px",
-                                    "marginBottom":"2px"
-                                }
+                                clearable=False,
+                                multi=False
                             )
                         ],
                         className="filter-card",
@@ -2099,24 +2042,15 @@ style={
                                     "marginBottom":"12px"
                                 }
                             ),
-                            dcc.Checklist(
+                            dcc.Dropdown(
                                 id="rango-dias",
                                 options=[
                                     {"label": "Ultimos 7 dias", "value": "ultimos7"},
                                     {"label": "Ultimos 21 dias", "value": "ultimos21"}
                                 ],
                                 value=[],
-                                inline=False,
-                                style={
-                                    "display": "grid",
-                                    "gridTemplateColumns": "1fr",
-                                    "gap": "8px"
-                                },
-                                labelStyle={
-                                    "color":"white",
-                                    "fontSize":"10px",
-                                    "marginBottom":"2px"
-                                }
+                                multi=True,
+                                placeholder="Seleccionar rango"
                             )
                         ],
                         className="filter-card",
@@ -2334,15 +2268,14 @@ def toggle_actividad_fecha(tab):
     Input("rango-dias", "value"),
     Input("jugador", "value"),
     Input("athlete", "value"),
-    Input("activitytag-central", "value"),
     Input("activitytag", "value"),
     Input("gametag", "value"),
     Input("periodtag", "value"),
     Input("fecha-actividad", "date")
 )
-def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores, athlete, activitytags_central, activitytags, gametags, periodtags, fecha_actividad):
+def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad):
     dff = df.copy()
-    activitytags = merge_filter_values(activitytags_central, activitytags)
+    activitytags = merge_filter_values(activitytags)
     # Filtros dinámicos
     if categorias: dff = dff[dff["Category"].isin(categorias)]
     dff = apply_rango_dias_filter(dff, rango_dias)
@@ -3289,7 +3222,6 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
 
 
 @app.callback(
-    Output("activitytag-central", "options"),
     Output("activitytag", "options"),
     Output("gametag", "options"),
     Output("gametag", "value"),
@@ -3316,7 +3248,7 @@ def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias, rango_dias)
     gametag_options = [{"label": x, "value": x} for x in gametag_vals]
     periodtag_options = [{"label": x, "value": x} for x in periodtag_vals]
 
-    return activitytag_options, activitytag_options, gametag_options, gametag_vals, periodtag_options, periodtag_vals
+    return activitytag_options, gametag_options, gametag_vals, periodtag_options, periodtag_vals
 
 @app.callback(
     Output("report_figures_preview", "children"),
@@ -3973,7 +3905,6 @@ def _build_graph_download(fig, filename, format):
     State("rango-dias", "value"),
     State("jugador", "value"),
     State("athlete", "value"),
-    State("activitytag-central", "value"),
     State("activitytag", "value"),
     State("gametag", "value"),
     State("periodtag", "value"),
@@ -3993,7 +3924,6 @@ def descargar_grafico(
     rango_dias,
     jugador,
     athlete,
-    activitytags_central,
     activitytags,
     gametags,
     periodtags,
@@ -4008,7 +3938,7 @@ def descargar_grafico(
     if not n_clicks_png:
         return no_update
 
-    activitytags = merge_filter_values(activitytags_central, activitytags)
+    activitytags = merge_filter_values(activitytags)
     dff = _filter_graph_dataframe(categoria, rango_dias, jugador, athlete, activitytags, gametags, periodtags)
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
@@ -4057,7 +3987,6 @@ def _calc_table_height(df_export, base=400, row_height=20):
     State("rango-dias", "value"),
     State("jugador", "value"),
     State("athlete", "value"),
-    State("activitytag-central", "value"),
     State("activitytag", "value"),
     State("gametag", "value"),
     State("periodtag", "value"),
@@ -4067,7 +3996,7 @@ def _calc_table_height(df_export, base=400, row_height=20):
 def descargar_tabla(
     _n_png, _n_pdf, _n_csv, _n_xlsx,
     tab, categorias, metricas, referencia,
-    rango_dias, jugadores, athlete, activitytags_central, activitytags, gametags, periodtags, fecha_actividad
+    rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad
 ):
     ctx = dash.callback_context
     if not ctx.triggered:
@@ -4085,7 +4014,7 @@ def descargar_tabla(
     if athlete and isinstance(athlete, str):
         athlete = [athlete]
 
-    activitytags = merge_filter_values(activitytags_central, activitytags)
+    activitytags = merge_filter_values(activitytags)
 
     if gametags and isinstance(gametags, str):
         gametags = [gametags]

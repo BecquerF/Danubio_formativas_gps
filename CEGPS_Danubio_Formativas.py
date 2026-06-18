@@ -1931,7 +1931,7 @@ style={
                         ],
                         className="filter-card",
                         style={
-                            "padding":"14px"
+                            "padding":"14px", "zIndex": 1000, "position": "relative"
                         }
                     ),
                     html.Div(
@@ -1998,7 +1998,9 @@ style={
                         className="filter-card",
                         style={
                             "padding":"14px",
-                            "marginBottom":"12px"
+                            "marginBottom":"12px",
+                            "zIndex": 1000,
+                            "position": "relative"
                         }
                     ),
                     html.Div(
@@ -2027,7 +2029,9 @@ style={
                         className="filter-card",
                         style={
                             "padding":"16px",
-                            "marginBottom":"12px"
+                            "marginBottom":"12px",
+                            "zIndex": 1000,
+                            "position": "relative"
                         }
                     ),
                     html.Div(
@@ -2056,7 +2060,9 @@ style={
                         className="filter-card",
                         style={
                             "padding":"16px",
-                            "marginBottom":"12px"
+                            "marginBottom":"12px",
+                            "zIndex": 1000,
+                            "position": "relative"
                         }
                     ),
                     html.Div(
@@ -2094,7 +2100,8 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True
+                                                multi=True,
+                                                style={"zIndex": 1000, "position": "relative"} 
                                             )
                                         ]
                                     ),
@@ -2119,7 +2126,8 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True
+                                                multi=True,
+                                                style={"zIndex": 1000, "position": "relative"} 
                                             )
                                         ]
                                     ),
@@ -2144,7 +2152,8 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True
+                                                multi=True,
+                                                style={"zIndex": 1000, "position": "relative"}
                                             )
                                         ]
                                     ),
@@ -2169,7 +2178,8 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True
+                                                multi=True,
+                                                style={"zIndex": 1000, "position": "relative"}
                                             )
                                         ]
                                     ),
@@ -2194,7 +2204,8 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True
+                                                multi=True,
+                                                style={"zIndex": 1000, "position": "relative"}
                                             )
                                         ]
                                     )
@@ -3175,14 +3186,15 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
                     value=dff["Player Name"].unique()[0],
                     placeholder="Seleccionar Jugador 1",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px", "color":"#0d1620"}
+                    style={"width":"45%","display":"inline-block","marginRight":"10px", "color":"#0d1620", 
+                           "zIndex": 1000, "position": "relative"}
                 ),
                 dcc.Dropdown(
                     id="jugador_2",
                     options=[{"label": j, "value": j} for j in dff["Player Name"].unique()],
                     value=dff["Player Name"].unique()[1] if len(dff["Player Name"].unique())>1 else None,
                     placeholder="Seleccionar Jugador 2",
-                    style={"width":"45%","display":"inline-block","color":"#0d1620"}
+                    style={"width":"45%","display":"inline-block","color":"#0d1620", "zIndex": 1000, "position": "relative" }
                 )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 
@@ -3192,13 +3204,13 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     id="game_tags",
                     options=[{"label": g, "value": g} for g in dff["Game Tags"].unique()],
                     placeholder="Filtrar por Game Tag",
-                    style={"width":"45%","display":"inline-block","marginRight":"10px","color":"#0d1620"}
+                    style={"width":"45%","display":"inline-block","marginRight":"10px","color":"#0d1620", "zIndex": 1000, "position": "relative"}
                 ),
                 dcc.Dropdown(
                     id="period_tags",
                     options=[{"label": p, "value": p} for p in dff["Period Tags"].unique()],
                     placeholder="Filtrar por Period Tag",
-                    style={"width":"45%","display":"inline-block", "color":"#0d1620"}
+                    style={"width":"45%","display":"inline-block", "color":"#0d1620", "zIndex": 1000, "position": "relative" }
                 )
             ], style={"display":"flex","justifyContent":"center","marginBottom":"20px"}),
 

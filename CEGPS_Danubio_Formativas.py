@@ -1931,8 +1931,7 @@ style={
                         ],
                         className="filter-card",
                         style={
-                            "padding":"14px", "zIndex": 1000, "position": "relative"
-                        }
+                            "padding":"14px"}
                     ),
                     html.Div(
                         [
@@ -1998,10 +1997,7 @@ style={
                         className="filter-card",
                         style={
                             "padding":"14px",
-                            "marginBottom":"12px",
-                            "zIndex": 1000,
-                            "position": "relative"
-                        }
+                            "marginBottom":"12px"}
                     ),
                     html.Div(
                         [
@@ -2029,10 +2025,7 @@ style={
                         className="filter-card",
                         style={
                             "padding":"16px",
-                            "marginBottom":"12px",
-                            "zIndex": 1000,
-                            "position": "relative"
-                        }
+                            "marginBottom":"12px"}
                     ),
                     html.Div(
                         [
@@ -2060,10 +2053,7 @@ style={
                         className="filter-card",
                         style={
                             "padding":"16px",
-                            "marginBottom":"12px",
-                            "zIndex": 1000,
-                            "position": "relative"
-                        }
+                            "marginBottom":"12px"}
                     ),
                     html.Div(
                         [
@@ -2100,9 +2090,7 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True,
-                                                style={"zIndex": 1000, "position": "relative"} 
-                                            )
+                                                multi=True)
                                         ]
                                     ),
 
@@ -2126,9 +2114,7 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True,
-                                                style={"zIndex": 1000, "position": "relative"} 
-                                            )
+                                                multi=True)
                                         ]
                                     ),
 
@@ -2152,9 +2138,7 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True,
-                                                style={"zIndex": 1000, "position": "relative"}
-                                            )
+                                                multi=True)
                                         ]
                                     ),
 
@@ -2178,9 +2162,7 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True,
-                                                style={"zIndex": 1000, "position": "relative"}
-                                            )
+                                                multi=True)
                                         ]
                                     ),
 
@@ -2204,8 +2186,7 @@ style={
                                                         .unique()
                                                     )
                                                 ],
-                                                multi=True,
-                                                style={"zIndex": 1000, "position": "relative"}
+                                                multi=True
                                             )
                                         ]
                                     )

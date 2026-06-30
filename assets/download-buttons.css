@@ -261,6 +261,87 @@ h4,
     border-color: rgba(137, 188, 239, 0.28);
     opacity: 1 !important;
 }
+
+.sidebar-right-panel .filter-card {
+    border-radius: 12px;
+    margin-bottom: 6px !important;
+    padding: 8px !important;
+}
+
+.sidebar-right-panel .filter-card:hover {
+    transform: none !important;
+}
+
+.sidebar-right-panel h4 {
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+    margin: 0 0 6px !important;
+    padding: 0 !important;
+}
+
+.sidebar-right-panel p {
+    font-size: 9px !important;
+    line-height: 1.1 !important;
+    margin: 0 0 3px !important;
+}
+
+.sidebar-right-panel .Select,
+.sidebar-right-panel .DateInput,
+.sidebar-right-panel .SingleDatePicker,
+.sidebar-right-panel .SingleDatePickerInput {
+    width: 100% !important;
+    font-size: 10px !important;
+}
+
+.sidebar-right-panel .Select-control {
+    min-height: 28px !important;
+    border-radius: 7px !important;
+    border-color: rgba(137, 188, 239, 0.22) !important;
+    background-color: #f7fbff !important;
+}
+
+.sidebar-right-panel .Select-placeholder,
+.sidebar-right-panel .Select-value-label,
+.sidebar-right-panel .Select-input {
+    line-height: 26px !important;
+    font-size: 10px !important;
+}
+
+.sidebar-right-panel .Select--multi .Select-control {
+    max-height: 52px !important;
+    overflow-y: auto !important;
+}
+
+.sidebar-right-panel .Select--multi .Select-value {
+    margin: 2px 2px 0 2px !important;
+    padding: 0 4px !important;
+    line-height: 16px !important;
+    max-width: 100% !important;
+}
+
+.sidebar-right-panel .Select--multi .Select-value-label {
+    font-size: 9px !important;
+    line-height: 16px !important;
+}
+
+.sidebar-right-panel .Select-menu-outer {
+    z-index: 9999 !important;
+    max-height: 150px !important;
+    font-size: 10px !important;
+}
+
+.sidebar-right-panel .VirtualizedSelectOption,
+.sidebar-right-panel .Select-option {
+    padding: 5px 8px !important;
+    line-height: 1.15 !important;
+}
+
+.sidebar-right-panel .DateInput_input {
+    height: 28px !important;
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    line-height: 20px !important;
+}
 .dash-table-container {
     background-color: #011c24;
     border-radius: 12px;

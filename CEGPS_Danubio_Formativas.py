@@ -70,7 +70,7 @@ except ImportError:
     PILImage = None
 
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
@@ -698,6 +698,57 @@ def section_title(section_value):
     return titles.get(section_value, section_value)
 
 
+REPORT_GRAPH_WIDTH = 1800
+REPORT_GRAPH_HEIGHT = 1000
+REPORT_IMAGE_SCALE = 2
+
+
+def apply_report_figure_style(fig, title=None, width=REPORT_GRAPH_WIDTH, height=REPORT_GRAPH_HEIGHT):
+    if fig is None:
+        return fig
+    layout_update = {
+        "width": width,
+        "height": height,
+        "paper_bgcolor": "#0b0c0e",
+        "plot_bgcolor": "#0b0c0e",
+        "font": {"color": "#f5f5f5", "family": "'Clash Display Semibold', 'Helvetica Neue'", "size": 18},
+        "margin": dict(l=90, r=50, t=90, b=80),
+        "legend": dict(
+            bgcolor="rgba(11,12,14,0.82)",
+            bordercolor="rgba(137,188,239,0.45)",
+            borderwidth=1,
+            font=dict(color="#f5f5f5", size=14)
+        )
+    }
+    if title:
+        layout_update["title"] = {
+            "text": title,
+            "font": {"color": "#f5f5f5", "family": "'Clash Display Semibold', 'Helvetica Neue'", "size": 28},
+            "x": 0.02,
+            "xanchor": "left"
+        }
+    fig.update_layout(**layout_update)
+    fig.update_xaxes(
+        showgrid=True,
+        gridcolor="rgba(137,188,239,0.18)",
+        zerolinecolor="rgba(255,255,255,0.08)",
+        linecolor="#89bcef",
+        tickfont=dict(color="#f5f5f5", size=14),
+        title_font=dict(color="#a3e3d0", size=16),
+        automargin=True
+    )
+    fig.update_yaxes(
+        showgrid=True,
+        gridcolor="rgba(137,188,239,0.18)",
+        zerolinecolor="rgba(255,255,255,0.08)",
+        linecolor="#89bcef",
+        tickfont=dict(color="#f5f5f5", size=14),
+        title_font=dict(color="#a3e3d0", size=16),
+        automargin=True
+    )
+    return fig
+
+
 def build_actividad_report_fig(dff, fecha_dt):
     if "Date" not in dff.columns:
         return go.Figure()
@@ -843,22 +894,25 @@ def build_plyr_vs_plyr_report_fig(dff):
 
 
 def build_section_report_fig(section, dff, fecha_dt, categorias):
-    
+    fig = None
     if section == "actividad":
-        return build_actividad_report_fig(dff, fecha_dt)
-    if section == "actividad_comparativa":
-        return build_actividad_comparativa_report_fig(dff, fecha_dt)
-    if section == "actividad_promedios":
-        return build_actividad_promedios_report_fig(dff, fecha_dt)
-    if section == "acwr":
-        return build_acwr_report_fig(dff)
-    if section == "plyr_vs_plyr":
-        return build_plyr_vs_plyr_report_fig(dff)
-    if section == "comparativas":
-        return build_comparativas(dff, categorias, ["Distance"], "Category")
-    if section == "cronologico":
-        return build_cronologico(dff, categorias, ["Distance"], "Category")
-    return go.Figure()
+        fig = build_actividad_report_fig(dff, fecha_dt)
+    elif section == "actividad_comparativa":
+        fig = build_actividad_comparativa_report_fig(dff, fecha_dt)
+    elif section == "actividad_promedios":
+        fig = build_actividad_promedios_report_fig(dff, fecha_dt)
+    elif section == "acwr":
+        fig = build_acwr_report_fig(dff)
+    elif section == "plyr_vs_plyr":
+        fig = build_plyr_vs_plyr_report_fig(dff)
+    elif section == "comparativas":
+        fig = build_comparativas(dff, categorias, ["Distance"], "Category")
+    elif section == "cronologico":
+        fig = build_cronologico(dff, categorias, ["Distance"], "Category")
+    else:
+        fig = go.Figure()
+
+    return apply_report_figure_style(fig, section_title(section))
 
 
 def build_plotly_table(header, rows, title):
@@ -870,23 +924,26 @@ def build_plotly_table(header, rows, title):
         go.Table(
             header=dict(
                 values=header,
-                fill_color="#1f2c56",
-                font=dict(color="white", size=11),
+                fill_color="#011c24",
+                line_color="rgba(137,188,239,0.35)",
+                font=dict(color="#a3e3d0", size=18),
                 align="center"
             ),
             cells=dict(
                 values=columns,
                 fill_color="#0b0c0e",
-                font=dict(color="white", size=10),
-                align="center"
+                line_color="rgba(137,188,239,0.18)",
+                font=dict(color="#f5f5f5", size=16),
+                align="center",
+                height=30
             )
         )
     ])
     fig.update_layout(
-        title={"text": title, "font": {"color": "#f5f5f5", "size": 16}, "x": 0.01},
-        width=1600,
-        height=900,
-        margin=dict(l=10, r=10, t=40, b=10),
+        title={"text": title, "font": {"color": "#f5f5f5", "size": 26}, "x": 0.01},
+        width=REPORT_GRAPH_WIDTH,
+        height=REPORT_GRAPH_HEIGHT,
+        margin=dict(l=30, r=30, t=80, b=30),
         paper_bgcolor="#0b0c0e"
     )
     return fig
@@ -1189,7 +1246,7 @@ def load_image_reader_from_bytes(image_bytes):
         raise
 
 
-def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filters_text=None, page_size=A4, margin=inch * 0.6):
+def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filters_text=None, page_size=None, margin=inch * 0.35):
     """
     Construye un PDF multi-página que incluye:
     - Portada con título, autor, fecha y filtros.
@@ -1197,6 +1254,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
     - Las imágenes se escalan manteniendo el aspecto; si no caben en la página se crea una nueva.
     Devuelve bytes del PDF final.
     """
+    page_size = page_size or landscape(A4)
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=page_size)
     width, height = page_size
@@ -1250,6 +1308,43 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
 
     page_num = 1
 
+    def draw_image_page(section, img_key, caption_key, page_num):
+        img_bytes = section.get(img_key)
+        if not img_bytes:
+            return page_num
+
+        c.showPage()
+        page_num += 1
+        y = draw_header(c)
+        caption = section.get(caption_key, section.get("title", ""))
+        c.setFont(title_font, 15)
+        c.drawString(margin, y, caption)
+        y -= 18
+
+        try:
+            image = load_image_reader_from_bytes(img_bytes)
+            img_w, img_h = image.getSize()
+            max_w = width - 2 * margin
+            max_h = y - margin - 8
+            ratio = min(max_w / img_w, max_h / img_h)
+            draw_w = img_w * ratio
+            draw_h = img_h * ratio
+            x = margin + (max_w - draw_w) / 2
+            c.drawImage(
+                image,
+                x,
+                y - draw_h,
+                width=draw_w,
+                height=draw_h,
+                preserveAspectRatio=True,
+                mask="auto"
+            )
+            draw_footer(c, page_num)
+        except Exception as e:
+            logging.warning("No se pudo incrustar imagen en seccion '%s': %s", section.get("title", ""), e)
+
+        return page_num
+
     # --- Iterar secciones ---
     for section in sections:
         page_num += 1
@@ -1278,6 +1373,12 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             y -= 8
 
         # Insertar imágenes: primero figura principal, luego tabla si existe
+        draw_footer(c, page_num)
+        page_num = draw_image_page(section, "img", "caption", page_num)
+        page_num = draw_image_page(section, "table_img", "table_caption", page_num)
+        section["img"] = None
+        section["table_img"] = None
+
         for img_key, caption_key, max_h_default in [
             ("img", "caption", 900),
             ("table_img", "table_caption", 900)
@@ -1883,7 +1984,7 @@ app.layout = html.Div([
     # Descarga del informe completo (opcional)
     html.Button(
         html.Img(src="/assets/icon-download-pdf.svg", style={"width":"16px"}),
-        id="generate_report",
+        id="generate_report_toolbar",
         className="download-btn",
         n_clicks=0
     ),
@@ -2207,18 +2308,18 @@ style={
                 className="sidebar-panel sidebar-right-panel",
                 style={
                     "flex": "0 0 auto",
-                    "width": "180px",
-                    "minWidth": "180px",
-                    "padding": "8px 8px",
+                    "width": "230px",
+                    "minWidth": "230px",
+                    "padding": "6px",
                     "backgroundColor": "#011c24",
-                    "borderRadius": "24px",
+                    "borderRadius": "16px",
                     "border": "1px solid rgba(137, 188, 239, 0.16)",
                     "boxShadow": "0 18px 48px rgba(0,0,0,0.35)",
-                    "position": "relative",
-                    "top": "10px",
-                    "gap": "10px",
-                    "maxHeight": "200vh",
-                    "overflowY": "auto"
+                    "position": "sticky",
+                    "top": "8px",
+                    "gap": "6px",
+                    "maxHeight": "calc(100vh - 24px)",
+                    "overflowY": "visible"
                 }
             )
         ],
@@ -3334,7 +3435,6 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     State("report_text_cronologico", "value"),
     State("categoria", "value"),
     State("report_fecha_actividad", "date"),
-    State("download_format", "value"),
     prevent_initial_call=True
 )
 def generar_informe(
@@ -3350,8 +3450,7 @@ def generar_informe(
     texto_comparativas,
     texto_cronologico,
     categorias,
-    fecha_actividad,
-    download_format
+    fecha_actividad
 ):
 
     if not n_clicks:
@@ -3560,8 +3659,8 @@ def generar_informe(
         else None
     )
 
-    if (download_format or "pdf").lower() == "png":
-
+    if False:
+    
         if not image_bytes_for_png:
             logging.warning(
                 "No hay imágenes para combinar en PNG."

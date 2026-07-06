@@ -234,7 +234,7 @@ metricas_base = metricas.copy()
 # Calculate average metrics per player
 df_promedios = (
     df.groupby("Player Name")[metricas_base]
-    .mean()
+    .mean(numeric_only=True)
     .reset_index()
 )
 
@@ -4153,7 +4153,7 @@ def descargar_tabla(
 
     # --- Construir df_export según tab ---
     if tab == "comparativas":
-        df_export = dff.groupby(referencia)[metricas].mean().reset_index()
+        df_export = dff.groupby(referencia)[metricas].mean(numeric_only=True).reset_index()
     elif tab == "actividad":
         fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else df["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
@@ -4169,8 +4169,8 @@ def descargar_tabla(
         fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else df["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
         metricas_base = [m for m in metricas if m in dff.columns]
-        resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].mean().reset_index()
-        promedio_jugador = dff.groupby("Player Name")[metricas_base].mean().reset_index()
+        resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].mean(numeric_only=True).reset_index()
+        promedio_jugador = dff.groupby("Player Name")[metricas_base].mean(numeric_only=True).reset_index()
         df_export = resumen_fecha.merge(promedio_jugador, on="Player Name", how="outer", suffixes=("", "_Promedio")).fillna(0)
     elif tab == "acwr":
         metricas_acwr = ["Distance","Player Load","Acceleration Efforts","Sprint Distance",
@@ -4180,8 +4180,8 @@ def descargar_tabla(
         ultimos7 = dff["Date"].max().normalize() - pd.Timedelta(days=7)
         df21 = dff[dff["Date"] >= ultimos21]
         df7 = dff[dff["Date"] >= ultimos7]
-        cronica = df21.groupby("Player Name")[metricas_acwr].mean().reset_index()
-        aguda = df7.groupby("Player Name")[metricas_acwr].mean().reset_index()
+        cronica = df21.groupby("Player Name")[metricas_acwr].mean(numeric_only=True).reset_index()
+        aguda = df7.groupby("Player Name")[metricas_acwr].mean(numeric_only=True).reset_index()
         tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7"))
         tabla = tabla.loc[:, ~tabla.columns.duplicated()]
         for m in metricas_acwr:

@@ -852,22 +852,39 @@ def build_actividad_promedios_report_fig(dff, fecha_dt):
 
 
 def build_acwr_report_fig(dff):
-    metrics = [m for m in ["Distance", "Player Load", "Sprint Distance", "High Speed Distance", "Sprint Efforts", "High Speed Efforts", "Impacts"] if m in dff.columns]
+    metrics = [m for m in [
+        "Distance", "Player Load", "Sprint Distance", 
+        "High Speed Distance", "Sprint Efforts", 
+        "High Speed Efforts", "Impacts"
+    ] if m in dff.columns]
+
     if dff.empty or not metrics:
         return go.Figure()
 
+    # Asegurar tipos correctos
+    dff["Date"] = pd.to_datetime(dff["Date"], errors="coerce")
+    for m in metrics:
+        dff[m] = pd.to_numeric(dff[m], errors="coerce")
+
     ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
     ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
+
     df21 = dff[dff["Date"] >= ultimos21]
     df7 = dff[dff["Date"] >= ultimos7]
+
     cronica = df21.groupby("Player Name")[metrics].mean().reset_index()
     aguda = df7.groupby("Player Name")[metrics].mean().reset_index()
+
     tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7")).fillna(0)
+
     rows = []
     for _, row in tabla.iterrows():
         for m in metrics:
-            rows.append({"Player Name": row["Player Name"], "Métrica": m, "Valor": round(row[f"{m}_7"] / row[f"{m}_21"] if row[f"{m}_21"] else 0, 2)})
+            valor = round(row[f"{m}_7"] / row[f"{m}_21"], 2) if row[f"{m}_21"] else 0
+            rows.append({"Player Name": row["Player Name"], "Métrica": m, "Valor": valor})
+
     data = pd.DataFrame(rows)
+
     fig = px.bar(
         data,
         x="Valor",
@@ -884,6 +901,7 @@ def build_acwr_report_fig(dff):
         font={"color": "#f5f5f5"}
     )
     return fig
+
 
 
 def build_plyr_vs_plyr_report_fig(dff):

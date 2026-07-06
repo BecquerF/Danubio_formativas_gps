@@ -427,7 +427,7 @@ def build_plyr_vs_plyr(dff, jugador_1, jugador_2, game_tag=None, period_tag=None
     # Calculate average metrics for the selected players
     radar_data = (
         dff_jugadores.groupby("Player Name")[metricas]
-        .mean()
+        .mean(numeric_only=True)
         .reset_index()
     )
 
@@ -513,7 +513,7 @@ def build_comparativas(dff, categorias, metricas, referencia):
     # Calculate the average metrics grouped by the reference column
     promedio = (
         dff.groupby(referencia)[metricas]
-        .mean()
+        .mean(numeric_only=True)
         .reset_index()
     )
 
@@ -791,7 +791,7 @@ def build_actividad_comparativa_report_fig(dff, fecha_dt):
 
     resumen = dff_fecha.groupby("Player Name")[metrics].sum().reset_index()
     dff_acum = dff[dff["Date"].dt.normalize() <= fecha_dt]
-    promedio = dff_acum.groupby("Player Name")[metrics].mean().reset_index()
+    promedio = dff_acum.groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
     promedio = promedio.rename(columns={m: f"{m} Prom" for m in metrics})
     tabla = resumen.merge(promedio, on="Player Name", how="left").fillna(0)
 
@@ -832,7 +832,7 @@ def build_actividad_promedios_report_fig(dff, fecha_dt):
     if dff_fecha.empty or not metrics:
         return go.Figure()
 
-    promedio = dff_fecha[metrics].mean().reset_index()
+    promedio = dff_fecha[metrics].mean(numeric_only=True).reset_index()
     promedio.columns = ["Métrica", "Valor"]
     fig = px.bar(
         promedio,
@@ -872,8 +872,8 @@ def build_acwr_report_fig(dff):
     df21 = dff[dff["Date"] >= ultimos21]
     df7 = dff[dff["Date"] >= ultimos7]
 
-    cronica = df21.groupby("Player Name")[metrics].mean().reset_index()
-    aguda = df7.groupby("Player Name")[metrics].mean().reset_index()
+    cronica = df21.groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
+    aguda = df7.groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
 
     tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7")).fillna(0)
 
@@ -989,7 +989,7 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
         if dff_fecha.empty or not metrics:
             return None
         resumen = dff_fecha.groupby("Player Name")[metrics].sum().reset_index()
-        promedio = dff[dff["Date"].dt.normalize() <= fecha_dt].groupby("Player Name")[metrics].mean().reset_index()
+        promedio = dff[dff["Date"].dt.normalize() <= fecha_dt].groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
         resumen = resumen.rename(columns={m: f"{m} Actual" for m in metrics})
         promedio = promedio.rename(columns={m: f"{m} Prom" for m in metrics})
         tabla = resumen.merge(promedio, on="Player Name", how="left").fillna(0).round(2)
@@ -1018,8 +1018,8 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
         ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
         df21 = dff[dff["Date"] >= ultimos21]
         df7 = dff[dff["Date"] >= ultimos7]
-        cronica = df21.groupby("Player Name")[metrics].mean().reset_index()
-        aguda = df7.groupby("Player Name")[metrics].mean().reset_index()
+        cronica = df21.groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
+        aguda = df7.groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
         tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7")).fillna(0)
         rows = []
         for _, row in tabla.iterrows():
@@ -2528,7 +2528,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
 
         # Acumulado para promedios y máximos
         dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
-        promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean().reset_index()
+        promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean(numeric_only=True).reset_index()
         promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
         maximo_jugador = dff_acumulado.groupby("Player Name")[metricas_max].max().reset_index()
         maximo_jugador = maximo_jugador.rename(columns={m: f"{m} Max" for m in metricas_max})
@@ -2749,7 +2749,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
 
             df21
             .groupby("Player Name")[metricas_acwr]
-            .mean()
+            .mean(numeric_only=True)
             .reset_index()
 
         )
@@ -2758,7 +2758,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
 
             df7
             .groupby("Player Name")[metricas_acwr]
-            .mean()
+            .mean(numeric_only=True)
             .reset_index()
 
         )

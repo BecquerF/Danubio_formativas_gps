@@ -229,30 +229,33 @@ metricas_promedios = metricas_radar + ["Max Velocity", "Duration"]
 # ======================================================
 
 # Copy base metrics
-metricas_base = metricas.copy()
+metricas_base = [m for m in metricas if m in df.columns]
 
-# Calculate average metrics per player
-df_promedios = (
-    df.groupby("Player Name")[metricas_base]
-    .mean(numeric_only=True)
-    .reset_index()
-)
+if not metricas_base or "Player Name" not in df.columns:
+    # Si no hay métricas válidas o falta la columna de jugadores,
+    # devolvemos un DataFrame vacío con las columnas esperadas
+    df_vacio = pd.DataFrame(columns=["Player Name"] + metricas_base + [f"{m} Prom" for m in metricas_base])
+else:
+    # Convertir métricas a float
+    for m in metricas_base:
+        df[m] = pd.to_numeric(df[m], errors="coerce").astype(float)
+        
+# Calcular promedios
+    df_promedios = (
+        df.groupby("Player Name")[metricas_base]
+        .mean(numeric_only=True)
+        .reset_index()
+    )
+    df_promedios.rename(columns={col: f"{col} Prom" for col in metricas_base}, inplace=True)
+  
+# Calcular acumulados
+    df_acumulados = (
+        df.groupby("Player Name")[metricas_base]
+        .sum(numeric_only=True)
+        .reset_index()
+    )
 
-# Rename columns to indicate they are averages
-df_promedios.rename(
-    columns={col: f"{col} Prom" for col in metricas_base},
-    inplace=True
-)
-
-# Calculate cumulative metrics per player
-df_acumulados = (
-    df.groupby("Player Name")[metricas_base]
-    .sum(numeric_only=True)
-    .reset_index()
-)
-
-df_Actividad_Comparativa_Individual = pd.merge(
-    df_acumulados,
+df_Actividad_Comparativa_Individual = pd.merge(df_acumulados,
     df_promedios,
     on="Player Name"
 )

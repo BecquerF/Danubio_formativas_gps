@@ -789,7 +789,7 @@ def build_actividad_comparativa_report_fig(dff, fecha_dt):
     if dff_fecha.empty or not metrics:
         return go.Figure()
 
-    resumen = dff_fecha.groupby("Player Name")[metrics].sum().reset_index()
+    resumen = dff_fecha.groupby("Player Name")[metrics].sum(numeric_only=True).reset_index()
     dff_acum = dff[dff["Date"].dt.normalize() <= fecha_dt]
     promedio = dff_acum.groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
     promedio = promedio.rename(columns={m: f"{m} Prom" for m in metrics})
@@ -905,7 +905,7 @@ def build_acwr_report_fig(dff):
 
 
 def build_plyr_vs_plyr_report_fig(dff):
-    nombres = dff.groupby("Player Name")["Distance"].sum().sort_values(ascending=False).head(2).index.tolist()
+    nombres = dff.groupby("Player Name")["Distance"].sum(numeric_only=True).sort_values(ascending=False).head(2).index.tolist()
     if len(nombres) < 2:
         return go.Figure()
     return build_plyr_vs_plyr(dff, nombres[0], nombres[1], None, None)
@@ -975,7 +975,7 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
         metrics = [m for m in ["Distance", "Player Load", "Sprint Distance", "High Speed Distance", "Sprint Efforts"] if m in dff_fecha.columns]
         if dff_fecha.empty or not metrics:
             return None
-        resumen = dff_fecha.groupby("Player Name")[metrics].sum().reset_index()
+        resumen = dff_fecha.groupby("Player Name")[metrics].sum(numeric_only=True).reset_index()
         resumen = resumen.sort_values(metrics[0], ascending=False).head(10).round(2)
         header = ["Player Name"] + metrics
         rows = resumen.to_dict(orient="records")
@@ -988,7 +988,7 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
         if dff_fecha.empty or not metrics:
             return None
-        resumen = dff_fecha.groupby("Player Name")[metrics].sum().reset_index()
+        resumen = dff_fecha.groupby("Player Name")[metrics].sum(numeric_only=True).reset_index()
         promedio = dff[dff["Date"].dt.normalize() <= fecha_dt].groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
         resumen = resumen.rename(columns={m: f"{m} Actual" for m in metrics})
         promedio = promedio.rename(columns={m: f"{m} Prom" for m in metrics})
@@ -2530,7 +2530,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
         dff_acumulado = dff[dff["Date"].dt.normalize() <= fecha_dt]
         promedio_jugador = dff_acumulado.groupby("Player Name")[metricas_base].mean(numeric_only=True).reset_index()
         promedio_jugador = promedio_jugador.rename(columns={m: f"{m} Prom" for m in metricas_base})
-        maximo_jugador = dff_acumulado.groupby("Player Name")[metricas_max].max().reset_index()
+        maximo_jugador = dff_acumulado.groupby("Player Name")[metricas_max].max(numeric_only=True).reset_index()
         maximo_jugador = maximo_jugador.rename(columns={m: f"{m} Max" for m in metricas_max})
 
         # Tabla final
@@ -3760,7 +3760,7 @@ def actualizar_radar(jugador_1, jugador_2, game_tags, period_tags):
     # Agrupar métricas
     radar_data = (
         dff_jugadores.groupby("Player Name")[metricas_radar]
-        .mean()
+        .mean(numeric_only=True)
         .reset_index()
     )
 

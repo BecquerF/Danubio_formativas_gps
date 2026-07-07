@@ -247,7 +247,7 @@ df_promedios.rename(
 # Calculate cumulative metrics per player
 df_acumulados = (
     df.groupby("Player Name")[metricas_base]
-    .sum()
+    .sum(numeric_only=True)
     .reset_index()
 )
 

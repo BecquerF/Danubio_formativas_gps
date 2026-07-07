@@ -260,8 +260,9 @@ df_Actividad_Comparativa_Individual = pd.merge(
 # Order columns
 orden = ["Player Name"]
 for m in metricas_base:
-    orden.extend([m, f"{m} Prom"])
-
+    if m in df_Actividad_Comparativa_Individual.columns:
+        orden.extend([m, f"{m} Prom"])
+        
 # Reorganize the DataFrame according to the specified order
 df_Actividad_Comparativa_Individual = df_Actividad_Comparativa_Individual[orden]
 

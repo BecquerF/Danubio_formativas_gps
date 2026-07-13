@@ -63,7 +63,7 @@ except Exception as e:
 from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
 import dash_auth
 
-from app_filters import sanitize_dropdown_values
+from app_filters import sanitize_dropdown_values, normalize_report_date
 
 # ReportLab imports
 try:
@@ -3408,8 +3408,11 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
 
-    fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else df["Date"].max().normalize()
-    if fecha_dt is not None:
+    fecha_dt = normalize_report_date(fecha_actividad)
+    if fecha_dt is None and "Date" in dff.columns:
+        fecha_dt = normalize_report_date(dff["Date"].max())
+
+    if fecha_dt is not None and "Date" in dff.columns:
         dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
 
     preview_cards = []
@@ -3526,14 +3529,14 @@ def generar_informe(
     # Copia del dataframe
     dff = df.copy()
 
-    # Garantizar datetime
+    # Garantizar datetime sin volver a imponer un formato rígido que rompe fechas ISO
     if "Date" in dff.columns:
         dff["Date"] = pd.to_datetime(
             dff["Date"],
-            format="%d-%m-%y",
-            dayfirst=True,
-            errors="coerce"
+            errors="coerce",
+            dayfirst=True
         )
+        dff["Date"] = dff["Date"].dt.normalize()
 
     # Filtrar categorías
     if categorias:
@@ -3541,18 +3544,10 @@ def generar_informe(
 
     # Fecha de corte
     if fecha_actividad:
-        fecha_dt = pd.to_datetime(
-            fecha_actividad,
-            format="%d-%m-%y",
-            dayfirst=True,
-            errors="coerce"
-        )
-
-        if pd.notna(fecha_dt):
-            fecha_dt = fecha_dt.normalize()
+        fecha_dt = normalize_report_date(fecha_actividad)
     else:
         fecha_dt = (
-            dff["Date"].max().normalize()
+            normalize_report_date(dff["Date"].max())
             if (
                 "Date" in dff.columns
                 and not dff.empty

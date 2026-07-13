@@ -63,6 +63,8 @@ except Exception as e:
 from dash import Dash, dcc, html, dash_table, Input, Output, State, no_update, ctx, ALL
 import dash_auth
 
+from app_filters import sanitize_dropdown_values
+
 # ReportLab imports
 try:
     from PIL import Image as PILImage
@@ -3338,22 +3340,28 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
 
 @app.callback(
     Output("activitytag", "options"),
+    Output("activitytag", "value"),
     Output("gametag", "options"),
     Output("gametag", "value"),
     Output("periodtag", "options"),
     Output("periodtag", "value"),
-    Input("fecha-actividad", "date"),
     Input("categoria", "value"),
-    Input("rango-dias", "value")
+    Input("rango-dias", "value"),
+    Input("jugador", "value"),
+    Input("athlete", "value"),
+    Input("activitytag", "value"),
+    Input("gametag", "value"),
+    Input("periodtag", "value")
 )
-def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias, rango_dias):
+def actualizar_tags_por_fecha_categoria(categorias, rango_dias, jugadores, athlete, current_activitytags, current_gametags, current_periodtags):
     dff = df.copy()
-    if fecha_actividad:
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize()
-        dff = dff[dff["Date"].dt.normalize() == fecha_dt]
     if categorias:
         dff = dff[dff["Category"].isin(categorias)]
     dff = apply_rango_dias_filter(dff, rango_dias)
+    if jugadores:
+        dff = dff[dff["Player Name"].isin(jugadores)]
+    if athlete:
+        dff = dff[dff["Athlete Tags"].isin(athlete)]
 
     activitytag_vals = sorted(dff["Activity Tags"].dropna().unique())
     gametag_vals = sorted(dff["Game Tags"].dropna().unique())
@@ -3363,7 +3371,18 @@ def actualizar_tags_por_fecha_categoria(fecha_actividad, categorias, rango_dias)
     gametag_options = [{"label": x, "value": x} for x in gametag_vals]
     periodtag_options = [{"label": x, "value": x} for x in periodtag_vals]
 
-    return activitytag_options, gametag_options, gametag_vals, periodtag_options, periodtag_vals
+    filtered_activitytags = sanitize_dropdown_values(current_activitytags, activitytag_vals)
+    filtered_gametags = sanitize_dropdown_values(current_gametags, gametag_vals)
+    filtered_periodtags = sanitize_dropdown_values(current_periodtags, periodtag_vals)
+
+    return (
+        activitytag_options,
+        filtered_activitytags,
+        gametag_options,
+        filtered_gametags,
+        periodtag_options,
+        filtered_periodtags,
+    )
 
 @app.callback(
     Output("report_figures_preview", "children"),

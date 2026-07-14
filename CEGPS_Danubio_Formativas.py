@@ -3467,6 +3467,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
 @app.callback(
     Output("download-report", "data"),
     Input("generate_report", "n_clicks"),
+    Input("generate_report_toolbar", "n_clicks"),
     State("report_title", "value"),
     State("report_author", "value"),
     State("report_sections", "value"),
@@ -3483,6 +3484,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
 )
 def generar_informe(
     n_clicks,
+    n_clicks_toolbar,
     title,
     author,
     sections,
@@ -3497,7 +3499,7 @@ def generar_informe(
     fecha_actividad
 ):
 
-    if not n_clicks:
+    if not n_clicks and not n_clicks_toolbar:
         return no_update
 
     # Asegurar lista de categorías
@@ -4101,6 +4103,66 @@ def _calc_table_height(df_export, base=400, row_height=20):
     except Exception:
         return base
 
+
+def build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad=None):
+    """Construye el dataframe listo para exportar según la pestaña activa."""
+    metricas = metricas or ["Distance"]
+    if isinstance(metricas, str):
+        metricas = [metricas]
+    referencia = referencia or "Category"
+
+    if tab == "comparativas":
+        return dff.groupby(referencia)[metricas].mean(numeric_only=True).reset_index()
+
+    if tab == "actividad":
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        columnas_requeridas = [
+            "Player Name","Accel + Decel Efforts","Accel + Decel Efforts Per Minute","Distance",
+            "Player Load","Max Velocity","Meterage Per Minute","Player Load Per Minute",
+            "Sprint Distance","Sprint Efforts","Sprint Dist Per Min","High Speed Distance",
+            "High Speed Efforts","High Speed Distance Per Minute","Impacts"
+        ]
+        columnas_presentes = [c for c in columnas_requeridas if c in dff_fecha.columns]
+        return dff_fecha[columnas_presentes]
+
+    if tab == "actividad_comparativa":
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        metricas_base = [m for m in metricas if m in dff.columns]
+        resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].mean(numeric_only=True).reset_index()
+        promedio_jugador = dff.groupby("Player Name")[metricas_base].mean(numeric_only=True).reset_index()
+        return resumen_fecha.merge(promedio_jugador, on="Player Name", how="outer", suffixes=("", "_Promedio")).fillna(0)
+
+    if tab == "acwr":
+        metricas_acwr = ["Distance","Player Load","Acceleration Efforts","Sprint Distance",
+                         "High Speed Distance","Sprint Efforts","High Speed Efforts","Impacts"]
+        dff = dff.copy()
+        dff["Player Name"] = dff["Player Name"].astype(str).str.strip()
+        ultimos21 = dff["Date"].max().normalize() - pd.Timedelta(days=21)
+        ultimos7 = dff["Date"].max().normalize() - pd.Timedelta(days=7)
+        df21 = dff[dff["Date"] >= ultimos21]
+        df7 = dff[dff["Date"] >= ultimos7]
+        cronica = df21.groupby("Player Name")[metricas_acwr].mean(numeric_only=True).reset_index()
+        aguda = df7.groupby("Player Name")[metricas_acwr].mean(numeric_only=True).reset_index()
+        tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7"))
+        tabla = tabla.loc[:, ~tabla.columns.duplicated()]
+        for m in metricas_acwr:
+            tabla[m + "_ACWR"] = (tabla[f"{m}_7"] / tabla[f"{m}_21"]).round(2)
+        return tabla[["Player Name"] + [f"{m}_ACWR" for m in metricas_acwr]].fillna(0)
+
+    metricas_validas = [m for m in metricas if m in dff.columns]
+    if not metricas_validas:
+        return pd.DataFrame()
+
+    return pd.melt(
+        dff,
+        id_vars=["Date", "Category"],
+        value_vars=metricas_validas,
+        var_name="Métrica",
+        value_name="Valor"
+    )
+
 @app.callback(
     Output("download-table", "data"),
     Input("download-table-png", "n_clicks"),
@@ -4149,11 +4211,6 @@ def descargar_tabla(
     if periodtags and isinstance(periodtags, str):
         periodtags = [periodtags]
 
-    metricas = metricas or ["Distance"]
-
-    if isinstance(metricas, str):
-        metricas = [metricas]
-
     # --- Construir dataframe filtrado ---
     dff = df.copy()
     if categorias: dff = dff[dff["Category"].isin(categorias)]
@@ -4169,59 +4226,9 @@ def descargar_tabla(
     item_name, metadata, printed_at = build_download_metadata(tab, categorias, metricas, referencia)
     tab_name = tab_titles.get(tab, tab)
 
-    # --- Construir df_export según tab ---
-    if tab == "comparativas":
-        df_export = dff.groupby(referencia)[metricas].mean(numeric_only=True).reset_index()
-    elif tab == "actividad":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else df["Date"].max().normalize()
-        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
-        columnas_requeridas = [
-            "Player Name","Accel + Decel Efforts","Accel + Decel Efforts Per Minute","Distance",
-            "Player Load","Max Velocity","Meterage Per Minute","Player Load Per Minute",
-            "Sprint Distance","Sprint Efforts","Sprint Dist Per Min","High Speed Distance",
-            "High Speed Efforts","High Speed Distance Per Minute","Impacts"
-        ]
-        columnas_presentes = [c for c in columnas_requeridas if c in dff_fecha.columns]
-        df_export = dff_fecha[columnas_presentes]
-    elif tab == "actividad_comparativa":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else df["Date"].max().normalize()
-        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
-        metricas_base = [m for m in metricas if m in dff.columns]
-        resumen_fecha = dff_fecha.groupby("Player Name")[metricas_base].mean(numeric_only=True).reset_index()
-        promedio_jugador = dff.groupby("Player Name")[metricas_base].mean(numeric_only=True).reset_index()
-        df_export = resumen_fecha.merge(promedio_jugador, on="Player Name", how="outer", suffixes=("", "_Promedio")).fillna(0)
-    elif tab == "acwr":
-        metricas_acwr = ["Distance","Player Load","Acceleration Efforts","Sprint Distance",
-                         "High Speed Distance","Sprint Efforts","High Speed Efforts","Impacts"]
-        dff["Player Name"] = dff["Player Name"].astype(str).str.strip()
-        ultimos21 = dff["Date"].max().normalize() - pd.Timedelta(days=21)
-        ultimos7 = dff["Date"].max().normalize() - pd.Timedelta(days=7)
-        df21 = dff[dff["Date"] >= ultimos21]
-        df7 = dff[dff["Date"] >= ultimos7]
-        cronica = df21.groupby("Player Name")[metricas_acwr].mean(numeric_only=True).reset_index()
-        aguda = df7.groupby("Player Name")[metricas_acwr].mean(numeric_only=True).reset_index()
-        tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7"))
-        tabla = tabla.loc[:, ~tabla.columns.duplicated()]
-        for m in metricas_acwr:
-            tabla[m + "_ACWR"] = (tabla[f"{m}_7"] / tabla[f"{m}_21"]).round(2)
-        df_export = tabla[["Player Name"] + [f"{m}_ACWR" for m in metricas_acwr]].fillna(0)
-    else:
-            metricas_validas = [
-        m
-        for m in metricas
-        if m in dff.columns
-    ]
-
-    if not metricas_validas:
+    df_export = build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad)
+    if df_export is None or df_export.empty:
         return no_update
-
-    df_export = pd.melt(
-        dff,
-        id_vars=["Date", "Category"],
-        value_vars=metricas_validas,
-        var_name="Métrica",
-        value_name="Valor"
-    )
     # --- CSV ---
     if trigger_id == "download-table-csv":
         buffer = io.BytesIO()

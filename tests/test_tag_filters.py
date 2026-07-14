@@ -1,8 +1,12 @@
+import os
 import unittest
 
 import pandas as pd
 
+os.environ.setdefault("SECRET_KEY", "test")
+
 from app_filters import build_filter_options, normalize_report_date
+import CEGPS_Danubio_Formativas as app_module
 
 
 class TagFilterOptionsTests(unittest.TestCase):
@@ -28,6 +32,24 @@ class TagFilterOptionsTests(unittest.TestCase):
 
         self.assertEqual([item["value"] for item in options], ["MD 19", "MD 23"])
         self.assertEqual(valid_values, ["MD 23"])
+
+
+class DownloadExportTests(unittest.TestCase):
+    def test_build_download_export_frame_supports_activity_tab(self):
+        dff = app_module.df.copy()
+        fecha = dff["Date"].max()
+
+        export_df = app_module.build_download_export_frame(
+            "actividad",
+            dff,
+            ["Distance"],
+            "Category",
+            fecha,
+        )
+
+        self.assertIsInstance(export_df, pd.DataFrame)
+        self.assertFalse(export_df.empty)
+        self.assertIn("Distance", export_df.columns)
 
 
 if __name__ == "__main__":

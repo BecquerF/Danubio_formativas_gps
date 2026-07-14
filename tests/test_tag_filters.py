@@ -51,6 +51,29 @@ class DownloadExportTests(unittest.TestCase):
         self.assertFalse(export_df.empty)
         self.assertIn("Distance", export_df.columns)
 
+    def test_build_best_performance_table_includes_athlete_tags_and_tooltips(self):
+        dff = pd.DataFrame(
+            {
+                "Player Name": ["Ana", "Ana", "Luis"],
+                "Date": pd.to_datetime(["2026-05-19", "2026-05-20", "2026-05-21"]),
+                "Game Tags": ["G1", "G2", "G3"],
+                "Athlete Tags": ["T1", "T2", "T3"],
+                "Meterage Per Minute": [10, 15, 12],
+                "Accel + Decel Efforts Per Minute": [8, 6, 9],
+                "Duration": [5, 7, 6],
+            }
+        )
+
+        table_df, tooltip_data = app_module.build_best_performances_table(
+            dff,
+            ["Meterage Per Minute", "Accel + Decel Efforts Per Minute", "Duration"],
+        )
+
+        self.assertIn("Athlete Tags", table_df.columns)
+        self.assertIn("Meterage Per Minute", table_df.columns)
+        self.assertTrue(tooltip_data)
+        self.assertIn("Date", tooltip_data[0]["Meterage Per Minute"]["value"])
+
 
 if __name__ == "__main__":
     unittest.main()

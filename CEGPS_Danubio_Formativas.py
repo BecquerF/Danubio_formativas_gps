@@ -407,6 +407,70 @@ def build_download_metadata(tab, categorias, metricas, referencia):
 
     return item_name, metadata, printed_at
 
+
+def build_best_performances_table(dff, selected_metrics=None):
+    """Devuelve una tabla por jugador con el mejor valor de cada métrica y tooltips con fecha/game tags."""
+    if dff is None or dff.empty:
+        return pd.DataFrame(columns=["Player Name", "Athlete Tags"]), []
+
+    metrics = [m for m in (selected_metrics or []) if m in dff.columns]
+    if not metrics:
+        return pd.DataFrame(columns=["Player Name", "Athlete Tags"]), []
+
+    players = sorted({str(value) for value in dff["Player Name"].dropna().astype(str).unique()})
+    rows = []
+
+    for player in players:
+        player_df = dff[dff["Player Name"].astype(str) == player].copy()
+        if player_df.empty:
+            continue
+
+        player_row = {"Player Name": player}
+        athlete_tags = None
+
+        for metric in metrics:
+            metric_df = player_df[["Player Name", "Athlete Tags", "Date", "Game Tags", metric]].dropna(subset=[metric]).copy()
+            if metric_df.empty:
+                continue
+
+            best_row = metric_df.loc[metric_df[metric].idxmax()]
+            player_row[metric] = best_row[metric]
+            player_row[f"__{metric}_date"] = best_row.get("Date")
+            player_row[f"__{metric}_game_tags"] = best_row.get("Game Tags")
+            if athlete_tags is None and pd.notna(best_row.get("Athlete Tags")):
+                athlete_tags = best_row.get("Athlete Tags")
+
+        player_row["Athlete Tags"] = athlete_tags or ""
+        rows.append(player_row)
+
+    if not rows:
+        return pd.DataFrame(columns=["Player Name", "Athlete Tags"]), []
+
+    summary_df = pd.DataFrame(rows)
+    metadata_columns = [col for col in summary_df.columns if col.startswith("__")]
+    display_columns = ["Player Name", "Athlete Tags"] + [m for m in metrics if m in summary_df.columns]
+    display_df = summary_df[display_columns].copy()
+
+    for metric in metrics:
+        display_df[metric] = pd.to_numeric(display_df[metric], errors="coerce")
+
+    tooltip_data = []
+    for _, row in summary_df.iterrows():
+        row_tooltips = {}
+        for metric in metrics:
+            date_value = row.get(f"__{metric}_date")
+            game_value = row.get(f"__{metric}_game_tags")
+            date_text = pd.Timestamp(date_value).strftime("%d/%m/%Y") if pd.notna(date_value) else "-"
+            game_text = str(game_value) if pd.notna(game_value) else "-"
+            row_tooltips[metric] = {
+                "value": f"Date: {date_text} | Game Tags: {game_text}",
+                "type": "text"
+            }
+        tooltip_data.append(row_tooltips)
+
+    return display_df, tooltip_data
+
+
 def build_plyr_vs_plyr(dff, jugador_1, jugador_2, game_tag=None, period_tag=None, metricas=None):
     # Prepare the metrics to use for the radar chart
     metricas = metricas_radar.copy()
@@ -2683,6 +2747,33 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 })
             )
 
+        best_performances_df, tooltip_data = build_best_performances_table(dff, metricas_promedios_validas)
+
+        if not best_performances_df.empty:
+            best_performances_table = dash_table.DataTable(
+                data=best_performances_df.to_dict("records"),
+                columns=[
+                    {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}}
+                    if col not in {"Player Name", "Athlete Tags"} else {"name": col, "id": col}
+                    for col in best_performances_df.columns
+                ],
+                sort_action="native",
+                style_table={
+                    "overflowX": "auto",
+                    "border": "1px solid rgba(137,188,239,0.18)",
+                    "borderRadius": "16px",
+                    "backgroundColor": "#0b0c0e"
+                },
+                style_header={"backgroundColor": "#011c24", "color": "#a3e3d0", "fontWeight": "700"},
+                style_cell={"backgroundColor": "#0b0c0e", "color": "#edf1f2", "padding": "10px", "fontSize": "12px"},
+                tooltip_data=tooltip_data,
+                tooltip_delay=0,
+                tooltip_duration=None,
+                css=[{"selector": ".dash-table-tooltip", "rule": "background-color: #011c24; color: #edf1f2;"}]
+            )
+        else:
+            best_performances_table = html.Div("No hay datos suficientes para construir este resumen.", style={"color": "#edf1f2", "padding": "16px"})
+
         return html.Div([
             html.Div([
                 html.H3(grafico_titulo, style={"color":"white","textAlign":"center","marginTop":"20px", 
@@ -2705,7 +2796,11 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             html.Div(
                 cards if cards else [html.Div("No hay datos para la fecha seleccionada.", style={"color": "#edf1f2", "textAlign": "center", "padding": "24px"})],
                 style={"minWidth":"180px", "display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(180px, 1fr))", "flexWrap":"wrap" ,"gap": "16px", "marginBottom":"24px"}
-            )
+            ),
+            html.Div([
+                html.H4("Mejores rendimientos por Jugador", style={"color": "#a3e3d0", "marginBottom": "12px"}),
+                best_performances_table
+            ], style={"marginTop": "24px", "padding": "18px", "background": "#071016", "borderRadius": "20px", "border": "1px solid rgba(137,188,239,0.18)"})
         ], style={"padding": "20px", "background": "linear-gradient(145deg, #0b0c0e, #1a1c1f)",
                     "border": "1px solid rgba(137,188,239,0.25)", "borderRadius": "28px",
                     "boxShadow": "0 12px 30px rgba(0,0,0,0.35)", "margin": "20px auto", "maxWidth": "1100px"})

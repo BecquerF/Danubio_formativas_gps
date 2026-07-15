@@ -366,7 +366,7 @@ def build_chart_title(tab, categorias, metricas, referencia):
     elif tab == "actividad":
         title = "Actividad por jugador"
     elif tab == "maximos_rendimientos":
-        title = " Máximos Rendimientos por jugador"    
+        title = " Máximos Rendimientos"    
     elif tab == "acwr":
         title = "ACWR - Últimos 7 días vs 21 días"
     elif tab == "actividad_comparativa":
@@ -763,6 +763,7 @@ def section_title(section_value):
         "actividad_comparativa": "Actividad Comparativa Individual",
         "actividad_promedios": "Actividad/Promedios",
         "acwr": "ACWR",
+        "maximos_rendimientos": "Máximos Rendimientos",
         "plyr_vs_plyr": "PLYR vs PLYR",
         "comparativas": "Comparativo",
         "cronologico": "Cronológico"
@@ -991,6 +992,8 @@ def build_section_report_fig(section, dff, fecha_dt, categorias):
         fig = build_actividad_comparativa_report_fig(dff, fecha_dt)
     elif section == "actividad_promedios":
         fig = build_actividad_promedios_report_fig(dff, fecha_dt)
+    elif section == "maximos_rendimientos":
+        fig = build_best_performances_table(dff, metricas_promedios)[0]    
     elif section == "acwr":
         fig = build_acwr_report_fig(dff)
     elif section == "plyr_vs_plyr":
@@ -1081,6 +1084,16 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
         promedio["Valor"] = promedio["Valor"].round(2)
         rows = promedio.to_dict(orient="records")
         return build_plotly_table(["Métrica", "Valor"], rows, f"Tabla de Actividad / Promedios {fecha_dt.strftime('%d/%m/%Y')}")
+    
+    if section == "maximos_rendimientos":
+        metrics = [m for m in metricas_promedios if m in dff.columns]
+        if dff.empty or not metrics:
+            return None
+        resumen, _ = build_best_performances_table(dff, metrics)
+        resumen = resumen.sort_values(metrics[0], ascending=False).head(10).round(2)
+        header = ["Player Name", "Athlete Tags"] + metrics
+        rows = resumen.to_dict(orient="records")
+        return build_plotly_table(header, rows, "Tabla de Máximos Rendimientos")
 
     if section == "acwr":
         metrics = [m for m in ["Distance", "Player Load", "Sprint Distance", "High Speed Distance", "Sprint Efforts", "High Speed Efforts", "Impacts"] if m in dff.columns]
@@ -1822,7 +1835,7 @@ app.layout = html.Div([
         ),
         
         dcc.Tab(
-                    label="Maximos Rendimientos por jugador",
+                    label="MAXIMOS RENDIMIENTOS",
                     value="maximos_rendimientos",
                     className="tab-item",
                     selected_className="tab-item-selected",

@@ -365,6 +365,8 @@ def build_chart_title(tab, categorias, metricas, referencia):
         title = f"Evolución cronológica de {metrica_text}"
     elif tab == "actividad":
         title = "Actividad por jugador"
+    elif tab == "maximos_rendimientos":
+        title = " Máximos Rendimientos por jugador"    
     elif tab == "acwr":
         title = "ACWR - Últimos 7 días vs 21 días"
     elif tab == "actividad_comparativa":
@@ -1818,6 +1820,38 @@ app.layout = html.Div([
                 "marginBottom":"1px"
             }
         ),
+        
+        dcc.Tab(
+                    label="Maximos Rendimientos por jugador",
+                    value="maximos_rendimientos",
+                    className="tab-item",
+                    selected_className="tab-item-selected",
+                    style={
+                        "whiteSpace": "normal",
+                        "overflow": "hidden",
+                        "textOverflow": "ellipsis",
+                        "color":"#edf1f2",
+                        "fontSize":"11px",
+                        "textAlign":"center",
+                        "fontWeight":"600",
+                        "borderTop":"1px solid rgba(137,188,239,.18)",
+                        "padding":"2px 6px",       
+                        "marginBottom":"1px"       
+                    },
+                    selected_style={
+                        "whiteSpace": "normal",
+                        "overflow": "hidden",
+                        "textOverflow": "ellipsis",
+                        "color":"#a3e3d0",
+                        "fontSize":"11px",
+                        "textAlign":"center",
+                        "fontWeight":"600",
+                        "borderTop":"1px solid #a3e3d0",
+                        "padding":"2px 6px",
+                        "backgroundColor":"#011c24",
+                        "marginBottom":"1px"
+                    }
+                ),
 
         dcc.Tab(
             label="ACWR",
@@ -2746,7 +2780,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     "padding": "16px"
                 })
             )
-
+            
+    elif tab == "maximos_rendimientos":
         best_performances_df, tooltip_data = build_best_performances_table(dff, metricas_promedios_validas)
 
         if not best_performances_df.empty:

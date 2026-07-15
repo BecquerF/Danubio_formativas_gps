@@ -3831,9 +3831,8 @@ def generar_informe(
         if LOGO_BASE64
         else None
     )
-
     if False:
-    
+            
         if not image_bytes_for_png:
             logging.warning(
                 "No hay imágenes para combinar en PNG."
@@ -4115,7 +4114,7 @@ def _create_tab_graph_figure(
             return None
         fecha_dt = pd.to_datetime(fecha_actividad).normalize()
         return build_actividad_promedios_report_fig(dff, fecha_dt)
-
+    
     if tab == "plyr_vs_plyr":
         return build_plyr_vs_plyr(
             dff,
@@ -4318,7 +4317,7 @@ def build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad=
     prevent_initial_call=True
 )
 def descargar_tabla(
-    _n_png, _n_pdf, _n_csv, _n_xlsx,
+    png_bytes, pdf_bytes,
     tab, categorias, metricas, referencia,
     rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad
 ):

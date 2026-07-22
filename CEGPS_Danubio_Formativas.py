@@ -2795,10 +2795,13 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             )
             
     elif tab == "maximos_rendimientos":
+        # Definir métricas válidas para este DataFrame
+        metricas_promedios_validas = [m for m in metricas_promedios if m in dff.columns]
+
         best_performances_df, tooltip_data = build_best_performances_table(dff, metricas_promedios_validas)
 
         if not best_performances_df.empty:
-            best_performances_table = dash_table.DataTable(
+            build_best_performances_table = dash_table.DataTable(
                 data=best_performances_df.to_dict("records"),
                 columns=[
                     {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}}
@@ -2822,6 +2825,11 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
         else:
             best_performances_table = html.Div("No hay datos suficientes para construir este resumen.", style={"color": "#edf1f2", "padding": "16px"})
 
+        return html.Div([
+            html.H4("Mejores rendimientos por Jugador", style={"color": "#a3e3d0", "marginBottom": "12px"}),
+            best_performances_table
+        ])
+    
         return html.Div([
             html.Div([
                 html.H3(grafico_titulo, style={"color":"white","textAlign":"center","marginTop":"20px", 

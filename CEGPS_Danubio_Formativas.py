@@ -1013,22 +1013,38 @@ def build_section_report_fig(section, dff, fecha_dt, categorias):
 def build_plotly_table(header, rows, title):
     if not rows:
         return None
-
+    # Construir columnas para go.Table
     columns = [[row.get(col, "") for row in rows] for col in header]
+
+    # Ajuste dinámico del ancho según número de columnas (mejora la legibilidad
+    # en navegadores y permite exportar tablas anchas sin pérdida)
+    try:
+        col_width = 160
+        n_cols = max(1, len(header))
+        calculated_width = n_cols * col_width
+        max_allowed = 4200
+        width = int(min(max(calculated_width, REPORT_GRAPH_WIDTH), max_allowed))
+    except Exception:
+        width = REPORT_GRAPH_WIDTH
+
+    # Ajustar tamaño de fuente según columnas
+    cell_font_size = 16 if len(header) <= 8 else 12
+    header_font_size = 18 if len(header) <= 8 else 14
+
     fig = go.Figure(data=[
         go.Table(
             header=dict(
                 values=header,
                 fill_color="#011c24",
                 line_color="rgba(137,188,239,0.35)",
-                font=dict(color="#a3e3d0", size=18),
+                font=dict(color="#a3e3d0", size=header_font_size),
                 align="center"
             ),
             cells=dict(
                 values=columns,
                 fill_color="#0b0c0e",
                 line_color="rgba(137,188,239,0.18)",
-                font=dict(color="#f5f5f5", size=16),
+                font=dict(color="#f5f5f5", size=cell_font_size),
                 align="center",
                 height=30
             )
@@ -1036,10 +1052,11 @@ def build_plotly_table(header, rows, title):
     ])
     fig.update_layout(
         title={"text": title, "font": {"color": "#f5f5f5", "size": 26}, "x": 0.01},
-        width=REPORT_GRAPH_WIDTH,
+        width=width,
         height=REPORT_GRAPH_HEIGHT,
         margin=dict(l=30, r=30, t=80, b=30),
-        paper_bgcolor="#0b0c0e"
+        paper_bgcolor="#0b0c0e",
+        autosize=False
     )
     return fig
 
@@ -1131,11 +1148,16 @@ def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=10):
     # 1) Kaleido (preferido)
     try:
         import plotly.io as pio
-        png = pio.to_image(fig, format="png", width=width, height=height, scale=scale)
+        # Forzar engine kaleido cuando esté disponible para mayor compatibilidad
+        try:
+            png = pio.to_image(fig, format="png", width=width, height=height, scale=scale, engine="kaleido")
+        except TypeError:
+            # versiones antiguas pueden no soportar engine param
+            png = pio.to_image(fig, format="png", width=width, height=height, scale=scale)
         if png:
             return png
     except Exception as e:
-        logging.debug("Kaleido falló: %s", e)
+        logging.debug("Kaleido falló o no disponible: %s", e)
 
     # 2) WeasyPrint: renderizar HTML de la figura y convertir a PNG vía PDF intermedio
     try:
@@ -2831,13 +2853,13 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 style_table={
                     "overflowX": "auto",
                     "overflowY": "auto",
-                    "maxHeight": "1000px",
+                    "maxHeight": "720px",
                     "border": "1px solid rgba(137,188,239,0.18)",
                     "borderRadius": "16px",
                     "backgroundColor": "#0b0c0e",
                     "width": "100%",
-                    "minWidth": "0",
-                    "tableLayout": "fixed"
+                    "minWidth": "100%",
+                    "tableLayout": "auto"
                 },
                 style_header={
                     "backgroundColor": "#011c24",
@@ -2851,14 +2873,14 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 style_cell={
                     "backgroundColor": "#0b0c0e",
                     "color": "#edf1f2",
-                    "padding": "8px",
+                    "padding": "6px",
                     "fontSize": "12px",
                     "textAlign": "center",
                     "whiteSpace": "normal",
                     "height": "auto",
-                    "minWidth": "60px",
+                    "minWidth": "40px",
                     "width": "auto",
-                    "maxWidth": "200px",
+                    "maxWidth": "240px",
                     "overflow": "hidden",
                     "textOverflow": "ellipsis"
                 },
@@ -2879,7 +2901,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             html.Div(
                 best_performances_table,
                 style={
-                    "display": "flex",
+                    "display": "block",
                     "justifyContent": "center",
                     "width": "100%",
                     "overflowX": "auto",
@@ -2888,39 +2910,14 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 }
             )
         ], style={
-            "padding": "22px",
+            "padding": "14px",
             "background": "#0b0c0e",
             "border": "1px solid rgba(137,188,239,0.18)",
-            "borderRadius": "24px",
+            "borderRadius": "12px",
             "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
             "width": "100%",
-            "maxWidth": "1000px",
             "margin": "0 auto"
         })
-    
-        return html.Div([
-            html.Div([
-                html.H3(grafico_titulo, style={"color":"white","textAlign":"center","marginTop":"20px", 
-                    "fontFamily":"'Clash Display Semibold', 'Helvetica Neue'","fontWeight":"600"}),
-                html.Div([
-                    html.Div([html.Div("Fecha de actividad", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
-                              html.Div(fecha_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
-                             style={"minWidth": "180px", "maxWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
-                    html.Div([html.Div("Game Tags", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
-                              html.Div(gametag_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
-                             style={"minWidth": "180px", "maxWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
-                    html.Div([html.Div("Period Tags", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
-                              html.Div(periodtag_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
-                             style={"minWidth": "180px", "maxWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"}),
-                    html.Div([html.Div("Category", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "4px"}),
-                              html.Div(categoria_text, style={"color": "#edf1f2", "fontSize": "14px", "fontWeight": "600"})],
-                             style={"minWidth": "180px", "maxWidth": "180px", "padding": "16px", "background": "#071016", "borderRadius": "18px", "border": "1px solid rgba(137,188,239,0.18)"})
-                ], style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(180px, 1fr))", "gap": "16px", "marginBottom": "24px"})
-            ], style={"marginBottom": "10px", "padding": "10px 10px"}),
-            html.Div(
-                cards if cards else [html.Div("No hay datos para la fecha seleccionada.", style={"color": "#edf1f2", "textAlign": "center", "padding": "24px"})],
-                style={"minWidth":"180px", "display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(180px, 1fr))", "flexWrap":"wrap" ,"gap": "16px", "marginBottom":"24px"}
-            )])
 
 # ACWR
     
@@ -3476,7 +3473,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 html.Button("Generar PDF", id="generate_report", n_clicks=0, style={"width":"100%","padding":"16px","borderRadius":"18px","border":"none","background":"#89bcef","color":"#0b0c0e","fontWeight":"700","cursor":"pointer"})
             ], style={"maxWidth":"320px","margin":"0 auto"}, style_selected={"background":"#48f788","color":"#0b0c0e"}),
             html.Div("Al hacer clic se generará un PDF con secciones seleccionadas, texto y gráficos incrustados.", style={"color":"#dcdcdc","fontSize":"12px","textAlign":"center","marginTop":"12px"})
-        ], style={"padding":"24px","background":"#0b0c0e","border":"1px solid rgba(137,188,239,0.18)","borderRadius":"28px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)","maxWidth":"1180px","margin":"20px auto"})
+        ], style={"padding":"24px","background":"#0b0c0e","border":"1px solid rgba(137,188,239,0.18)","borderRadius":"28px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)","width":"100%","margin":"20px auto"})
 
     # ======================================================
 # PLYR vs PLYR

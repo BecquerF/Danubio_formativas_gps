@@ -3793,7 +3793,10 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     preview_cards = []
     for section in sections:
         try:
-            fig = build_section_report_fig(section, dff, fecha_dt, categorias)
+            if section == "actividad_promedios":
+                fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
+            else:
+                fig = build_section_report_fig(section, dff, fecha_dt, categorias)
         except Exception as e:
             logging.warning("Error construyendo figura para sección %s: %s", section, e)
             fig = None
@@ -3934,8 +3937,8 @@ def _build_report_download_payload(
             continue
 
         try:
-            fig = build_section_report_fig(section, dff, fecha_dt, categorias)
             table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
+            fig = None if section == "actividad_promedios" else build_section_report_fig(section, dff, fecha_dt, categorias)
         except Exception:
             logging.exception(f"Error generando figuras para {section}")
             continue
@@ -3955,9 +3958,7 @@ def _build_report_download_payload(
         except Exception:
             logging.exception(f"Error exportando tabla {section}")
 
-        section_note = (
-            "" if (img_bytes or table_bytes) else "\nNota: no se generó ninguna imagen o tabla para esta sección."
-        )
+        section_note = "" if (img_bytes or table_bytes) else "\nNota: no se generó ninguna imagen o tabla para esta sección."
 
         report_sections.append(
             {

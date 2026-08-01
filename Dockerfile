@@ -44,4 +44,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Ejecutar la aplicación con Gunicorn en el puerto que Render espera
-CMD ["gunicorn", "-b", "0.0.0.0:10000", "CEGPS_Danubio_Formativas:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:10000", "CEGPS_Danubio_Formativas:server", "--workers", "1", "--timeout", "180", "--graceful-timeout", "30", "--keep-alive", "5"]

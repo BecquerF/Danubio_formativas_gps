@@ -4036,36 +4036,42 @@ def generar_informe(
     categorias,
     fecha_actividad,
 ):
+    if not n_clicks and not n_clicks_toolbar:
+        return no_update
+
     triggered = None
     try:
-        triggered = ctx.triggered_id
-    except Exception:
-        pass
+        triggered = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
+    except Exception as exc:
+        logging.exception("Error leyendo trigger del callback generar_informe: %s", exc)
+        return no_update
 
-    if not n_clicks and not n_clicks_toolbar:
+    if not triggered:
+        logging.warning("Callback generar_informe recibido sin trigger válido")
         return no_update
 
     if triggered == "generate_report_toolbar" and tab != "informe":
         logging.warning("Se ha intentado generar informe desde otra pestaña: %s", tab)
         return no_update
 
-    if not triggered:
+    try:
+        return _build_report_download_payload(
+            title,
+            author,
+            sections,
+            texto_actividad,
+            texto_actividad_comparativa,
+            texto_actividad_promedios,
+            texto_acwr,
+            texto_plyr_vs_plyr,
+            texto_comparativas,
+            texto_cronologico,
+            categorias,
+            fecha_actividad,
+        )
+    except Exception as exc:
+        logging.exception("Error en callback generar_informe: %s", exc)
         return no_update
-
-    return _build_report_download_payload(
-        title,
-        author,
-        sections,
-        texto_actividad,
-        texto_actividad_comparativa,
-        texto_actividad_promedios,
-        texto_acwr,
-        texto_plyr_vs_plyr,
-        texto_comparativas,
-        texto_cronologico,
-        categorias,
-        fecha_actividad,
-    )
 
 
 @app.callback(

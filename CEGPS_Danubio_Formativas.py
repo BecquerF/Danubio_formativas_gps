@@ -1079,7 +1079,7 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
         if dff_fecha.empty or not metrics:
             return None
-        promedio = dff_fecha[metrics].mean().reset_index()
+        promedio = dff_fecha[metrics].mean(numeric_only=True).reset_index()
         promedio.columns = ["Métrica", "Valor"]
         promedio["Valor"] = promedio["Valor"].round(2)
         rows = promedio.to_dict(orient="records")
@@ -2546,7 +2546,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
 
         # ACTIVIDAD POR JUGADOR
     elif tab == "actividad":
-            fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else df["Date"].max().normalize()
+            fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
             dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
             columnas_requeridas = [
@@ -2629,7 +2629,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
   
 # ACTIVIDAD COMPARATIVA INDIVIDUAL
     elif tab == "actividad_comparativa":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else df["Date"].max().normalize()
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
         metricas_base = [
@@ -2741,11 +2741,11 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
         })
 
     elif tab == "actividad_promedios":
-        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else df["Date"].max().normalize()
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
         dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
 
         metricas_promedios_validas = [m for m in metricas_promedios if m in dff_fecha.columns]
-        resumen = dff_fecha[metricas_promedios_validas].mean().round(2).to_dict() if not dff_fecha.empty else {}
+        resumen = dff_fecha[metricas_promedios_validas].mean(numeric_only=True).round(2).to_dict() if not dff_fecha.empty else {}
 
         categoria_text = summarize_items(categorias, max_items=10, default="Todas")
         activitytag_text = summarize_items(activitytags, max_items=10, default="Todas")
@@ -2793,7 +2793,22 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     "padding": "16px"
                 })
             )
-            
+
+        return html.Div([
+            html.H4("Actividad / Promedios", style={"color": "#a3e3d0", "marginBottom": "12px"}),
+            html.Div(
+                cards if cards else [html.Div("No hay datos para la fecha seleccionada.", style={"color": "#edf1f2", "textAlign": "center", "padding": "24px"})],
+                style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(180px, 1fr))", "gap": "16px"}
+            )
+        ], style={
+            "padding": "22px",
+            "background": "#0b0c0e",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "24px",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+            "overflowX": "auto",
+            "maxWidth": "1000px"
+        })
     elif tab == "maximos_rendimientos":
         # Definir métricas válidas para este DataFrame
         metricas_promedios_validas = [m for m in metricas_promedios if m in dff.columns]
@@ -2801,7 +2816,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
         best_performances_df, tooltip_data = build_best_performances_table(dff, metricas_promedios_validas)
 
         if not best_performances_df.empty:
-            build_best_performances_table = dash_table.DataTable(
+            best_performances_table = dash_table.DataTable(
                 data=best_performances_df.to_dict("records"),
                 columns=[
                     {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}}

@@ -1,5 +1,6 @@
 import logging
 import io
+import json
 import base64
 import textwrap
 import html as html_module
@@ -10,6 +11,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
+import multiprocessing
 
 # Selenium fallback imports are loaded only when needed
 import os
@@ -1110,48 +1112,68 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
     return None
 
 
-def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=10):
-    """Convierte una figura Plotly en PNG usando Kaleido."""
+def _fig_to_png_via_kaleido(fig, width, height, scale):
+    try:
+        return pio.to_image(fig, format="png", width=width, height=height, scale=scale, engine="kaleido")
+    except Exception:
+        return pio.to_image(fig, format="png", width=width, height=height, scale=scale)
+
+
+def _fig_to_png_process(fig, width, height, scale, queue):
+    try:
+        png = _fig_to_png_via_kaleido(fig, width, height, scale)
+        queue.put(png)
+    except Exception as e:
+        queue.put(e)
+
+
+def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=20):
+    """Convierte una figura Plotly en PNG usando Kaleido con timeout y fallback."""
     if fig is None or not getattr(fig, "data", None):
         return None
 
-    # 1) Kaleido (preferido)
+    # 1) Kaleido con timeout en proceso separado
     try:
-        import plotly.io as pio
-        # Forzar engine kaleido cuando esté disponible para mayor compatibilidad
-        try:
-            png = pio.to_image(fig, format="png", width=width, height=height, scale=scale, engine="kaleido")
-        except TypeError:
-            # versiones antiguas pueden no soportar engine param
-            png = pio.to_image(fig, format="png", width=width, height=height, scale=scale)
-        if png:
-            return png
+        queue = multiprocessing.Queue()
+        process = multiprocessing.Process(
+            target=_fig_to_png_process,
+            args=(fig, width, height, scale, queue)
+        )
+        process.start()
+        process.join(timeout)
+        if process.is_alive():
+            process.terminate()
+            process.join()
+            logging.warning("Kaleido timed out after %s seconds", timeout)
+        else:
+            if not queue.empty():
+                result = queue.get()
+                if isinstance(result, bytes):
+                    return result
+                logging.debug("Kaleido error result: %s", result)
     except Exception as e:
-        logging.debug("Kaleido falló o no disponible: %s", e)
+        logging.debug("Kaleido proceso falló: %s", e)
 
     # 2) WeasyPrint: renderizar HTML de la figura y convertir a PNG vía PDF intermedio
     try:
         if WeasyHTML is not None:
             html_str = fig.to_html(full_html=False, include_plotlyjs="cdn")
-            # envolver en un HTML simple para WeasyPrint
             wrapper = f"""
             <html><head><meta charset="utf-8"></head>
             <body style="background:white;margin:0;padding:0;">
             {html_str}
             </body></html>
             """
-            # WeasyPrint puede generar PDF; para PNG generamos PDF y luego lo convertimos con Pillow
             pdf_bytes = WeasyHTML(string=wrapper).write_pdf()
-            # convertir primera página del PDF a PNG con Pillow (si Pillow soporta)
             try:
                 from pdf2image import convert_from_bytes
                 pages = convert_from_bytes(pdf_bytes)
                 buf = io.BytesIO()
                 pages[0].save(buf, format="PNG")
                 return buf.getvalue()
-            except Exception:
-                # si no está pdf2image, devolver el PDF bytes (caller puede usar build_graph_pdf_bytes)
-                logging.debug("pdf2image no disponible para convertir PDF->PNG")
+            except Exception as e:
+                logging.debug("pdf2image no disponible o falló: %s", e)
+                return None
     except Exception as e:
         logging.debug("WeasyPrint fallback falló: %s", e)
 
@@ -1170,9 +1192,8 @@ def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=10):
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
         try:
-            # Debés exponer la app (ej: http://127.0.0.1:8050) y conocer el selector del div del gráfico
             app_url = os.environ.get("APP_URL", "http://127.0.0.1:8050")
-            graph_selector = os.environ.get("GRAPH_SELECTOR", "#report_figures_preview .tab-graph")  # ajustar
+            graph_selector = os.environ.get("GRAPH_SELECTOR", "#report_figures_preview .tab-graph")
             driver.set_page_load_timeout(timeout)
             driver.get(app_url)
             time.sleep(1.0)
@@ -1184,7 +1205,6 @@ def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=10):
     except Exception as e:
         logging.debug("Selenium fallback no disponible o falló: %s", e)
 
-    # Si todo falla
     logging.warning("No se pudo generar PNG para la figura (todos los fallbacks fallaron).")
     return None
 
@@ -3751,10 +3771,27 @@ def pronosticar_dinamicas(categoria, game_tag, activity_tags):
     if activity_tags:
         filtros.append(f"Activity Tag: {', '.join(activity_tags)}")
 
+    filtro_badges = [
+        html.Span(
+            filtro,
+            style={
+                "backgroundColor": "#011c24",
+                "color": "#edf1f2",
+                "padding": "6px 12px",
+                "borderRadius": "16px",
+                "margin": "0 6px 6px 0",
+                "display": "inline-block",
+                "fontSize": "0.95rem",
+                "border": "1px solid rgba(163,227,208,0.2)"
+            }
+        )
+        for filtro in filtros
+    ]
+
     return html.Div([
         html.Div(
-            " | ".join(filtros),
-            style={"color": "#011c24", "marginBottom": "12px", "textAlign": "center"}
+            filtro_badges,
+            style={"marginBottom": "12px", "textAlign": "center"}
         ),
         tabla
     ], style={"padding": "18px", "background": "#0b0c0e", "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "20px"})

@@ -2834,7 +2834,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     "borderRadius": "16px",
                     "backgroundColor": "#0b0c0e",
                     "width": "100%",
-                    "minWidth": "max-content"
+                    "minWidth": "0",
+                    "tableLayout": "fixed"
                 },
                 style_header={
                     "backgroundColor": "#011c24",
@@ -2853,13 +2854,15 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     "textAlign": "center",
                     "whiteSpace": "normal",
                     "height": "auto",
-                    "minWidth": "90px",
-                    "width": "90px",
-                    "maxWidth": "90px"
+                    "minWidth": "60px",
+                    "width": "auto",
+                    "maxWidth": "200px",
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis"
                 },
                 style_cell_conditional=[
-                    {"if": {"column_id": "Player Name"}, "textAlign": "left", "minWidth": "180px", "width": "180px", "maxWidth": "180px"},
-                    {"if": {"column_id": "Athlete Tags"}, "textAlign": "left", "minWidth": "90px", "width": "90px", "maxWidth": "90px"}
+                    {"if": {"column_id": "Player Name"}, "textAlign": "left", "minWidth": "180px", "width": "180px", "maxWidth": "220px"},
+                    {"if": {"column_id": "Athlete Tags"}, "textAlign": "left", "minWidth": "90px", "width": "90px", "maxWidth": "120px"}
                 ],
                 tooltip_data=tooltip_data,
                 tooltip_delay=0,

@@ -1,4 +1,5 @@
 from typing import Any, List, Sequence
+import re
 
 import pandas as pd
 
@@ -28,6 +29,12 @@ def normalize_report_date(value: Any, fallback: Any = None) -> Any:
 
     if isinstance(value, pd.Timestamp):
         dt = value
+    elif isinstance(value, str):
+        text = value.strip()
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", text) or re.match(r"^\d{4}-\d{2}-\d{2}T", text):
+            dt = pd.to_datetime(text, errors="coerce", dayfirst=False)
+        else:
+            dt = pd.to_datetime(text, errors="coerce", dayfirst=True)
     else:
         dt = pd.to_datetime(value, errors="coerce", dayfirst=True)
 

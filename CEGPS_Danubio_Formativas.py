@@ -1897,6 +1897,38 @@ app.layout = html.Div([
         ),
         
         dcc.Tab(
+            label="PRONÓSTICO DE CARGA",
+            value="pronostico_carga",
+            className="tab-item",
+            selected_className="tab-item-selected",
+            style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#edf1f2",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"2px 6px",       
+                "marginBottom":"1px"       
+            },
+            selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#a3e3d0",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"2px 6px",
+                "backgroundColor":"#011c24",
+                "marginBottom":"1px"
+            }
+        ),
+        
+        dcc.Tab(
             label="PLYR vs PLYR",
             value="plyr_vs_plyr",
             className="tab-item",
@@ -2899,6 +2931,54 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             "margin": "0 auto"
         })
 
+    elif tab == "pronostico_carga":
+        categorias_options = [
+            {"label": c, "value": c}
+            for c in sorted(df["Category"].dropna().unique())
+        ]
+        game_tag_options = [
+            {"label": g, "value": g}
+            for g in sorted(df["Game Tags"].dropna().unique())
+        ]
+
+        return html.Div([
+            html.H3(
+                "Pronóstico de carga",
+                style={"color": "#edf1f2", "textAlign": "center", "marginBottom": "20px"}
+            ),
+            html.Div([
+                html.Div([
+                    html.Label("Categoría", style={"color": "#a3e3d0", "marginBottom": "6px"}),
+                    dcc.Dropdown(
+                        id="forecast-category",
+                        options=categorias_options,
+                        placeholder="Seleccione categoría",
+                        clearable=True,
+                        style={"backgroundColor": "#011c24", "color": "#edf1f2"}
+                    )
+                ], style={"flex": "1", "minWidth": "240px"}),
+                html.Div([
+                    html.Label("Game Tag", style={"color": "#a3e3d0", "marginBottom": "6px"}),
+                    dcc.Dropdown(
+                        id="forecast-game-tag",
+                        options=game_tag_options,
+                        placeholder="Seleccione Game Tag",
+                        clearable=True,
+                        style={"backgroundColor": "#011c24", "color": "#edf1f2"}
+                    )
+                ], style={"flex": "1", "minWidth": "240px"})
+            ], style={"display": "flex", "flexWrap": "wrap", "gap": "16px", "marginBottom": "20px"}),
+            html.Div(id="forecast-table", style={"marginTop": "20px"})
+        ], style={
+            "padding": "24px",
+            "background": "#0b0c0e",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "24px",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+            "width": "100%",
+            "margin": "0 auto"
+        })
+
 # ACWR
     
     elif tab=="acwr":
@@ -3585,6 +3665,81 @@ def actualizar_tags_por_fecha_categoria(categorias, rango_dias, jugadores, athle
         periodtag_options,
         filtered_periodtags,
     )
+
+@app.callback(
+    Output("forecast-table", "children"),
+    Input("forecast-category", "value"),
+    Input("forecast-game-tag", "value"),
+    State("metrica", "value")
+)
+def pronosticar_dinamicas(game_tag, categoria, metricas):
+    if not game_tag or not categoria:
+        return html.Div(
+            "Seleccione categoría y Game Tag",
+            style={"color": "#edf1f2", "textAlign": "center", "padding": "16px"}
+        )
+
+    dff = df.copy()
+    dff = dff[(dff["Category"] == categoria) & (dff["Game Tags"] == game_tag)]
+    if dff.empty:
+        return html.Div(
+            "No hay datos para esa categoría y Game Tag.",
+            style={"color": "#edf1f2", "textAlign": "center", "padding": "16px"}
+        )
+
+    if isinstance(metricas, str):
+        metricas = [metricas]
+    metricas_seleccionadas = metricas or [
+        "Distance","Player Load","Sprint Distance","High Speed Distance",
+        "Sprint Efforts","High Speed Efforts","Impacts"
+    ]
+    metricas_validas = [m for m in metricas_seleccionadas if m in dff.columns]
+    if not metricas_validas:
+        return html.Div(
+            "No hay métricas válidas seleccionadas para esta categoría.",
+            style={"color": "#edf1f2", "textAlign": "center", "padding": "16px"}
+        )
+
+    fecha_max = dff["Date"].max()
+    ultimos21 = fecha_max - pd.Timedelta(days=21)
+    dff_21 = dff[dff["Date"] >= ultimos21]
+    if dff_21.empty:
+        return html.Div(
+            "No hay datos en los últimos 21 días para esta selección.",
+            style={"color": "#edf1f2", "textAlign": "center", "padding": "16px"}
+        )
+
+    pronostico = []
+    for m in metricas_validas:
+        cronico = dff_21[m].mean()
+        inferior = round(cronico * -1.3, 2)
+        superior = round(cronico * +0.8, 2)
+        pronostico.append({
+            "Métrica": m,
+            "Crónica (21d)": round(cronico, 2),
+            "Margen Inferior (-1.3)": inferior,
+            "Margen Superior (+0.8)": superior
+        })
+
+    tabla = dash_table.DataTable(
+        columns=[{"name": c, "id": c} for c in pronostico[0].keys()],
+        data=pronostico,
+        style_table={"overflowX": "auto", "minWidth": "640px"},
+        style_cell={"textAlign": "center", "padding": "10px", "backgroundColor": "#071016", "color": "#edf1f2"},
+        style_header={"backgroundColor": "#011c24", "color": "#a3e3d0", "fontWeight": "700"},
+        style_data={"backgroundColor": "#0b0c0e"},
+        page_size=10,
+        sort_action="native"
+    )
+
+    return html.Div([
+        html.Div(
+            f"Categoría: {categoria} | Game Tag: {game_tag}",
+            style={"color": "#dcdcdc", "marginBottom": "12px", "textAlign": "center"}
+        ),
+        tabla
+    ], style={"padding": "18px", "background": "#0b0c0e", "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "20px"})
+
 
 @app.callback(
     Output("report_figures_preview", "children"),

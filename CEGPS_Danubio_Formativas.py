@@ -993,7 +993,9 @@ def build_section_report_fig(section, dff, fecha_dt, categorias):
     elif section == "actividad_promedios":
         fig = build_actividad_promedios_report_fig(dff, fecha_dt)
     elif section == "maximos_rendimientos":
-        fig = build_best_performances_table(dff, metricas_promedios)[0]    
+        # Para consistencia con la exportación de informes, devolver una figura Plotly
+        # Usamos el generador de tabla para construir una figura de tabla
+        fig = build_section_report_table_fig("maximos_rendimientos", dff, fecha_dt, categorias)
     elif section == "acwr":
         fig = build_acwr_report_fig(dff)
     elif section == "plyr_vs_plyr":

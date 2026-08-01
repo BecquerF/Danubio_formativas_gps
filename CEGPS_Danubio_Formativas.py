@@ -2103,6 +2103,7 @@ app.layout = html.Div([
         id="download-table-csv",
         className="download-btn",
         n_clicks=0,
+        type="button",
         title="Descargar tabla como CSV"
     ),
     html.Button(
@@ -2110,6 +2111,7 @@ app.layout = html.Div([
         id="download-table-xlsx",
         className="download-btn",
         n_clicks=0,
+        type="button",
         title="Descargar tabla como Excel"
     ),
     html.Button(
@@ -2117,6 +2119,7 @@ app.layout = html.Div([
         id="download-table-png",
         className="download-btn",
         n_clicks=0,
+        type="button",
         title="Descargar tabla como PNG"
     ),
     html.Button(
@@ -2124,6 +2127,7 @@ app.layout = html.Div([
         id="download-table-pdf",
         className="download-btn",
         n_clicks=0,
+        type="button",
         title="Descargar tabla como PDF"
     ),
 
@@ -2133,6 +2137,7 @@ app.layout = html.Div([
         id="generate_report_toolbar",
         className="download-btn",
         n_clicks=0,
+        type="button",
         title="Generar y descargar informe completo en PDF"
     ),
 ],
@@ -3526,7 +3531,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 "marginBottom": "24px"
             }),
             html.Div([
-                html.Button("Generar PDF", id="generate_report", n_clicks=0, style={"width":"100%","padding":"16px","borderRadius":"18px","border":"none","background":"#89bcef","color":"#0b0c0e","fontWeight":"700","cursor":"pointer"})
+                html.Button("Generar PDF", id="generate_report", n_clicks=0, type="button", style={"width":"100%","padding":"16px","borderRadius":"18px","border":"none","background":"#89bcef","color":"#0b0c0e","fontWeight":"700","cursor":"pointer"})
             ], style={"maxWidth":"320px","margin":"0 auto"}),
                 html.Div("Al hacer clic se generará un PDF con secciones seleccionadas, texto y gráficos incrustados.", style={"color":"#dcdcdc","fontSize":"12px","textAlign":"center","marginTop":"12px"})
             ], style={"padding":"24px","background":"#0b0c0e","border":"1px solid rgba(137,188,239,0.18)","borderRadius":"28px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)","width":"100%","margin":"20px auto"})
@@ -3839,10 +3844,167 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     return preview_cards
 
 
+def _build_report_download_payload(
+    title,
+    author,
+    sections,
+    texto_actividad,
+    texto_actividad_comparativa,
+    texto_actividad_promedios,
+    texto_acwr,
+    texto_plyr_vs_plyr,
+    texto_comparativas,
+    texto_cronologico,
+    categorias,
+    fecha_actividad,
+):
+    # Asegurar lista de categorías
+    if categorias and isinstance(categorias, str):
+        categorias = [categorias]
+
+    title = (title or "").strip() or build_auto_report_title(
+        categorias,
+        fecha_actividad,
+    )
+
+    author = (author or "").strip() or "Desconocido"
+
+    fecha_text = (
+        pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y")
+        if fecha_actividad
+        else datetime.now().strftime("%d/%m/%Y")
+    )
+
+    selected_sections = sections or [
+        "actividad",
+        "actividad_promedios",
+        "acwr",
+    ]
+
+    if not selected_sections:
+        return no_update
+
+    dff = df.copy()
+    if "Date" in dff.columns:
+        dff["Date"] = pd.to_datetime(
+            dff["Date"],
+            errors="coerce",
+            dayfirst=True,
+        )
+        dff["Date"] = dff["Date"].dt.normalize()
+
+    if categorias:
+        dff = dff[dff["Category"].isin(categorias)]
+
+    if fecha_actividad:
+        fecha_dt = normalize_report_date(fecha_actividad)
+    else:
+        fecha_dt = (
+            normalize_report_date(dff["Date"].max())
+            if (
+                "Date" in dff.columns
+                and not dff.empty
+                and dff["Date"].notna().any()
+            )
+            else None
+        )
+
+    if fecha_dt is not None and "Date" in dff.columns:
+        dff = dff[dff["Date"].dt.normalize() <= fecha_dt]
+
+    section_texts = {
+        "actividad": texto_actividad or "",
+        "actividad_comparativa": texto_actividad_comparativa or "",
+        "actividad_promedios": texto_actividad_promedios or "",
+        "acwr": texto_acwr or "",
+        "plyr_vs_plyr": texto_plyr_vs_plyr or "",
+        "comparativas": texto_comparativas or "",
+        "cronologico": texto_cronologico or "",
+    }
+
+    filters_parts = []
+    if categorias:
+        filters_parts.append(f"Categorías: {', '.join(categorias)}")
+    filters_parts.append(f"Fecha: {fecha_text}")
+    filters_text = " | ".join(filters_parts)
+
+    report_sections = []
+    for section in selected_sections:
+        if section == "informe":
+            continue
+
+        try:
+            fig = build_section_report_fig(section, dff, fecha_dt, categorias)
+            table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
+        except Exception:
+            logging.exception(f"Error generando figuras para {section}")
+            continue
+
+        img_bytes = None
+        table_bytes = None
+
+        try:
+            if fig and getattr(fig, "data", None):
+                img_bytes = fig_to_png_bytes(fig, width=1600, height=900, scale=2)
+        except Exception:
+            logging.exception(f"Error exportando gráfico {section}")
+
+        try:
+            if table_fig and getattr(table_fig, "data", None):
+                table_bytes = fig_to_png_bytes(table_fig, width=1600, height=900, scale=2)
+        except Exception:
+            logging.exception(f"Error exportando tabla {section}")
+
+        section_note = (
+            "" if (img_bytes or table_bytes) else "\nNota: no se generó ninguna imagen o tabla para esta sección."
+        )
+
+        report_sections.append(
+            {
+                "title": section_title(section),
+                "text": truncate_to_n_words(section_texts.get(section, ""), 500) + section_note,
+                "img": img_bytes,
+                "table_img": table_bytes,
+                "caption": f"Figura: {section_title(section)} con los filtros seleccionados.",
+                "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados.",
+            }
+        )
+
+    if not report_sections:
+        logging.warning("No se generó ninguna sección para el informe.")
+        return no_update
+
+    if not any(item["text"].strip() for item in report_sections):
+        for item in report_sections:
+            item["text"] = f"Informe de la sección {item['title']} generado automáticamente."
+
+    logo_bytes = base64.b64decode(LOGO_BASE64) if LOGO_BASE64 else None
+
+    try:
+        pdf_bytes = build_report_pdf_multi(
+            title=title,
+            author=author,
+            logo_bytes=logo_bytes,
+            sections=report_sections,
+            fecha_text=fecha_text,
+            filters_text=filters_text,
+        )
+    except Exception:
+        logging.exception("Error generando PDF con ReportLab")
+        return no_update
+
+    if not pdf_bytes:
+        return no_update
+
+    filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.pdf"
+    return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
+
+
 @app.callback(
     Output("download-report", "data"),
     Input("generate_report", "n_clicks"),
     Input("generate_report_toolbar", "n_clicks"),
+    State("tabs", "value"),
     State("report_title", "value"),
     State("report_author", "value"),
     State("report_sections", "value"),
@@ -3860,6 +4022,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
 def generar_informe(
     n_clicks,
     n_clicks_toolbar,
+    tab,
     title,
     author,
     sections,
@@ -3871,260 +4034,40 @@ def generar_informe(
     texto_comparativas,
     texto_cronologico,
     categorias,
-    fecha_actividad
+    fecha_actividad,
 ):
+    triggered = None
+    try:
+        triggered = ctx.triggered_id
+    except Exception:
+        pass
 
     if not n_clicks and not n_clicks_toolbar:
         return no_update
 
-    # Asegurar lista de categorías
-    if categorias and isinstance(categorias, str):
-        categorias = [categorias]
+    if triggered == "generate_report_toolbar" and tab != "informe":
+        logging.warning("Se ha intentado generar informe desde otra pestaña: %s", tab)
+        return no_update
 
-    title = (title or "").strip() or build_auto_report_title(
+    if not triggered:
+        return no_update
+
+    return _build_report_download_payload(
+        title,
+        author,
+        sections,
+        texto_actividad,
+        texto_actividad_comparativa,
+        texto_actividad_promedios,
+        texto_acwr,
+        texto_plyr_vs_plyr,
+        texto_comparativas,
+        texto_cronologico,
         categorias,
-        fecha_actividad
+        fecha_actividad,
     )
 
-    author = (author or "").strip() or "Desconocido"
 
-    fecha_text = (
-        pd.to_datetime(fecha_actividad).strftime("%d/%m/%Y")
-        if fecha_actividad
-        else datetime.now().strftime("%d/%m/%Y")
-    )
-
-    selected_sections = sections or [
-        "actividad",
-        "actividad_promedios",
-        "acwr"
-    ]
-
-    if not selected_sections:
-        return no_update
-
-    # Copia del dataframe
-    dff = df.copy()
-
-    # Garantizar datetime sin volver a imponer un formato rígido que rompe fechas ISO
-    if "Date" in dff.columns:
-        dff["Date"] = pd.to_datetime(
-            dff["Date"],
-            errors="coerce",
-            dayfirst=True
-        )
-        dff["Date"] = dff["Date"].dt.normalize()
-
-    # Filtrar categorías
-    if categorias:
-        dff = dff[dff["Category"].isin(categorias)]
-
-    # Fecha de corte
-    if fecha_actividad:
-        fecha_dt = normalize_report_date(fecha_actividad)
-    else:
-        fecha_dt = (
-            normalize_report_date(dff["Date"].max())
-            if (
-                "Date" in dff.columns
-                and not dff.empty
-                and dff["Date"].notna().any()
-            )
-            else None
-        )
-
-    if fecha_dt is not None and "Date" in dff.columns:
-        dff = dff[
-            dff["Date"].dt.normalize() <= fecha_dt
-        ]
-
-    section_texts = {
-        "actividad": texto_actividad or "",
-        "actividad_comparativa": texto_actividad_comparativa or "",
-        "actividad_promedios": texto_actividad_promedios or "",
-        "acwr": texto_acwr or "",
-        "plyr_vs_plyr": texto_plyr_vs_plyr or "",
-        "comparativas": texto_comparativas or "",
-        "cronologico": texto_cronologico or ""
-    }
-
-    filters_parts = []
-
-    if categorias:
-        filters_parts.append(
-            f"Categorías: {', '.join(categorias)}"
-        )
-
-    filters_parts.append(
-        f"Fecha: {fecha_text}"
-    )
-
-    filters_text = " | ".join(filters_parts)
-
-    report_sections = []
-    image_bytes_for_png = []
-
-    for section in selected_sections:
-
-        if section == "informe":
-            continue
-
-        try:
-            fig = build_section_report_fig(
-                section,
-                dff,
-                fecha_dt,
-                categorias
-            )
-
-            table_fig = build_section_report_table_fig(
-                section,
-                dff,
-                fecha_dt,
-                categorias
-            )
-
-        except Exception:
-            logging.exception(
-                f"Error generando figuras para {section}"
-            )
-            continue
-
-        img_bytes = None
-        table_bytes = None
-
-        try:
-            if fig and getattr(fig, "data", None):
-                img_bytes = fig_to_png_bytes(
-                    fig,
-                    width=1600,
-                    height=900,
-                    scale=2
-                )
-        except Exception:
-            logging.exception(
-                f"Error exportando gráfico {section}"
-            )
-
-        try:
-            if table_fig and getattr(table_fig, "data", None):
-                table_bytes = fig_to_png_bytes(
-                    table_fig,
-                    width=1600,
-                    height=900,
-                    scale=2
-                )
-        except Exception:
-            logging.exception(
-                f"Error exportando tabla {section}"
-            )
-
-        if img_bytes:
-            image_bytes_for_png.append(img_bytes)
-
-        if table_bytes:
-            image_bytes_for_png.append(table_bytes)
-
-        section_note = (
-            ""
-            if (img_bytes or table_bytes)
-            else "\nNota: no se generó ninguna imagen o tabla para esta sección."
-        )
-
-        report_sections.append({
-            "title": section_title(section),
-            "text": truncate_to_n_words(
-                section_texts.get(section, ""),
-                500
-            ) + section_note,
-            "img": img_bytes,
-            "table_img": table_bytes,
-            "caption": (
-                f"Figura: {section_title(section)} "
-                f"con los filtros seleccionados."
-            ),
-            "table_caption": (
-                f"Tabla: {section_title(section)} "
-                f"con los filtros seleccionados."
-            )
-        })
-
-    if not report_sections:
-        logging.warning(
-            "No se generó ninguna sección para el informe."
-        )
-        return no_update
-
-    if not any(
-        item["text"].strip()
-        for item in report_sections
-    ):
-        for item in report_sections:
-            item["text"] = (
-                f"Informe de la sección "
-                f"{item['title']} "
-                f"generado automáticamente."
-            )
-
-    logo_bytes = (
-        base64.b64decode(LOGO_BASE64)
-        if LOGO_BASE64
-        else None
-    )
-    if False:
-            
-        if not image_bytes_for_png:
-            logging.warning(
-                "No hay imágenes para combinar en PNG."
-            )
-            return no_update
-
-        combined_png = combine_image_bytes_vertically(
-            image_bytes_for_png
-        )
-
-        if not combined_png:
-            return no_update
-
-        filename = (
-            f"{title.replace(' ', '_')}_"
-            f"{fecha_text.replace('/', '-')}.png"
-        )
-
-        return dcc.send_bytes(
-            lambda buf: buf.write(combined_png),
-            filename
-        )
-
-    try:
-        pdf_bytes = build_report_pdf_multi(
-            title=title,
-            author=author,
-            logo_bytes=logo_bytes,
-            sections=report_sections,
-            fecha_text=fecha_text,
-            filters_text=filters_text
-        )
-
-    except Exception:
-        logging.exception(
-            "Error generando PDF con ReportLab"
-        )
-        return no_update
-
-    if not pdf_bytes:
-        return no_update
-
-    filename = (
-        f"{title.replace(' ', '_')}_"
-        f"{fecha_text.replace('/', '-')}.pdf"
-    )
-
-    return dcc.send_bytes(
-        lambda buf: buf.write(pdf_bytes),
-        filename
-    )
-    
 @app.callback(
     Output("radar_chart", "figure"),
     [

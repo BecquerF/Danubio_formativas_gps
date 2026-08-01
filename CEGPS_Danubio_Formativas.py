@@ -2833,7 +2833,8 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     "border": "1px solid rgba(137,188,239,0.18)",
                     "borderRadius": "16px",
                     "backgroundColor": "#0b0c0e",
-                    "minWidth": "100%"
+                    "width": "100%",
+                    "minWidth": "max-content"
                 },
                 style_header={
                     "backgroundColor": "#011c24",
@@ -2852,13 +2853,13 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     "textAlign": "center",
                     "whiteSpace": "normal",
                     "height": "auto",
-                    "minWidth": "120px",
-                    "width": "120px",
-                    "maxWidth": "120px"
+                    "minWidth": "90px",
+                    "width": "90px",
+                    "maxWidth": "90px"
                 },
                 style_cell_conditional=[
                     {"if": {"column_id": "Player Name"}, "textAlign": "left", "minWidth": "180px", "width": "180px", "maxWidth": "180px"},
-                    {"if": {"column_id": "Athlete Tags"}, "textAlign": "left", "minWidth": "180px", "width": "180px", "maxWidth": "180px"}
+                    {"if": {"column_id": "Athlete Tags"}, "textAlign": "left", "minWidth": "90px", "width": "90px", "maxWidth": "90px"}
                 ],
                 tooltip_data=tooltip_data,
                 tooltip_delay=0,

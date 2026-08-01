@@ -2930,7 +2930,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             ),
             html.Div([
                 html.Div([
-                    html.Label("Categoría", style={"color": "#a3e3d0", "marginBottom": "6px"}),
+                    html.Div("Categoría", style={"color": "#a3e3d0", "marginBottom": "6px"}),
                     dcc.Dropdown(
                         id="forecast-category",
                         options=categorias_options,
@@ -2940,7 +2940,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     )
                 ], style={"flex": "1", "minWidth": "240px"}),
                 html.Div([
-                    html.Label("Game Tag", style={"color": "#a3e3d0", "marginBottom": "6px"}),
+                    html.Div("Game Tag", style={"color": "#a3e3d0", "marginBottom": "6px"}),
                     dcc.Dropdown(
                         id="forecast-game-tag",
                         options=game_tag_options,
@@ -2950,7 +2950,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     )
                 ], style={"flex": "1", "minWidth": "240px"}),
                 html.Div([
-                    html.Label("Activity Tags", style={"color": "#a3e3d0", "marginBottom": "6px"}),
+                    html.Div("Activity Tags", style={"color": "#a3e3d0", "marginBottom": "6px"}),
                     dcc.Dropdown(
                         id="forecast-activity-tag",
                         options=[{"label": tag, "value": tag} for tag in sorted(df["Activity Tags"].dropna().unique())],
@@ -3438,16 +3438,16 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 html.H2("Informe de Actividad", style={"color":"#edf1f2","textAlign":"center","marginBottom":"20px"}),
                 html.Div([
                 html.Div([
-                    html.Label("Título del informe", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Label("Título del informe", htmlFor="report_title", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Input(id="report_title", type="text", placeholder="Título personalizado del informe (opcional)", value="", style={"width":"100%","padding":"10px","borderRadius":"12px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"}),
                     html.Div("Deja el título en blanco para generar uno automático.", style={"color":"#dcdcdc","fontSize":"11px","marginTop":"6px"})
                 ], style={"flex":"1"}),
                 html.Div([
-                    html.Label("Creado por", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Label("Creado por", htmlFor="report_author", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Input(id="report_author", type="text", placeholder="Nombre del creador", value="", style={"width":"100%","padding":"10px","borderRadius":"12px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"260px","marginLeft":"16px"}),
                 html.Div([
-                    html.Label("Fecha de actividad", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Div("Fecha de actividad", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.DatePickerSingle(
                         id="report_fecha_actividad",
                         date=fecha_max.date(),
@@ -3467,7 +3467,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 ], style={"flex":"1","minWidth":"260px","marginLeft":"16px"})
             ], style={"display":"flex","gap":"16px","marginBottom":"24px","flexWrap":"wrap"}),
             html.Div([
-                html.Label("Secciones del informe", style={"color":"#a3e3d0","marginBottom":"8px"}),
+                html.Div("Secciones del informe", style={"color":"#a3e3d0","marginBottom":"8px"}),
                 dcc.Checklist(
                     id="report_sections",
                     options=[
@@ -3488,37 +3488,37 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             ], style={"marginBottom":"28px","padding":"20px","background":"#071016","borderRadius":"18px","border":"1px solid rgba(137,188,239,0.18)"}),
             html.Div([
                 html.Div([
-                    html.Label("Actividad", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Label("Actividad", htmlFor="report_text_actividad", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Textarea(id="report_text_actividad", placeholder="Describe la sección de Actividad. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"}),
                 html.Div([
-                    html.Label("Actividad Comparativa Individual", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Label("Actividad Comparativa Individual", htmlFor="report_text_actividad_comparativa", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Textarea(id="report_text_actividad_comparativa", placeholder="Describe la sección de Actividad Comparativa Individual. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
             ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"16px"}),
             html.Div([
                 html.Div([
-                    html.Label("Actividad/Promedios", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Label("Actividad/Promedios", htmlFor="report_text_actividad_promedios", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Textarea(id="report_text_actividad_promedios", placeholder="Describe la sección de Actividad/Promedios. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"}),
                 html.Div([
-                    html.Label("ACWR", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Label("ACWR", htmlFor="report_text_acwr", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Textarea(id="report_text_acwr", placeholder="Describe la sección de ACWR. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
             ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"16px"}),
             html.Div([
                 html.Div([
-                    html.Label("PLYR vs PLYR", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Label("PLYR vs PLYR", htmlFor="report_text_plyr_vs_plyr", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Textarea(id="report_text_plyr_vs_plyr", placeholder="Describe la sección de PLYR vs PLYR. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"}),
                 html.Div([
-                    html.Label("Comparativo", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Label("Comparativo", htmlFor="report_text_comparativas", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Textarea(id="report_text_comparativas", placeholder="Describe la sección de Comparativo. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
             ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"16px"}),
             html.Div([
                 html.Div([
-                    html.Label("Cronológico", style={"color":"#a3e3d0","marginBottom":"6px"}),
+                    html.Label("Cronológico", htmlFor="report_text_cronologico", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Textarea(id="report_text_cronologico", placeholder="Describe la sección Cronológico. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
             ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"24px"}),

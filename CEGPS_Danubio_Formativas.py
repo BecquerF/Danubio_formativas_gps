@@ -3380,9 +3380,10 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                                 "maxWidth": "1000px"})
 
     elif tab == "informe":
-        return html.Div([
-            html.H2("Informe de Actividad", style={"color":"#edf1f2","textAlign":"center","marginBottom":"20px"}),
-            html.Div([
+        try:
+            return html.Div([
+                html.H2("Informe de Actividad", style={"color":"#edf1f2","textAlign":"center","marginBottom":"20px"}),
+                html.Div([
                 html.Div([
                     html.Label("Título del informe", style={"color":"#a3e3d0","marginBottom":"6px"}),
                     dcc.Input(id="report_title", type="text", placeholder="Título personalizado del informe (opcional)", value="", style={"width":"100%","padding":"10px","borderRadius":"12px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"}),
@@ -3472,8 +3473,14 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             html.Div([
                 html.Button("Generar PDF", id="generate_report", n_clicks=0, style={"width":"100%","padding":"16px","borderRadius":"18px","border":"none","background":"#89bcef","color":"#0b0c0e","fontWeight":"700","cursor":"pointer"})
             ], style={"maxWidth":"320px","margin":"0 auto"}, style_selected={"background":"#48f788","color":"#0b0c0e"}),
-            html.Div("Al hacer clic se generará un PDF con secciones seleccionadas, texto y gráficos incrustados.", style={"color":"#dcdcdc","fontSize":"12px","textAlign":"center","marginTop":"12px"})
-        ], style={"padding":"24px","background":"#0b0c0e","border":"1px solid rgba(137,188,239,0.18)","borderRadius":"28px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)","width":"100%","margin":"20px auto"})
+                html.Div("Al hacer clic se generará un PDF con secciones seleccionadas, texto y gráficos incrustados.", style={"color":"#dcdcdc","fontSize":"12px","textAlign":"center","marginTop":"12px"})
+            ], style={"padding":"24px","background":"#0b0c0e","border":"1px solid rgba(137,188,239,0.18)","borderRadius":"28px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)","width":"100%","margin":"20px auto"})
+        except Exception as e:
+            logging.exception("Error construyendo UI Informe: %s", e)
+            return html.Div([
+                html.H3("Error al generar la sección Informe", style={"color": "#ff6666"}),
+                html.Pre(str(e), style={"color": "#fff", "whiteSpace": "pre-wrap"})
+            ], style={"padding": "18px", "background": "#300a0a", "borderRadius": "12px"})
 
     # ======================================================
 # PLYR vs PLYR

@@ -2966,6 +2966,17 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                         clearable=True,
                         style={"backgroundColor": "#011c24", "color": "#edf1f2"}
                     )
+                ], style={"flex": "1", "minWidth": "240px"}),
+                html.Div([
+                    html.Label("Activity Tags", style={"color": "#a3e3d0", "marginBottom": "6px"}),
+                    dcc.Dropdown(
+                        id="forecast-activity-tag",
+                        options=[{"label": tag, "value": tag} for tag in sorted(df["Activity Tags"].dropna().unique())],
+                        placeholder="Seleccione Activity Tag",
+                        multi=True,
+                        clearable=True,
+                        style={"backgroundColor": "#011c24", "color": "#edf1f2"}
+                    )
                 ], style={"flex": "1", "minWidth": "240px"})
             ], style={"display": "flex", "flexWrap": "wrap", "gap": "16px", "marginBottom": "20px"}),
             html.Div(id="forecast-table", style={"marginTop": "20px"})
@@ -3670,10 +3681,10 @@ def actualizar_tags_por_fecha_categoria(categorias, rango_dias, jugadores, athle
     Output("forecast-table", "children"),
     Input("forecast-category", "value"),
     Input("forecast-game-tag", "value"),
-    State("metrica", "value")
+    Input("forecast-activity-tag", "value")
 )
-def pronosticar_dinamicas(game_tag, categoria, metricas):
-    if not game_tag or not categoria:
+def pronosticar_dinamicas(categoria, game_tag, activity_tags):
+    if not categoria or not game_tag:
         return html.Div(
             "Seleccione categoría y Game Tag",
             style={"color": "#edf1f2", "textAlign": "center", "padding": "16px"}
@@ -3681,22 +3692,21 @@ def pronosticar_dinamicas(game_tag, categoria, metricas):
 
     dff = df.copy()
     dff = dff[(dff["Category"] == categoria) & (dff["Game Tags"] == game_tag)]
+    if activity_tags:
+        if isinstance(activity_tags, str):
+            activity_tags = [activity_tags]
+        dff = dff[dff["Activity Tags"].isin(activity_tags)]
+
     if dff.empty:
         return html.Div(
-            "No hay datos para esa categoría y Game Tag.",
+            "No hay datos para esa combinación de filtros.",
             style={"color": "#edf1f2", "textAlign": "center", "padding": "16px"}
         )
 
-    if isinstance(metricas, str):
-        metricas = [metricas]
-    metricas_seleccionadas = metricas or [
-        "Distance","Player Load","Sprint Distance","High Speed Distance",
-        "Sprint Efforts","High Speed Efforts","Impacts"
-    ]
-    metricas_validas = [m for m in metricas_seleccionadas if m in dff.columns]
+    metricas_validas = [m for m in metricas_promedios if m in dff.columns]
     if not metricas_validas:
         return html.Div(
-            "No hay métricas válidas seleccionadas para esta categoría.",
+            "No hay métricas de promedios disponibles para esta selección.",
             style={"color": "#edf1f2", "textAlign": "center", "padding": "16px"}
         )
 
@@ -3712,29 +3722,36 @@ def pronosticar_dinamicas(game_tag, categoria, metricas):
     pronostico = []
     for m in metricas_validas:
         cronico = dff_21[m].mean()
-        inferior = round(cronico * -1.3, 2)
-        superior = round(cronico * +0.8, 2)
         pronostico.append({
             "Métrica": m,
-            "Crónica (21d)": round(cronico, 2),
-            "Margen Inferior (-1.3)": inferior,
-            "Margen Superior (+0.8)": superior
+            "Proyección -1,3": round(cronico * -1.3, 2),
+            "Proyección +0,8": round(cronico * 0.8, 2)
         })
 
     tabla = dash_table.DataTable(
-        columns=[{"name": c, "id": c} for c in pronostico[0].keys()],
+        columns=[
+            {"name": "Métrica", "id": "Métrica"},
+            {"name": "Proyección -1,3", "id": "Proyección -1,3", "type": "numeric", "format": {"specifier": ".2f"}},
+            {"name": "Proyección +0,8", "id": "Proyección +0,8", "type": "numeric", "format": {"specifier": ".2f"}}
+        ],
         data=pronostico,
         style_table={"overflowX": "auto", "minWidth": "640px"},
-        style_cell={"textAlign": "center", "padding": "10px", "backgroundColor": "#071016", "color": "#edf1f2"},
+        style_cell={"textAlign": "center", "padding": "10px", "backgroundColor": "#071016", "color": "#edf1f2", "whiteSpace": "normal"},
         style_header={"backgroundColor": "#011c24", "color": "#a3e3d0", "fontWeight": "700"},
         style_data={"backgroundColor": "#0b0c0e"},
-        page_size=10,
+        page_size=15,
         sort_action="native"
     )
 
+    filtros = []
+    filtros.append(f"Categoría: {categoria}")
+    filtros.append(f"Game Tag: {game_tag}")
+    if activity_tags:
+        filtros.append(f"Activity Tag: {', '.join(activity_tags)}")
+
     return html.Div([
         html.Div(
-            f"Categoría: {categoria} | Game Tag: {game_tag}",
+            " | ".join(filtros),
             style={"color": "#dcdcdc", "marginBottom": "12px", "textAlign": "center"}
         ),
         tabla

@@ -2798,7 +2798,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             html.H4("Actividad / Promedios", style={"color": "#a3e3d0", "marginBottom": "12px"}),
             html.Div(
                 cards if cards else [html.Div("No hay datos para la fecha seleccionada.", style={"color": "#edf1f2", "textAlign": "center", "padding": "24px"})],
-                style={"display": "grid", "gridTemplateColumns": "repeat(auto-fit, minmax(180px, 1fr))", "gap": "16px"}
+                style={"display": "grid", "gridTemplateColumns": "repeat(4, minmax(180px, 1fr))", "gap": "16px"}
             )
         ], style={
             "padding": "22px",
@@ -2819,19 +2819,41 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             best_performances_table = dash_table.DataTable(
                 data=best_performances_df.to_dict("records"),
                 columns=[
-                    {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}}
-                    if col not in {"Player Name", "Athlete Tags"} else {"name": col, "id": col}
+                    {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}, "presentation": "markdown"}
+                    if col not in {"Player Name", "Athlete Tags"} else {"name": col, "id": col, "presentation": "markdown"}
                     for col in best_performances_df.columns
                 ],
                 sort_action="native",
                 style_table={
                     "overflowX": "auto",
+                    "overflowY": "auto",
+                    "maxHeight": "640px",
                     "border": "1px solid rgba(137,188,239,0.18)",
                     "borderRadius": "16px",
-                    "backgroundColor": "#0b0c0e"
+                    "backgroundColor": "#0b0c0e",
+                    "minWidth": "100%"
                 },
-                style_header={"backgroundColor": "#011c24", "color": "#a3e3d0", "fontWeight": "700"},
-                style_cell={"backgroundColor": "#0b0c0e", "color": "#edf1f2", "padding": "10px", "fontSize": "12px"},
+                style_header={
+                    "backgroundColor": "#011c24",
+                    "color": "#a3e3d0",
+                    "fontWeight": "700",
+                    "whiteSpace": "normal",
+                    "height": "auto",
+                    "lineHeight": "18px",
+                    "textAlign": "center"
+                },
+                style_cell={
+                    "backgroundColor": "#0b0c0e",
+                    "color": "#edf1f2",
+                    "padding": "8px",
+                    "fontSize": "12px",
+                    "textAlign": "center",
+                    "whiteSpace": "normal",
+                    "height": "auto",
+                    "minWidth": "120px",
+                    "width": "120px",
+                    "maxWidth": "120px"
+                },
                 tooltip_data=tooltip_data,
                 tooltip_delay=0,
                 tooltip_duration=None,
@@ -2841,9 +2863,28 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             best_performances_table = html.Div("No hay datos suficientes para construir este resumen.", style={"color": "#edf1f2", "padding": "16px"})
 
         return html.Div([
-            html.H4("Mejores rendimientos por Jugador", style={"color": "#a3e3d0", "marginBottom": "12px"}),
-            best_performances_table
-        ])
+            html.H4("Mejores rendimientos por Jugador", style={"color": "#a3e3d0", "marginBottom": "12px", "textAlign": "center"}),
+            html.Div(
+                best_performances_table,
+                style={
+                    "display": "flex",
+                    "justifyContent": "center",
+                    "width": "100%",
+                    "overflowX": "auto",
+                    "overflowY": "auto",
+                    "padding": "8px"
+                }
+            )
+        ], style={
+            "padding": "22px",
+            "background": "#0b0c0e",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "24px",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+            "width": "100%",
+            "maxWidth": "1000px",
+            "margin": "0 auto"
+        })
     
         return html.Div([
             html.Div([

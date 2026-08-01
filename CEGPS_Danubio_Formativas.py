@@ -11,38 +11,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 
-# Selenium and WebDriver Manager imports
+# Selenium fallback imports are loaded only when needed
 import os
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-
-# Set up Chrome options
-options = Options()
-if os.path.exists("/usr/bin/chromium"):
-    options.binary_location = "/usr/bin/chromium"
-elif os.path.exists("/usr/bin/google-chrome"):
-    options.binary_location = "/usr/bin/google-chrome"
-    
-options.add_argument("--headless=new")  # Use the new headless mode
-options.add_argument("--no-sandbox")     # Required for running headless in certain environments
-options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
-
-# Set up the ChromeDriver service
-service = Service(ChromeDriverManager().install())
-
-# Initialize the Chrome WebDriver
-driver = webdriver.Chrome(service=service, options=options)
-
-# Navigate to the Python website
-driver.get("https://www.python.org")
-
-# Print the title of the page
-print(driver.title)
-
-# Close the browser
-driver.quit()
 
 logging.basicConfig(level=logging.INFO)
 
@@ -179,7 +149,7 @@ app.config.suppress_callback_exceptions = True
 server = app.server
 
 # Set secret key for session management
-SECRET_KEY = os.environ["SECRET_KEY"]
+SECRET_KEY = os.environ.get("SECRET_KEY", "local-secret")
 server.secret_key = SECRET_KEY
 
 # Define valid username and password pairs for authentication
@@ -1187,7 +1157,11 @@ def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=10):
 
     # 3) Selenium screenshot (solo si la app es accesible y Selenium está instalado)
     try:
+        from selenium import webdriver
+        from selenium.webdriver.chrome.service import Service
+        from selenium.webdriver.chrome.options import Options
         from selenium.webdriver.common.by import By
+        from webdriver_manager.chrome import ChromeDriverManager
 
         chrome_options = Options()
         chrome_options.add_argument("--headless=new")
@@ -2822,7 +2796,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             html.H4("Actividad / Promedios", style={"color": "#a3e3d0", "marginBottom": "12px"}),
             html.Div(
                 cards if cards else [html.Div("No hay datos para la fecha seleccionada.", style={"color": "#edf1f2", "textAlign": "center", "padding": "24px"})],
-                style={"display": "grid", "gridTemplateColumns": "repeat(4, minmax(180px, 1fr))", "gap": "16px"}
+                style={"display": "grid", "gridTemplateColumns": "repeat(4, minmax(220px, 1fr))", "gap": "16px"}
             )
         ], style={
             "padding": "22px",
@@ -2851,15 +2825,15 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 fixed_columns={"headers": True, "data": 1},
                 fixed_rows={"headers": True},
                 style_table={
-                    "overflowX": "auto",
+                    "overflowX": "hidden",
                     "overflowY": "auto",
                     "maxHeight": "720px",
                     "border": "1px solid rgba(137,188,239,0.18)",
                     "borderRadius": "16px",
                     "backgroundColor": "#0b0c0e",
                     "width": "100%",
-                    "minWidth": "100%",
-                    "tableLayout": "auto"
+                    "minWidth": "0",
+                    "tableLayout": "fixed"
                 },
                 style_header={
                     "backgroundColor": "#011c24",
@@ -2878,12 +2852,13 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     "textAlign": "center",
                     "whiteSpace": "normal",
                     "height": "auto",
-                    "minWidth": "40px",
-                    "width": "auto",
-                    "maxWidth": "240px",
+                    "minWidth": "60px",
+                    "width": "90px",
+                    "maxWidth": "120px",
                     "overflow": "hidden",
                     "textOverflow": "ellipsis"
                 },
+
                 style_cell_conditional=[
                     {"if": {"column_id": "Player Name"}, "textAlign": "left", "minWidth": "180px", "width": "180px", "maxWidth": "220px"},
                     {"if": {"column_id": "Athlete Tags"}, "textAlign": "left", "minWidth": "90px", "width": "90px", "maxWidth": "120px"}

@@ -3472,7 +3472,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             html.Div(id="report_figures_preview", style={"display":"grid","gridTemplateColumns":"repeat(auto-fit,minmax(320px,1fr))","gap":"20px","marginBottom":"24px"}),
             html.Div([
                 html.Button("Generar PDF", id="generate_report", n_clicks=0, style={"width":"100%","padding":"16px","borderRadius":"18px","border":"none","background":"#89bcef","color":"#0b0c0e","fontWeight":"700","cursor":"pointer"})
-            ], style={"maxWidth":"320px","margin":"0 auto"}, style_selected={"background":"#48f788","color":"#0b0c0e"}),
+            ], style={"maxWidth":"320px","margin":"0 auto"}),
                 html.Div("Al hacer clic se generará un PDF con secciones seleccionadas, texto y gráficos incrustados.", style={"color":"#dcdcdc","fontSize":"12px","textAlign":"center","marginTop":"12px"})
             ], style={"padding":"24px","background":"#0b0c0e","border":"1px solid rgba(137,188,239,0.18)","borderRadius":"28px","boxShadow":"0 18px 40px rgba(0,0,0,0.25)","width":"100%","margin":"20px auto"})
         except Exception as e:

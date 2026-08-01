@@ -2093,25 +2093,29 @@ app.layout = html.Div([
         html.Img(src="/assets/icon-download-csv.svg", style={"width":"16px"}),
         id="download-table-csv",
         className="download-btn",
-        n_clicks=0
+        n_clicks=0,
+        title="Descargar tabla como CSV"
     ),
     html.Button(
         html.Img(src="/assets/icon-download-xlsx.svg", style={"width":"16px"}),
         id="download-table-xlsx",
         className="download-btn",
-        n_clicks=0
+        n_clicks=0,
+        title="Descargar tabla como Excel"
     ),
     html.Button(
         html.Img(src="/assets/icon-download-png.svg", style={"width":"16px"}),
         id="download-table-png",
         className="download-btn",
-        n_clicks=0
+        n_clicks=0,
+        title="Descargar tabla como PNG"
     ),
     html.Button(
         html.Img(src="/assets/icon-download-pdf.svg", style={"width":"16px"}),
         id="download-table-pdf",
         className="download-btn",
-        n_clicks=0
+        n_clicks=0,
+        title="Descargar tabla como PDF"
     ),
 
     # Descarga del informe completo (opcional)
@@ -2119,7 +2123,8 @@ app.layout = html.Div([
         html.Img(src="/assets/icon-download-pdf.svg", style={"width":"16px"}),
         id="generate_report_toolbar",
         className="download-btn",
-        n_clicks=0
+        n_clicks=0,
+        title="Generar y descargar informe completo en PDF"
     ),
 ],
 style={
@@ -4384,7 +4389,7 @@ def build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad=
     prevent_initial_call=True
 )
 def descargar_tabla(
-    png_bytes, pdf_bytes,
+    png_clicks, pdf_clicks, csv_clicks, xlsx_clicks,
     tab, categorias, metricas, referencia,
     rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad
 ):

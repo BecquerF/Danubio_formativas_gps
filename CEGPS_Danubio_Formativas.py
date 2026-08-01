@@ -2831,7 +2831,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 style_table={
                     "overflowX": "auto",
                     "overflowY": "auto",
-                    "maxHeight": "640px",
+                    "maxHeight": "1000px",
                     "border": "1px solid rgba(137,188,239,0.18)",
                     "borderRadius": "16px",
                     "backgroundColor": "#0b0c0e",

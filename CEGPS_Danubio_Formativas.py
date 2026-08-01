@@ -1121,6 +1121,84 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
     return None
 
 
+def build_section_report_pdf_table(section, dff, fecha_dt, categorias):
+    if section == "actividad":
+        if "Date" not in dff.columns:
+            return None
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        metrics = [m for m in ["Distance", "Player Load", "Sprint Distance", "High Speed Distance", "Sprint Efforts"] if m in dff_fecha.columns]
+        if dff_fecha.empty or not metrics:
+            return None
+        resumen = dff_fecha.groupby("Player Name")[metrics].sum(numeric_only=True).reset_index()
+        resumen = resumen.sort_values(metrics[0], ascending=False).head(10).round(2)
+        header = ["Player Name"] + metrics
+        rows = resumen.to_dict(orient="records")
+        return header, rows
+
+    if section == "actividad_comparativa":
+        if "Date" not in dff.columns:
+            return None
+        metrics = [m for m in ["Distance", "Player Load", "Sprint Distance"] if m in dff.columns]
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        if dff_fecha.empty or not metrics:
+            return None
+        resumen = dff_fecha.groupby("Player Name")[metrics].sum(numeric_only=True).reset_index()
+        promedio = dff[dff["Date"].dt.normalize() <= fecha_dt].groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
+        resumen = resumen.rename(columns={m: f"{m} Actual" for m in metrics})
+        promedio = promedio.rename(columns={m: f"{m} Prom" for m in metrics})
+        tabla = resumen.merge(promedio, on="Player Name", how="left").fillna(0).round(2)
+        header = ["Player Name"] + [f"{m} Actual" for m in metrics] + [f"{m} Prom" for m in metrics]
+        rows = tabla.sort_values(f"{metrics[0]} Actual", ascending=False).head(10).to_dict(orient="records")
+        return header, rows
+
+    if section == "actividad_promedios":
+        if "Date" not in dff.columns:
+            return None
+        metrics = [m for m in metricas_promedios if m in dff.columns]
+        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
+        if dff_fecha.empty or not metrics:
+            return None
+        promedio = dff_fecha[metrics].mean(numeric_only=True).reset_index()
+        promedio.columns = ["Métrica", "Valor"]
+        promedio["Valor"] = promedio["Valor"].round(2)
+        return ["Métrica", "Valor"], promedio.to_dict(orient="records")
+
+    if section == "maximos_rendimientos":
+        metrics = [m for m in metricas_promedios if m in dff.columns]
+        if dff.empty or not metrics:
+            return None
+        resumen, _ = build_best_performances_table(dff, metrics)
+        resumen = resumen.sort_values(metrics[0], ascending=False).head(10).round(2)
+        header = ["Player Name", "Athlete Tags"] + metrics
+        rows = resumen.to_dict(orient="records")
+        return header, rows
+
+    if section == "acwr":
+        metrics = [m for m in ["Distance", "Player Load", "Sprint Distance", "High Speed Distance", "Sprint Efforts", "High Speed Efforts", "Impacts"] if m in dff.columns]
+        if dff.empty or not metrics:
+            return None
+        ultimos21 = dff["Date"].max() - pd.Timedelta(days=21)
+        ultimos7 = dff["Date"].max() - pd.Timedelta(days=7)
+        df21 = dff[dff["Date"] >= ultimos21]
+        df7 = dff[dff["Date"] >= ultimos7]
+        cronica = df21.groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
+        aguda = df7.groupby("Player Name")[metrics].mean(numeric_only=True).reset_index()
+        tabla = cronica.merge(aguda, on="Player Name", how="outer", suffixes=("_21", "_7")).fillna(0)
+        rows = []
+        for _, row in tabla.iterrows():
+            item = {"Player Name": row["Player Name"]}
+            for m in metrics:
+                item[f"{m} ACWR"] = round((row[f"{m}_7"] / row[f"{m}_21"]) if row[f"{m}_21"] else 0, 2)
+            rows.append(item)
+        if not rows:
+            return None
+        header = ["Player Name"] + [f"{m} ACWR" for m in metrics]
+        df_ratio = pd.DataFrame(rows).sort_values(f"{metrics[0]} ACWR", ascending=False).head(10)
+        return header, df_ratio.to_dict(orient="records")
+
+    return None
+
+
 def _fig_to_png_via_kaleido(fig, width, height, scale):
     try:
         return pio.to_image(fig, format="png", width=width, height=height, scale=scale, engine="kaleido")
@@ -1446,6 +1524,64 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
 
         return page_num
 
+    def draw_table_page(section, table_key, page_num):
+        table_data = section.get(table_key)
+        if not table_data:
+            return page_num
+
+        header, rows = table_data
+        if not header or not rows:
+            return page_num
+
+        c.showPage()
+        page_num += 1
+        y = draw_header(c)
+        c.setFont(title_font, 15)
+        c.drawString(margin, y, section.get("table_caption", section.get("title", "")))
+        y -= 18
+
+        table_rows = [header]
+        for row in rows:
+            table_rows.append([str(row.get(col, "")) for col in header])
+
+        col_count = max(1, len(header))
+        max_width = width - 2 * margin
+        base_width = max(70, int(max_width / col_count))
+        col_widths = [base_width for _ in header]
+        table = Table(table_rows, colWidths=col_widths, repeatRows=1)
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#011c24")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#a3e3d0")),
+            ("TEXTCOLOR", (0, 1), (-1, -1), colors.HexColor("#1a1a1a")),
+            ("BACKGROUND", (0, 1), (-1, -1), colors.white),
+            ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#89bcef")),
+            ("FONTNAME", (0, 0), (-1, 0), title_font),
+            ("FONTNAME", (0, 1), (-1, -1), small_font),
+            ("FONTSIZE", (0, 0), (-1, -1), 8),
+            ("LEADING", (0, 0), (-1, -1), 9),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+            ("ALIGN", (0, 1), (-1, -1), "CENTER"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 4),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ]))
+
+        table_width, table_height = table.wrapOn(c, max_width, height)
+        if y - table_height < margin:
+            c.showPage()
+            page_num += 1
+            y = draw_header(c)
+            c.setFont(title_font, 15)
+            c.drawString(margin, y, section.get("table_caption", section.get("title", "")))
+            y -= 18
+            table_width, table_height = table.wrapOn(c, max_width, height)
+
+        table.drawOn(c, margin, y - table_height)
+        draw_footer(c, page_num)
+        return page_num
+
     # --- Iterar secciones ---
     for section in sections:
         page_num += 1
@@ -1477,6 +1613,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
         draw_footer(c, page_num)
         page_num = draw_image_page(section, "img", "caption", page_num)
         page_num = draw_image_page(section, "table_img", "table_caption", page_num)
+        page_num = draw_table_page(section, "table_data", page_num)
         section["img"] = None
         section["table_img"] = None
 
@@ -3982,39 +4119,20 @@ def _build_report_pdf_bytes(
             continue
 
         try:
-            if section == "actividad_promedios":
-                table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
-                fig = None
-            else:
-                fig = build_section_report_fig(section, dff, fecha_dt, categorias)
-                table_fig = None
+            table_data = build_section_report_pdf_table(section, dff, fecha_dt, categorias)
         except Exception:
             logging.exception(f"Error generando figuras para {section}")
             continue
 
-        img_bytes = None
-        table_bytes = None
-
-        try:
-            if fig and getattr(fig, "data", None):
-                img_bytes = export_report_figure_png(fig)
-        except Exception:
-            logging.exception(f"Error exportando gráfico {section}")
-
-        try:
-            if table_fig and getattr(table_fig, "data", None):
-                table_bytes = export_report_figure_png(table_fig)
-        except Exception:
-            logging.exception(f"Error exportando tabla {section}")
-
-        section_note = "" if (img_bytes or table_bytes) else "\nNota: no se generó ninguna imagen o tabla para esta sección."
+        section_note = "" if table_data else "\nNota: no se generó ninguna tabla para esta sección."
 
         report_sections.append(
             {
                 "title": section_title(section),
                 "text": truncate_to_n_words(section_texts.get(section, ""), 500) + section_note,
-                "img": img_bytes,
-                "table_img": table_bytes,
+                "img": None,
+                "table_img": None,
+                "table_data": table_data,
                 "caption": f"Figura: {section_title(section)} con los filtros seleccionados.",
                 "table_caption": f"Tabla: {section_title(section)} con los filtros seleccionados.",
             }

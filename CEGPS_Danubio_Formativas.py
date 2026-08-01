@@ -3754,7 +3754,7 @@ def pronosticar_dinamicas(categoria, game_tag, activity_tags):
     return html.Div([
         html.Div(
             " | ".join(filtros),
-            style={"color": "#dcdcdc", "marginBottom": "12px", "textAlign": "center"}
+            style={"color": "#011c24", "marginBottom": "12px", "textAlign": "center"}
         ),
         tabla
     ], style={"padding": "18px", "background": "#0b0c0e", "border": "1px solid rgba(137,188,239,0.18)", "borderRadius": "20px"})

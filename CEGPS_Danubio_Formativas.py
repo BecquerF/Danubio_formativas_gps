@@ -3724,18 +3724,20 @@ def pronosticar_dinamicas(categoria, game_tag, activity_tags):
         cronico = dff_21[m].mean()
         pronostico.append({
             "Métrica": m,
-            "Proyección -1,3": round(cronico * -1.3, 2),
-            "Proyección +0,8": round(cronico * 0.8, 2)
+            "Bajo (<0.8x)": round(cronico * 0.8, 2),
+            "Zona segura (0.8-1.3x)": round(cronico * 1.3, 2),
+            "Riesgo lesión (>1.5x)": round(cronico * 1.5, 2)
         })
 
     tabla = dash_table.DataTable(
         columns=[
             {"name": "Métrica", "id": "Métrica"},
-            {"name": "Proyección -1,3", "id": "Proyección -1,3", "type": "numeric", "format": {"specifier": ".2f"}},
-            {"name": "Proyección +0,8", "id": "Proyección +0,8", "type": "numeric", "format": {"specifier": ".2f"}}
+            {"name": "Bajo (<0.8x)", "id": "Bajo (<0.8x)", "type": "numeric", "format": {"specifier": ".2f"}},
+            {"name": "Zona segura (0.8-1.3x)", "id": "Zona segura (0.8-1.3x)", "type": "numeric", "format": {"specifier": ".2f"}},
+            {"name": "Riesgo lesión (>1.5x)", "id": "Riesgo lesión (>1.5x)", "type": "numeric", "format": {"specifier": ".2f"}}
         ],
         data=pronostico,
-        style_table={"overflowX": "auto", "minWidth": "640px"},
+        style_table={"overflowX": "auto", "minWidth": "820px"},
         style_cell={"textAlign": "center", "padding": "10px", "backgroundColor": "#071016", "color": "#edf1f2", "whiteSpace": "normal"},
         style_header={"backgroundColor": "#011c24", "color": "#a3e3d0", "fontWeight": "700"},
         style_data={"backgroundColor": "#0b0c0e"},

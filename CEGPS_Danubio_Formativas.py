@@ -61,6 +61,10 @@ BASE_DIR = Path(__file__).resolve().parent
 FONT_DIR = BASE_DIR / "assets" / "fonts"
 REPORT_DOWNLOAD_DIR = Path(tempfile.gettempdir()) / "danubio_report_downloads"
 REPORT_DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
+REPORT_IMAGE_WIDTH = 1200
+REPORT_IMAGE_HEIGHT = 675
+REPORT_IMAGE_SCALE = 1
+REPORT_IMAGE_TIMEOUT = 6
 
 def register_pdf_fonts():
     try:
@@ -1170,6 +1174,16 @@ def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=8):
     logging.warning("No se pudo generar PNG para la figura con Kaleido. Se omite la imagen en el PDF.")
     return None
 
+
+def export_report_figure_png(fig):
+    return fig_to_png_bytes(
+        fig,
+        width=REPORT_IMAGE_WIDTH,
+        height=REPORT_IMAGE_HEIGHT,
+        scale=REPORT_IMAGE_SCALE,
+        timeout=REPORT_IMAGE_TIMEOUT,
+    )
+
 def build_graph_pdf_from_fig(fig, width=1600, height=900, scale=2):
 
     png_bytes = fig_to_png_bytes(fig, width=width, height=height, scale=scale)
@@ -1329,7 +1343,7 @@ def load_image_reader_from_bytes(image_bytes):
         raise
 
 
-def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filters_text=None, page_size=None, margin=inch * 0.35):
+def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filters_text=None, page_size=None, margin=inch * 0.35, output_path=None):
     """
     Construye un PDF multi-página que incluye:
     - Portada con título, autor, fecha y filtros.
@@ -1338,8 +1352,12 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
     Devuelve bytes del PDF final.
     """
     page_size = page_size or landscape(A4)
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=page_size)
+    buffer = None
+    if output_path is None:
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=page_size)
+    else:
+        c = canvas.Canvas(str(output_path), pagesize=page_size)
     width, height = page_size
 
     # Fuentes a usar (registradas previamente si están disponibles)
@@ -1512,6 +1530,9 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
     # Pie de página en la última página
     draw_footer(c, page_num)
     c.save()
+    if output_path is not None:
+        return str(output_path)
+
     buffer.seek(0)
     return buffer.read()
 
@@ -3883,6 +3904,7 @@ def _build_report_pdf_bytes(
     texto_cronologico,
     categorias,
     fecha_actividad,
+    output_path=None,
 ):
     # Asegurar lista de categorías
     if categorias and isinstance(categorias, str):
@@ -3960,8 +3982,12 @@ def _build_report_pdf_bytes(
             continue
 
         try:
-            table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
-            fig = None if section == "actividad_promedios" else build_section_report_fig(section, dff, fecha_dt, categorias)
+            if section == "actividad_promedios":
+                table_fig = build_section_report_table_fig(section, dff, fecha_dt, categorias)
+                fig = None
+            else:
+                fig = build_section_report_fig(section, dff, fecha_dt, categorias)
+                table_fig = None
         except Exception:
             logging.exception(f"Error generando figuras para {section}")
             continue
@@ -3971,13 +3997,13 @@ def _build_report_pdf_bytes(
 
         try:
             if fig and getattr(fig, "data", None):
-                img_bytes = fig_to_png_bytes(fig, width=1600, height=900, scale=2)
+                img_bytes = export_report_figure_png(fig)
         except Exception:
             logging.exception(f"Error exportando gráfico {section}")
 
         try:
             if table_fig and getattr(table_fig, "data", None):
-                table_bytes = fig_to_png_bytes(table_fig, width=1600, height=900, scale=2)
+                table_bytes = export_report_figure_png(table_fig)
         except Exception:
             logging.exception(f"Error exportando tabla {section}")
 
@@ -4012,13 +4038,11 @@ def _build_report_pdf_bytes(
             sections=report_sections,
             fecha_text=fecha_text,
             filters_text=filters_text,
+            output_path=output_path,
         )
     except Exception:
         logging.exception("Error generando PDF con ReportLab")
         return no_update
-
-    if not pdf_bytes:
-        return None
 
     return pdf_bytes
 
@@ -4036,6 +4060,7 @@ def _build_report_request_payload(
     texto_cronologico,
     categorias,
     fecha_actividad,
+    output_path=None,
 ):
     return {
         "title": title,
@@ -4091,7 +4116,7 @@ def _cleanup_report_request(request_path):
 
 def _cleanup_old_report_requests(max_age_seconds=6 * 60 * 60):
     cutoff = time.time() - max_age_seconds
-    for candidate in REPORT_DOWNLOAD_DIR.glob("*.json"):
+    for candidate in list(REPORT_DOWNLOAD_DIR.glob("*.json")) + list(REPORT_DOWNLOAD_DIR.glob("*.pdf")):
         try:
             if candidate.stat().st_mtime < cutoff:
                 candidate.unlink()
@@ -4111,9 +4136,11 @@ def download_report_pdf(token):
     if payload is None:
         abort(404)
 
+    temp_pdf_path = REPORT_DOWNLOAD_DIR / f"{token}.pdf"
+    response = None
     try:
-        pdf_bytes = _build_report_pdf_bytes(**payload)
-        if not pdf_bytes:
+        pdf_result = _build_report_pdf_bytes(**payload, output_path=temp_pdf_path)
+        if not pdf_result:
             return ("", 404)
 
         title = _sanitize_filename_part(payload.get("title"), "informe")
@@ -4124,18 +4151,27 @@ def download_report_pdf(token):
             else datetime.now().strftime("%d-%m-%Y")
         )
         filename = f"{title.replace(' ', '_')}_{fecha_text}.pdf"
-        return send_file(
-            io.BytesIO(pdf_bytes),
+        response = send_file(
+            str(temp_pdf_path),
             mimetype="application/pdf",
             as_attachment=True,
             download_name=filename,
             max_age=0,
         )
+        def _cleanup_download():
+            _cleanup_report_request(request_path)
+            _cleanup_report_request(temp_pdf_path)
+        response.call_on_close(_cleanup_download)
+
+        return response
     except Exception:
         logging.exception("Error generando la descarga directa del informe PDF")
+        _cleanup_report_request(temp_pdf_path)
         abort(500)
     finally:
-        _cleanup_report_request(request_path)
+        if response is None:
+            _cleanup_report_request(request_path)
+            _cleanup_report_request(temp_pdf_path)
 
 
 @app.callback(

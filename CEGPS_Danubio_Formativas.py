@@ -1127,12 +1127,11 @@ def _fig_to_png_process(fig, width, height, scale, queue):
         queue.put(e)
 
 
-def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=20):
-    """Convierte una figura Plotly en PNG usando Kaleido con timeout y fallback."""
+def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=8):
+    """Convierte una figura Plotly en PNG usando Kaleido con timeout y devuelve None si falla."""
     if fig is None or not getattr(fig, "data", None):
         return None
 
-    # 1) Kaleido con timeout en proceso separado
     try:
         queue = multiprocessing.Queue()
         process = multiprocessing.Process(
@@ -1145,67 +1144,25 @@ def fig_to_png_bytes(fig, width=1600, height=900, scale=2, timeout=20):
             process.terminate()
             process.join()
             logging.warning("Kaleido timed out after %s seconds", timeout)
+        elif not queue.empty():
+            result = queue.get()
+            if isinstance(result, bytes):
+                return result
+            logging.debug("Kaleido error result: %s", result)
         else:
-            if not queue.empty():
-                result = queue.get()
-                if isinstance(result, bytes):
-                    return result
-                logging.debug("Kaleido error result: %s", result)
+            logging.warning("Kaleido finished without returning image bytes.")
     except Exception as e:
         logging.debug("Kaleido proceso falló: %s", e)
 
-    # 2) WeasyPrint: renderizar HTML de la figura y convertir a PNG vía PDF intermedio
     try:
-        if WeasyHTML is not None:
-            html_str = fig.to_html(full_html=False, include_plotlyjs="cdn")
-            wrapper = f"""
-            <html><head><meta charset="utf-8"></head>
-            <body style="background:white;margin:0;padding:0;">
-            {html_str}
-            </body></html>
-            """
-            pdf_bytes = WeasyHTML(string=wrapper).write_pdf()
-            try:
-                from pdf2image import convert_from_bytes
-                pages = convert_from_bytes(pdf_bytes)
-                buf = io.BytesIO()
-                pages[0].save(buf, format="PNG")
-                return buf.getvalue()
-            except Exception as e:
-                logging.debug("pdf2image no disponible o falló: %s", e)
-                return None
+        logging.debug("Intentando exportar directamente con Kaleido sin proceso separado.")
+        png_bytes = pio.to_image(fig, format="png", width=width, height=height, scale=scale, engine="kaleido")
+        if isinstance(png_bytes, (bytes, bytearray)):
+            return bytes(png_bytes)
     except Exception as e:
-        logging.debug("WeasyPrint fallback falló: %s", e)
+        logging.debug("Exportación directa con Kaleido falló: %s", e)
 
-    # 3) Selenium screenshot (solo si la app es accesible y Selenium está instalado)
-    try:
-        from selenium import webdriver
-        from selenium.webdriver.chrome.service import Service
-        from selenium.webdriver.chrome.options import Options
-        from selenium.webdriver.common.by import By
-        from webdriver_manager.chrome import ChromeDriverManager
-
-        chrome_options = Options()
-        chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        try:
-            app_url = os.environ.get("APP_URL", "http://127.0.0.1:8050")
-            graph_selector = os.environ.get("GRAPH_SELECTOR", "#report_figures_preview .tab-graph")
-            driver.set_page_load_timeout(timeout)
-            driver.get(app_url)
-            time.sleep(1.0)
-            el = driver.find_element(By.CSS_SELECTOR, graph_selector)
-            png = el.screenshot_as_png
-            return png
-        finally:
-            driver.quit()
-    except Exception as e:
-        logging.debug("Selenium fallback no disponible o falló: %s", e)
-
-    logging.warning("No se pudo generar PNG para la figura (todos los fallbacks fallaron).")
+    logging.warning("No se pudo generar PNG para la figura con Kaleido. Se omite la imagen en el PDF.")
     return None
 
 def build_graph_pdf_from_fig(fig, width=1600, height=900, scale=2):

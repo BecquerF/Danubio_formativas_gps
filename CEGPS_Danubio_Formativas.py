@@ -3469,7 +3469,14 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     dcc.Textarea(id="report_text_cronologico", placeholder="Describe la sección Cronológico. Hasta 500 palabras.", style={"width":"100%","height":"140px","borderRadius":"16px","border":"1px solid rgba(137,188,239,0.18)","background":"#071016","color":"#edf1f2"})
                 ], style={"flex":"1","minWidth":"280px","marginBottom":"16px"})
             ], style={"display":"flex","flexWrap":"wrap","gap":"16px","marginBottom":"24px"}),
-            html.Div(id="report_figures_preview", style={"display":"grid","gridTemplateColumns":"repeat(auto-fit,minmax(320px,1fr))","gap":"20px","marginBottom":"24px"}),
+            html.Div(id="report_figures_preview", style={
+                "display": "grid",
+                "gridTemplateColumns": "repeat(auto-fit,minmax(360px,1fr))",
+                "gridAutoRows": "minmax(320px, auto)",
+                "alignItems": "start",
+                "gap": "20px",
+                "marginBottom": "24px"
+            }),
             html.Div([
                 html.Button("Generar PDF", id="generate_report", n_clicks=0, style={"width":"100%","padding":"16px","borderRadius":"18px","border":"none","background":"#89bcef","color":"#0b0c0e","fontWeight":"700","cursor":"pointer"})
             ], style={"maxWidth":"320px","margin":"0 auto"}),
@@ -3663,15 +3670,20 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
                         className="tab-graph",
                         figure=fig,
                         config={"displayModeBar": False, "responsive": True},
-                        style={"height": "600px", "width": "100%"}
+                        style={"flex": "1", "minHeight": "240px", "maxHeight": "480px", "width": "100%"}
                     )
                 ],
                 style={
+                    "display": "flex",
+                    "flexDirection": "column",
                     "padding": "18px",
                     "background": "#0b0c0e",
                     "border": "1px solid rgba(137,188,239,0.18)",
                     "borderRadius": "24px",
-                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)"
+                    "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+                    "minHeight": "320px",
+                    "maxHeight": "520px",
+                    "overflow": "hidden"
                 }
             )
         preview_cards.append(card)

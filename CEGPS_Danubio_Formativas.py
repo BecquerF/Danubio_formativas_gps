@@ -2819,11 +2819,13 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             best_performances_table = dash_table.DataTable(
                 data=best_performances_df.to_dict("records"),
                 columns=[
-                    {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}, "presentation": "markdown"}
-                    if col not in {"Player Name", "Athlete Tags"} else {"name": col, "id": col, "presentation": "markdown"}
+                    {"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}}
+                    if col not in {"Player Name", "Athlete Tags"} else {"name": col, "id": col}
                     for col in best_performances_df.columns
                 ],
                 sort_action="native",
+                fixed_columns={"headers": True, "data": 1},
+                fixed_rows={"headers": True},
                 style_table={
                     "overflowX": "auto",
                     "overflowY": "auto",
@@ -2854,6 +2856,10 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                     "width": "120px",
                     "maxWidth": "120px"
                 },
+                style_cell_conditional=[
+                    {"if": {"column_id": "Player Name"}, "textAlign": "left", "minWidth": "180px", "width": "180px", "maxWidth": "180px"},
+                    {"if": {"column_id": "Athlete Tags"}, "textAlign": "left", "minWidth": "180px", "width": "180px", "maxWidth": "180px"}
+                ],
                 tooltip_data=tooltip_data,
                 tooltip_delay=0,
                 tooltip_duration=None,

@@ -2,9 +2,11 @@ import logging
 import io
 import json
 import base64
+import re
 import textwrap
 import html as html_module
 import tempfile
+import uuid
 from pathlib import Path
 import dash
 import pandas as pd
@@ -23,6 +25,7 @@ import pandas as pd
 from openpyxl.drawing.image import Image as ExcelImage
 from datetime import datetime
 from pathlib import Path
+from flask import abort, send_file
 
 # WeasyPrint setup
 try:
@@ -56,6 +59,8 @@ import time
 # Base directory and font directory
 BASE_DIR = Path(__file__).resolve().parent
 FONT_DIR = BASE_DIR / "assets" / "fonts"
+REPORT_DOWNLOAD_DIR = Path(tempfile.gettempdir()) / "danubio_report_downloads"
+REPORT_DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 def register_pdf_fonts():
     try:
@@ -2069,7 +2074,7 @@ app.layout = html.Div([
 
             dcc.Download(id="download-graph"),
             dcc.Download(id="download-table"),
-            dcc.Download(id="download-report"),
+            dcc.Location(id="download-report-location", refresh=True),
 
 
             # GRÁFICO
@@ -2147,7 +2152,25 @@ style={
     "gap":"12px",
     "marginTop":"10px",
     "paddingBottom":"18px"
-})
+}),
+html.Div(
+    dcc.Loading(
+        type="circle",
+        color="#89bcef",
+        children=html.Div(
+            id="report-download-status",
+            children="Listo para generar el informe PDF.",
+            style={
+                "color": "#a3e3d0",
+                "fontSize": "12px",
+                "textAlign": "center",
+                "minHeight": "22px",
+                "paddingBottom": "10px"
+            }
+        )
+    ),
+    style={"width": "100%"}
+)
 
         ],
 
@@ -3847,7 +3870,7 @@ def actualizar_vista_previa_informe(sections, categorias, fecha_actividad):
     return preview_cards
 
 
-def _build_report_download_payload(
+def _build_report_pdf_bytes(
     title,
     author,
     sections,
@@ -3995,14 +4018,129 @@ def _build_report_download_payload(
         return no_update
 
     if not pdf_bytes:
-        return no_update
+        return None
 
-    filename = f"{title.replace(' ', '_')}_{fecha_text.replace('/', '-')}.pdf"
-    return dcc.send_bytes(lambda buf: buf.write(pdf_bytes), filename)
+    return pdf_bytes
+
+
+def _build_report_request_payload(
+    title,
+    author,
+    sections,
+    texto_actividad,
+    texto_actividad_comparativa,
+    texto_actividad_promedios,
+    texto_acwr,
+    texto_plyr_vs_plyr,
+    texto_comparativas,
+    texto_cronologico,
+    categorias,
+    fecha_actividad,
+):
+    return {
+        "title": title,
+        "author": author,
+        "sections": sections,
+        "texto_actividad": texto_actividad,
+        "texto_actividad_comparativa": texto_actividad_comparativa,
+        "texto_actividad_promedios": texto_actividad_promedios,
+        "texto_acwr": texto_acwr,
+        "texto_plyr_vs_plyr": texto_plyr_vs_plyr,
+        "texto_comparativas": texto_comparativas,
+        "texto_cronologico": texto_cronologico,
+        "categorias": categorias,
+        "fecha_actividad": fecha_actividad,
+    }
+
+
+def _store_report_request(payload):
+    _cleanup_old_report_requests()
+    token = uuid.uuid4().hex
+    request_path = REPORT_DOWNLOAD_DIR / f"{token}.json"
+    request_path.write_text(
+        json.dumps(payload, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    return token
+
+
+def _load_report_request(token):
+    if not token or not token.replace("-", "").isalnum():
+        return None, None
+
+    request_path = REPORT_DOWNLOAD_DIR / f"{token}.json"
+    if not request_path.exists():
+        return None, None
+
+    try:
+        payload = json.loads(request_path.read_text(encoding="utf-8"))
+    except Exception:
+        logging.exception("No se pudo leer la solicitud temporal del informe: %s", token)
+        return None, request_path
+
+    return payload, request_path
+
+
+def _cleanup_report_request(request_path):
+    try:
+        if request_path and request_path.exists():
+            request_path.unlink()
+    except Exception:
+        logging.warning("No se pudo eliminar la solicitud temporal del informe: %s", request_path)
+
+
+def _cleanup_old_report_requests(max_age_seconds=6 * 60 * 60):
+    cutoff = time.time() - max_age_seconds
+    for candidate in REPORT_DOWNLOAD_DIR.glob("*.json"):
+        try:
+            if candidate.stat().st_mtime < cutoff:
+                candidate.unlink()
+        except Exception:
+            logging.debug("No se pudo limpiar solicitud antigua: %s", candidate)
+
+
+def _sanitize_filename_part(value, fallback="informe"):
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", (value or "").strip())
+    cleaned = cleaned.strip("._-")
+    return cleaned or fallback
+
+
+@server.get("/download-report-pdf/<token>")
+def download_report_pdf(token):
+    payload, request_path = _load_report_request(token)
+    if payload is None:
+        abort(404)
+
+    try:
+        pdf_bytes = _build_report_pdf_bytes(**payload)
+        if not pdf_bytes:
+            return ("", 404)
+
+        title = _sanitize_filename_part(payload.get("title"), "informe")
+        fecha_actividad = payload.get("fecha_actividad")
+        fecha_text = (
+            pd.to_datetime(fecha_actividad).strftime("%d-%m-%Y")
+            if fecha_actividad
+            else datetime.now().strftime("%d-%m-%Y")
+        )
+        filename = f"{title.replace(' ', '_')}_{fecha_text}.pdf"
+        return send_file(
+            io.BytesIO(pdf_bytes),
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=filename,
+            max_age=0,
+        )
+    except Exception:
+        logging.exception("Error generando la descarga directa del informe PDF")
+        abort(500)
+    finally:
+        _cleanup_report_request(request_path)
 
 
 @app.callback(
-    Output("download-report", "data"),
+    Output("download-report-location", "href"),
+    Output("report-download-status", "children"),
     Input("generate_report", "n_clicks"),
     Input("generate_report_toolbar", "n_clicks"),
     State("tabs", "value"),
@@ -4038,25 +4176,21 @@ def generar_informe(
     fecha_actividad,
 ):
     if not n_clicks and not n_clicks_toolbar:
-        return no_update
+        return no_update, no_update
 
     triggered = None
     try:
         triggered = ctx.triggered[0]["prop_id"].split(".")[0] if ctx.triggered else None
     except Exception as exc:
         logging.exception("Error leyendo trigger del callback generar_informe: %s", exc)
-        return no_update
+        return no_update, "No se pudo iniciar la generación del informe."
 
     if not triggered:
         logging.warning("Callback generar_informe recibido sin trigger válido")
-        return no_update
-
-    if triggered == "generate_report_toolbar" and tab != "informe":
-        logging.warning("Se ha intentado generar informe desde otra pestaña: %s", tab)
-        return no_update
+        return no_update, "No se detectó el botón que inició la generación."
 
     try:
-        return _build_report_download_payload(
+        payload = _build_report_request_payload(
             title,
             author,
             sections,
@@ -4070,9 +4204,11 @@ def generar_informe(
             categorias,
             fecha_actividad,
         )
+        token = _store_report_request(payload)
+        return f"/download-report-pdf/{token}", "Informe listo. Iniciando descarga del PDF."
     except Exception as exc:
         logging.exception("Error en callback generar_informe: %s", exc)
-        return no_update
+        return no_update, "No se pudo generar el informe PDF."
 
 
 @app.callback(

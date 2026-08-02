@@ -2343,6 +2343,7 @@ app.layout = html.Div([
 
             dcc.Download(id="download-graph"),
             dcc.Download(id="download-table"),
+            dcc.Location(id="download-table-location", refresh=True),
             dcc.Location(id="download-report-location", refresh=True),
 
 
@@ -4307,6 +4308,36 @@ def _build_report_request_payload(
     }
 
 
+def _build_table_download_request_payload(
+    tab,
+    categorias,
+    metricas,
+    referencia,
+    rango_dias,
+    jugadores,
+    athlete,
+    activitytags,
+    gametags,
+    periodtags,
+    fecha_actividad,
+    file_format,
+):
+    return {
+        "tab": tab,
+        "categorias": categorias,
+        "metricas": metricas,
+        "referencia": referencia,
+        "rango_dias": rango_dias,
+        "jugadores": jugadores,
+        "athlete": athlete,
+        "activitytags": activitytags,
+        "gametags": gametags,
+        "periodtags": periodtags,
+        "fecha_actividad": fecha_actividad,
+        "file_format": file_format,
+    }
+
+
 def _store_report_request(payload):
     _cleanup_old_report_requests()
     token = uuid.uuid4().hex
@@ -4890,8 +4921,6 @@ def build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad=
 
 @app.callback(
     Output("download-table", "data"),
-    Input("download-table-png", "n_clicks"),
-    Input("download-table-pdf", "n_clicks"),
     Input("download-table-csv", "n_clicks"),
     Input("download-table-xlsx", "n_clicks"),
     State("tabs", "value"),
@@ -4907,8 +4936,8 @@ def build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad=
     State("fecha-actividad", "date"),
     prevent_initial_call=True
 )
-def descargar_tabla(
-    png_clicks, pdf_clicks, csv_clicks, xlsx_clicks,
+def descargar_tabla_csv_xlsx(
+    csv_clicks, xlsx_clicks,
     tab, categorias, metricas, referencia,
     rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad
 ):
@@ -4916,35 +4945,33 @@ def descargar_tabla(
     if not ctx.triggered:
         return no_update
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-    
-    # Normalización de filtros
 
     if categorias and isinstance(categorias, str):
         categorias = [categorias]
-
     if jugadores and isinstance(jugadores, str):
         jugadores = [jugadores]
-
     if athlete and isinstance(athlete, str):
         athlete = [athlete]
-
     activitytags = merge_filter_values(activitytags)
-
     if gametags and isinstance(gametags, str):
         gametags = [gametags]
-
     if periodtags and isinstance(periodtags, str):
         periodtags = [periodtags]
 
-    # --- Construir dataframe filtrado ---
     dff = df.copy()
-    if categorias: dff = dff[dff["Category"].isin(categorias)]
+    if categorias:
+        dff = dff[dff["Category"].isin(categorias)]
     dff = apply_rango_dias_filter(dff, rango_dias)
-    if jugadores: dff = dff[dff["Player Name"].isin(jugadores)]
-    if athlete: dff = dff[dff["Athlete Tags"].isin(athlete)]
-    if activitytags: dff = dff[dff["Activity Tags"].isin(activitytags)]
-    if gametags: dff = dff[dff["Game Tags"].isin(gametags)]
-    if periodtags: dff = dff[dff["Period Tags"].isin(periodtags)]
+    if jugadores:
+        dff = dff[dff["Player Name"].isin(jugadores)]
+    if athlete:
+        dff = dff[dff["Athlete Tags"].isin(athlete)]
+    if activitytags:
+        dff = dff[dff["Activity Tags"].isin(activitytags)]
+    if gametags:
+        dff = dff[dff["Game Tags"].isin(gametags)]
+    if periodtags:
+        dff = dff[dff["Period Tags"].isin(periodtags)]
 
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
@@ -4954,7 +4981,7 @@ def descargar_tabla(
     df_export = build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad)
     if df_export is None or df_export.empty:
         return no_update
-    # --- CSV ---
+
     if trigger_id == "download-table-csv":
         buffer = io.BytesIO()
         buffer.write(metadata.encode("utf-8"))
@@ -4963,7 +4990,6 @@ def descargar_tabla(
         buffer.seek(0)
         return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.csv")
 
-    # --- XLSX ---
     if trigger_id == "download-table-xlsx":
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
@@ -4986,44 +5012,170 @@ def descargar_tabla(
         buffer.seek(0)
         return dcc.send_bytes(lambda b: b.write(buffer.read()), f"tabla_{tab_name}.xlsx")
 
-    # --- PNG ---
-    if trigger_id == "download-table-png":
-        fig_table = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
-        if fig_table is None or not getattr(fig_table, "data", None):
-            logging.warning("No hay figura de tabla para la pestaña %s", tab)
-            return no_update
-        height = _calc_table_height(df_export)
-        if df_export.empty:
-            logging.warning(
-        "No hay datos para exportar."
-    )
-            return no_update
-        png_bytes = fig_to_png_bytes(fig_table, width=1600, height=900, scale=2)
-        if not png_bytes:
-            return no_update
-        return dcc.send_bytes(lambda b: b.write(png_bytes), f"tabla_{tab_name}.png")
-
-    # --- PDF ---
-    if trigger_id == "download-table-pdf":
-        fig_to_export = build_section_report_table_fig(tab, dff, pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None, categorias)
-        if fig_to_export is None or not getattr(fig_to_export, "data", None):
-            return no_update
-        height = _calc_table_height(df_export, base=800)
-        png_bytes = fig_to_png_bytes(fig_to_export, width=1600, height=900, scale=2)
-        if not png_bytes:
-            return no_update
-        pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)
-        if not pdf_bytes:
-            return no_update
-        return dcc.send_bytes(lambda b: b.write(pdf_bytes), f"tabla_{tab_name}.pdf")
-
     return no_update
+
+
+@server.get("/download-table-file/<token>")
+def download_table_file(token):
+    payload, request_path = _load_report_request(token)
+    if payload is None:
+        abort(404)
+
+    temp_file_path = REPORT_DOWNLOAD_DIR / f"{token}"
+    response = None
+    try:
+        tab = payload.get("tab")
+        categorias = payload.get("categorias")
+        metricas = payload.get("metricas")
+        referencia = payload.get("referencia")
+        rango_dias = payload.get("rango_dias")
+        jugadores = payload.get("jugadores")
+        athlete = payload.get("athlete")
+        activitytags = payload.get("activitytags")
+        gametags = payload.get("gametags")
+        periodtags = payload.get("periodtags")
+        fecha_actividad = payload.get("fecha_actividad")
+        file_format = payload.get("file_format")
+
+        if categorias and isinstance(categorias, str):
+            categorias = [categorias]
+        if jugadores and isinstance(jugadores, str):
+            jugadores = [jugadores]
+        if athlete and isinstance(athlete, str):
+            athlete = [athlete]
+        activitytags = merge_filter_values(activitytags)
+        if gametags and isinstance(gametags, str):
+            gametags = [gametags]
+        if periodtags and isinstance(periodtags, str):
+            periodtags = [periodtags]
+
+        dff = df.copy()
+        if categorias:
+            dff = dff[dff["Category"].isin(categorias)]
+        dff = apply_rango_dias_filter(dff, rango_dias)
+        if jugadores:
+            dff = dff[dff["Player Name"].isin(jugadores)]
+        if athlete:
+            dff = dff[dff["Athlete Tags"].isin(athlete)]
+        if activitytags:
+            dff = dff[dff["Activity Tags"].isin(activitytags)]
+        if gametags:
+            dff = dff[dff["Game Tags"].isin(gametags)]
+        if periodtags:
+            dff = dff[dff["Period Tags"].isin(periodtags)]
+
+        metricas = metricas or ["Distance"]
+        referencia = referencia or "Category"
+        tab_name = tab_titles.get(tab, tab)
+        df_export = build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad)
+        if df_export is None or df_export.empty:
+            return ("", 404)
+
+        fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None
+
+        if file_format == "png":
+            fig_table = build_section_report_table_fig(tab, dff, fecha_dt, categorias)
+            if fig_table is None or not getattr(fig_table, "data", None):
+                return ("", 404)
+            png_bytes = fig_to_png_bytes(fig_table, width=1600, height=900, scale=2)
+            if not png_bytes:
+                return ("", 404)
+            response = send_file(
+                io.BytesIO(png_bytes),
+                mimetype="image/png",
+                as_attachment=True,
+                download_name=f"tabla_{tab_name}.png",
+                max_age=0,
+            )
+        elif file_format == "pdf":
+            fig_to_export = build_section_report_table_fig(tab, dff, fecha_dt, categorias)
+            if fig_to_export is None or not getattr(fig_to_export, "data", None):
+                return ("", 404)
+            png_bytes = fig_to_png_bytes(fig_to_export, width=1600, height=900, scale=2)
+            if not png_bytes:
+                return ("", 404)
+            pdf_bytes = build_graph_pdf_bytes(f"Tabla {tab_name}", png_bytes)
+            if not pdf_bytes:
+                return ("", 404)
+            response = send_file(
+                io.BytesIO(pdf_bytes),
+                mimetype="application/pdf",
+                as_attachment=True,
+                download_name=f"tabla_{tab_name}.pdf",
+                max_age=0,
+            )
+        else:
+            return ("", 404)
+
+        def _cleanup_download():
+            _cleanup_report_request(request_path)
+            _cleanup_report_request(temp_file_path)
+
+        response.call_on_close(_cleanup_download)
+        return response
+    except Exception:
+        logging.exception("Error generando la descarga directa de la tabla")
+        _cleanup_report_request(request_path)
+        _cleanup_report_request(temp_file_path)
+        abort(500)
+
+
+@app.callback(
+    Output("download-table-location", "href"),
+    Input("download-table-png", "n_clicks"),
+    Input("download-table-pdf", "n_clicks"),
+    State("tabs", "value"),
+    State("categoria", "value"),
+    State("metrica", "value"),
+    State("referencia", "value"),
+    State("rango-dias", "value"),
+    State("jugador", "value"),
+    State("athlete", "value"),
+    State("activitytag", "value"),
+    State("gametag", "value"),
+    State("periodtag", "value"),
+    State("fecha-actividad", "date"),
+    prevent_initial_call=True
+)
+def descargar_tabla_png_pdf(
+    png_clicks, pdf_clicks,
+    tab, categorias, metricas, referencia,
+    rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad
+):
+    if not png_clicks and not pdf_clicks:
+        return no_update
+
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return no_update
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if trigger_id not in {"download-table-png", "download-table-pdf"}:
+        return no_update
+
+    payload = _build_table_download_request_payload(
+        tab,
+        categorias,
+        metricas,
+        referencia,
+        rango_dias,
+        jugadores,
+        athlete,
+        merge_filter_values(activitytags),
+        gametags,
+        periodtags,
+        fecha_actividad,
+        "png" if trigger_id == "download-table-png" else "pdf",
+    )
+    token = _store_report_request(payload)
+    return f"/download-table-file/{token}"
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8050))
     app.run(
         host="0.0.0.0",
         port=port,
-        debug=False
+        debug=False,
+        threaded=True
     )
 

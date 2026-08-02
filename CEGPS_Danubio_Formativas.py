@@ -54,6 +54,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
+from reportlab.pdfbase.pdfmetrics import stringWidth
 import time
 
 # Base directory and font directory
@@ -1475,6 +1476,115 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
         footer_text = f"Creado por {author} — Página {page_num}"
         c.drawRightString(width - margin, margin / 2, footer_text)
 
+    def draw_section_separator(y_pos):
+        c.setStrokeColorRGB(0.65, 0.75, 0.85)
+        c.setLineWidth(0.25)
+        c.line(margin, y_pos, width - margin, y_pos)
+
+    def draw_section_title(y_pos, text, subtitle=None, title_size=16, subtitle_size=9):
+        c.setFillColorRGB(0.0, 0.0, 0.0)
+        c.setFont(title_font, title_size)
+        c.drawString(margin, y_pos, text)
+        y_pos -= title_size + 1
+        if subtitle:
+            c.setFont(small_font, subtitle_size)
+            c.setFillColorRGB(0.32, 0.32, 0.32)
+            c.drawString(margin, y_pos, subtitle)
+            subtitle_width = stringWidth(subtitle, small_font, subtitle_size)
+            c.setStrokeColorRGB(0.78, 0.85, 0.92)
+            c.setLineWidth(0.2)
+            c.line(margin, y_pos - 2, margin + subtitle_width, y_pos - 2)
+            y_pos -= subtitle_size + 2
+        c.setFillColorRGB(0.0, 0.0, 0.0)
+        return y_pos
+
+    def compute_table_widths(header, rows, max_width):
+        if not header:
+            return [], max_width
+
+        widths = []
+        sample_rows = rows[:15] if rows else []
+        for idx, col in enumerate(header):
+            candidates = [str(col)]
+            for row in sample_rows:
+                candidates.append(str(row.get(col, "")))
+            longest = max(candidates, key=len)
+            sample_width = stringWidth(longest, small_font, 8) + 12
+            header_width = stringWidth(str(col), title_font, 8) + 14
+            widths.append(max(42, min(max(sample_width, header_width), max_width)))
+
+        total_width = sum(widths)
+        min_total = max(72, 32 * len(header))
+
+        if total_width > max_width:
+            scale = max_width / total_width
+            widths = [max(42, w * scale) for w in widths]
+            total_width = sum(widths)
+        elif total_width < min_total and len(header) > 1:
+            boost = min_total / total_width
+            widths = [w * boost for w in widths]
+            total_width = sum(widths)
+
+        total_width = min(max(total_width, min_total), max_width)
+        if total_width and abs(sum(widths) - total_width) > 1:
+            scale = total_width / sum(widths)
+            widths = [max(36, w * scale) for w in widths]
+            total_width = sum(widths)
+
+        return widths, total_width
+
+    def draw_table_page(section, table_key, page_num):
+        table_data = section.get(table_key)
+        if not table_data:
+            return page_num
+
+        header, rows = table_data
+        if not header or not rows:
+            return page_num
+
+        c.showPage()
+        page_num += 1
+        y = draw_header(c)
+        y = draw_section_title(y, section.get("table_caption", section.get("title", "")), subtitle="Tabla resumida del apartado", title_size=14, subtitle_size=8)
+
+        table_rows = [header]
+        for row in rows:
+            table_rows.append([str(row.get(col, "")) for col in header])
+
+        max_width = width - 2 * margin
+        col_widths, table_width = compute_table_widths(header, rows, max_width)
+        table = Table(table_rows, colWidths=col_widths, repeatRows=1)
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#011c24")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#a3e3d0")),
+            ("TEXTCOLOR", (0, 1), (-1, -1), colors.HexColor("#1a1a1a")),
+            ("BACKGROUND", (0, 1), (-1, -1), colors.white),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f4f8fb")]),
+            ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#89bcef")),
+            ("FONTNAME", (0, 0), (-1, 0), title_font),
+            ("FONTNAME", (0, 1), (-1, -1), small_font),
+            ("FONTSIZE", (0, 0), (-1, -1), 8),
+            ("LEADING", (0, 0), (-1, -1), 9),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+            ("ALIGN", (0, 1), (-1, -1), "CENTER"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 4),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING", (0, 0), (-1, -1), 3),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ]))
+
+        table_height = table.wrapOn(c, table_width, height)[1]
+        if y - table_height < margin:
+            c.showPage()
+            page_num += 1
+            y = draw_header(c)
+            y = draw_section_title(y, f"{section.get('table_caption', section.get('title', ''))} (continuación)", subtitle="Tabla resumida del apartado", title_size=14, subtitle_size=8)
+            table_height = table.wrapOn(c, table_width, height)[1]
+
+        table_x = margin + max(0, (max_width - table_width) / 2)
+        table.drawOn(c, table_x, y - table_height)
+        return page_num
     # --- Portada ---
     c.setFont(title_font, 28)
     c.drawCentredString(width / 2, height - 2.5 * inch, title)
@@ -1524,21 +1634,23 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
 
         return page_num
 
-    def draw_table_page(section, table_key, page_num):
-        table_data = section.get(table_key)
+    def estimate_text_height(text, leading=11, wrap_width=100):
+        if not text:
+            return 0
+        total_lines = 0
+        for paragraph in text.split("\n"):
+            wrapped = textwrap.wrap(paragraph, width=wrap_width) or [""]
+            total_lines += len(wrapped)
+        return total_lines * leading
+
+    def draw_table_block(section, page_num, y):
+        table_data = section.get("table_data")
         if not table_data:
-            return page_num
+            return y, page_num
 
         header, rows = table_data
         if not header or not rows:
-            return page_num
-
-        c.showPage()
-        page_num += 1
-        y = draw_header(c)
-        c.setFont(title_font, 15)
-        c.drawString(margin, y, section.get("table_caption", section.get("title", "")))
-        y -= 18
+            return y, page_num
 
         table_rows = [header]
         for row in rows:
@@ -1546,7 +1658,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
 
         col_count = max(1, len(header))
         max_width = width - 2 * margin
-        base_width = max(70, int(max_width / col_count))
+        base_width = max(62, int(max_width / col_count))
         col_widths = [base_width for _ in header]
         table = Table(table_rows, colWidths=col_widths, repeatRows=1)
         table.setStyle(TableStyle([
@@ -1554,6 +1666,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#a3e3d0")),
             ("TEXTCOLOR", (0, 1), (-1, -1), colors.HexColor("#1a1a1a")),
             ("BACKGROUND", (0, 1), (-1, -1), colors.white),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f4f8fb")]),
             ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#89bcef")),
             ("FONTNAME", (0, 0), (-1, 0), title_font),
             ("FONTNAME", (0, 1), (-1, -1), small_font),
@@ -1564,108 +1677,117 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             ("ALIGN", (0, 1), (-1, -1), "CENTER"),
             ("LEFTPADDING", (0, 0), (-1, -1), 4),
             ("RIGHTPADDING", (0, 0), (-1, -1), 4),
-            ("TOPPADDING", (0, 0), (-1, -1), 4),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING", (0, 0), (-1, -1), 3),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
         ]))
 
-        table_width, table_height = table.wrapOn(c, max_width, height)
-        if y - table_height < margin:
+        section_label = section.get("table_caption", section.get("title", ""))
+        section_repeat = False
+
+        while True:
+            available = y - margin
+            if available < 90:
+                draw_footer(c, page_num)
+                c.showPage()
+                page_num += 1
+                y = draw_header(c)
+                c.setFont(title_font, 13)
+                c.drawString(margin, y, f"{section_label} (continuación)" if section_repeat else section_label)
+                y -= 18
+                section_repeat = True
+                continue
+
+            _, table_height = table.wrapOn(c, max_width, height)
+            if table_height <= available:
+                table.drawOn(c, margin, y - table_height)
+                y -= table_height + 6
+                return y, page_num
+
+            parts = table.split(max_width, available)
+            if parts:
+                first = parts[0]
+                _, first_height = first.wrapOn(c, max_width, height)
+                if first_height > available:
+                    draw_footer(c, page_num)
+                    c.showPage()
+                    page_num += 1
+                    y = draw_header(c)
+                    c.setFont(title_font, 13)
+                    c.drawString(margin, y, f"{section_label} (continuación)" if section_repeat else section_label)
+                    y -= 18
+                    section_repeat = True
+                    continue
+
+                first.drawOn(c, margin, y - first_height)
+                draw_footer(c, page_num)
+                c.showPage()
+                page_num += 1
+                y = draw_header(c)
+                c.setFont(title_font, 13)
+                c.drawString(margin, y, f"{section_label} (continuación)")
+                y -= 18
+                section_repeat = True
+                if len(parts) > 1:
+                    table = parts[1]
+                    continue
+                return y, page_num
+
+            draw_footer(c, page_num)
             c.showPage()
             page_num += 1
             y = draw_header(c)
-            c.setFont(title_font, 15)
-            c.drawString(margin, y, section.get("table_caption", section.get("title", "")))
+            c.setFont(title_font, 13)
+            c.drawString(margin, y, f"{section_label} (continuación)" if section_repeat else section_label)
             y -= 18
-            table_width, table_height = table.wrapOn(c, max_width, height)
-
-        table.drawOn(c, margin, y - table_height)
-        draw_footer(c, page_num)
-        return page_num
+            section_repeat = True
 
     # --- Iterar secciones ---
     for section in sections:
         page_num += 1
         y = draw_header(c)
 
+        section_title_text = section.get("title", "")
+        section_text = section.get("text", "")
+        table_data = section.get("table_data")
+        estimated_block = 22 + estimate_text_height(section_text, leading=11) + 12
+        if table_data and table_data[0] and table_data[1]:
+            table_rows = [table_data[0]] + [[str(row.get(col, "")) for col in table_data[0]] for row in table_data[1]]
+            estimated_table = Table(table_rows, colWidths=[max(62, int((width - 2 * margin) / max(1, len(table_data[0])))) for _ in table_data[0]], repeatRows=1)
+            _, est_table_h = estimated_table.wrapOn(c, width - 2 * margin, height)
+            estimated_block += est_table_h + 18
+        if y - estimated_block < margin + 24:
+            draw_footer(c, page_num)
+            c.showPage()
+            page_num += 1
+            y = draw_header(c)
+
         # Título de sección
-        c.setFont(title_font, 16)
-        c.drawString(margin, y, section.get("title", ""))
-        y -= 20
+        y = draw_section_title(y, section_title_text, subtitle="Redacción del apartado", title_size=16, subtitle_size=8)
 
         # Texto de la sección (envuelto)
         c.setFont(small_font, 10)
-        text = section.get("text", "")
-        if text:
+        if section_text:
             y = draw_wrapped_text(
                 c,
-                text,
+                section_text,
                 margin,
                 y,
                 int(width - 2 * margin),
-                12,
+                11,
                 height,
                 margin,
                 header_func=None
             )
+            y -= 4
+
+        if table_data:
+            y -= 2
+            draw_section_separator(y)
             y -= 8
+            y, page_num = draw_table_block(section, page_num, y)
+        else:
+            draw_footer(c, page_num)
 
-        # Insertar imágenes: primero figura principal, luego tabla si existe
-        draw_footer(c, page_num)
-        page_num = draw_image_page(section, "img", "caption", page_num)
-        page_num = draw_image_page(section, "table_img", "table_caption", page_num)
-        page_num = draw_table_page(section, "table_data", page_num)
-        section["img"] = None
-        section["table_img"] = None
-
-        for img_key, caption_key, max_h_default in [
-            ("img", "caption", 900),
-            ("table_img", "table_caption", 900)
-        ]:
-            img_bytes = section.get(img_key)
-            caption = section.get(caption_key, "")
-            if not img_bytes:
-                continue
-            try:
-                image = load_image_reader_from_bytes(img_bytes)
-                img_w, img_h = image.getSize()
-                max_w = width - 2 * margin
-                max_h = y - margin
-                # Si no hay suficiente espacio vertical, abrir nueva página y redibujar encabezado
-                if max_h <= 120:
-                    c.showPage()
-                    page_num += 1
-                    y = draw_header(c)
-                    c.setFont(title_font, 16)
-                    c.drawString(margin, y, section.get("title", ""))
-                    y -= 20
-                    max_h = y - margin
-
-                # limitar altura a un valor razonable para evitar imágenes gigantes
-                max_h = min(max_h, max_h_default)
-                ratio = min(max_w / img_w, max_h / img_h, 1)
-                draw_w = img_w * ratio
-                draw_h = img_h * ratio
-                x = margin + (max_w - draw_w) / 2
-                c.drawImage(image, x, y - draw_h, width=draw_w, height=draw_h, preserveAspectRatio=True, mask='auto')
-                y -= draw_h + 6
-
-                if caption:
-                    c.setFont(small_font, 9)
-                    c.drawString(margin, y, caption)
-                    y -= 14
-
-            except Exception as e:
-                logging.warning("No se pudo incrustar imagen en sección '%s': %s", section.get("title", ""), e)
-                # dejar un pequeño espacio y continuar
-                y -= 8
-
-        # Después de insertar contenido, si queda poco espacio, crear nueva página
-        if y < margin + 120:
-            c.showPage()
-            page_num += 1
-
-    # Pie de página en la última página
-    draw_footer(c, page_num)
     c.save()
     if output_path is not None:
         return str(output_path)

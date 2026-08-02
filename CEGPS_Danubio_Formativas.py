@@ -1443,10 +1443,10 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
     title_font = "ClashDisplay-Semibold" if "ClashDisplay-Semibold" in pdfmetrics.getRegisteredFontNames() else "Helvetica-Bold"
     small_font = "Manrope-Light" if "Manrope-Light" in pdfmetrics.getRegisteredFontNames() else "Helvetica"
 
-    def draw_header(c):
+    def draw_header(c, include_meta=True, include_filters=True, title_size=18):
         """Dibuja el encabezado y devuelve la coordenada y disponible debajo del encabezado."""
         y = height - margin
-        c.setFont(title_font, 18)
+        c.setFont(title_font, title_size)
         c.setFillColorRGB(0, 0, 0)
         c.drawString(margin, y, title)
         if logo_bytes:
@@ -1455,15 +1455,15 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
                 c.drawImage(logo, width - margin - 100, height - margin - 60, width=100, height=60, preserveAspectRatio=True, mask='auto')
             except Exception:
                 pass
-        y -= 26
-        c.setFont(small_font, 9)
-        c.drawString(margin, y, f"Autor: {author}")
-        c.drawRightString(width - margin, y, f"Fecha: {fecha_text}")
-        y -= 14
-        if filters_text:
-            # draw_wrapped_text devuelve la nueva y después de escribir el texto
+        y -= title_size + 8
+        if include_meta:
+            c.setFont(small_font, 9)
+            c.drawString(margin, y, f"Autor: {author}")
+            c.drawRightString(width - margin, y, f"Fecha: {fecha_text}")
+            y -= 14
+        if include_filters and filters_text:
             y = draw_wrapped_text(c, filters_text, margin, y, int(width - 2 * margin), 11, height, margin, header_func=None)
-        y -= 8
+            y -= 8
         c.setStrokeColorRGB(0.6, 0.7, 0.8)
         c.setLineWidth(0.5)
         c.line(margin, y, width - margin, y)
@@ -1473,8 +1473,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
         """Dibuja el pie de página con número de página."""
         footer_font = title_font if title_font else "Helvetica-Bold"
         c.setFont(footer_font, 9)
-        footer_text = f"Creado por {author} — Página {page_num}"
-        c.drawRightString(width - margin, margin / 2, footer_text)
+        c.drawCentredString(width / 2, margin / 2, f"Página {page_num}")
 
     def draw_section_separator(y_pos):
         c.setStrokeColorRGB(0.65, 0.75, 0.85)
@@ -1504,32 +1503,33 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
 
         widths = []
         sample_rows = rows[:15] if rows else []
-        for idx, col in enumerate(header):
+        for col in header:
             candidates = [str(col)]
             for row in sample_rows:
                 candidates.append(str(row.get(col, "")))
             longest = max(candidates, key=len)
             sample_width = stringWidth(longest, small_font, 8) + 12
             header_width = stringWidth(str(col), title_font, 8) + 14
-            widths.append(max(42, min(max(sample_width, header_width), max_width)))
+            widths.append(max(36, min(max(sample_width, header_width), max_width)))
 
         total_width = sum(widths)
-        min_total = max(72, 32 * len(header))
+        n_cols = len(header)
 
         if total_width > max_width:
             scale = max_width / total_width
-            widths = [max(42, w * scale) for w in widths]
-            total_width = sum(widths)
-        elif total_width < min_total and len(header) > 1:
-            boost = min_total / total_width
-            widths = [w * boost for w in widths]
-            total_width = sum(widths)
-
-        total_width = min(max(total_width, min_total), max_width)
-        if total_width and abs(sum(widths) - total_width) > 1:
-            scale = total_width / sum(widths)
             widths = [max(36, w * scale) for w in widths]
             total_width = sum(widths)
+        else:
+            if n_cols >= 6 and total_width < max_width * 0.95:
+                target = max_width * 0.95
+                scale = target / total_width
+                widths = [w * scale for w in widths]
+                total_width = sum(widths)
+            elif 4 <= n_cols <= 5 and total_width < max_width * 0.75:
+                target = max_width * 0.75
+                scale = target / total_width
+                widths = [w * scale for w in widths]
+                total_width = sum(widths)
 
         return widths, total_width
 
@@ -1544,8 +1544,8 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
 
         c.showPage()
         page_num += 1
-        y = draw_header(c)
-        y = draw_section_title(y, section.get("table_caption", section.get("title", "")), subtitle="Tabla resumida del apartado", title_size=14, subtitle_size=8)
+        y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
+        y = draw_section_title(y, section.get("table_caption", section.get("title", "")), subtitle="Tabla resumida del apartado", title_size=13, subtitle_size=8)
 
         table_rows = [header]
         for row in rows:
@@ -1578,8 +1578,8 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
         if y - table_height < margin:
             c.showPage()
             page_num += 1
-            y = draw_header(c)
-            y = draw_section_title(y, f"{section.get('table_caption', section.get('title', ''))} (continuación)", subtitle="Tabla resumida del apartado", title_size=14, subtitle_size=8)
+            y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
+            y = draw_section_title(y, f"{section.get('table_caption', section.get('title', ''))} (continuación)", subtitle="Tabla resumida del apartado", title_size=13, subtitle_size=8)
             table_height = table.wrapOn(c, table_width, height)[1]
 
         table_x = margin + max(0, (max_width - table_width) / 2)
@@ -1690,10 +1690,8 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
                 draw_footer(c, page_num)
                 c.showPage()
                 page_num += 1
-                y = draw_header(c)
-                c.setFont(title_font, 13)
-                c.drawString(margin, y, f"{section_label} (continuación)" if section_repeat else section_label)
-                y -= 18
+                y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
+                y = draw_section_title(y, f"{section_label} (continuación)" if section_repeat else section_label, subtitle="Tabla resumida del apartado", title_size=13, subtitle_size=8)
                 section_repeat = True
                 continue
 
@@ -1711,10 +1709,8 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
                     draw_footer(c, page_num)
                     c.showPage()
                     page_num += 1
-                    y = draw_header(c)
-                    c.setFont(title_font, 13)
-                    c.drawString(margin, y, f"{section_label} (continuación)" if section_repeat else section_label)
-                    y -= 18
+                    y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
+                    y = draw_section_title(y, f"{section_label} (continuación)" if section_repeat else section_label, subtitle="Tabla resumida del apartado", title_size=13, subtitle_size=8)
                     section_repeat = True
                     continue
 
@@ -1722,10 +1718,8 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
                 draw_footer(c, page_num)
                 c.showPage()
                 page_num += 1
-                y = draw_header(c)
-                c.setFont(title_font, 13)
-                c.drawString(margin, y, f"{section_label} (continuación)")
-                y -= 18
+                y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
+                y = draw_section_title(y, f"{section_label} (continuación)", subtitle="Tabla resumida del apartado", title_size=13, subtitle_size=8)
                 section_repeat = True
                 if len(parts) > 1:
                     table = parts[1]
@@ -1735,16 +1729,14 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             draw_footer(c, page_num)
             c.showPage()
             page_num += 1
-            y = draw_header(c)
-            c.setFont(title_font, 13)
-            c.drawString(margin, y, f"{section_label} (continuación)" if section_repeat else section_label)
-            y -= 18
+            y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
+            y = draw_section_title(y, f"{section_label} (continuación)" if section_repeat else section_label, subtitle="Tabla resumida del apartado", title_size=13, subtitle_size=8)
             section_repeat = True
 
     # --- Iterar secciones ---
     for section in sections:
         page_num += 1
-        y = draw_header(c)
+        y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
 
         section_title_text = section.get("title", "")
         section_text = section.get("text", "")
@@ -1759,7 +1751,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             draw_footer(c, page_num)
             c.showPage()
             page_num += 1
-            y = draw_header(c)
+            y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
 
         # Título de sección
         y = draw_section_title(y, section_title_text, subtitle="Redacción del apartado", title_size=16, subtitle_size=8)

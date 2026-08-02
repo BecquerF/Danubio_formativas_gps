@@ -52,8 +52,10 @@ from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import Table, TableStyle
+from reportlab.platypus import Table, TableStyle, Paragraph, Spacer, SimpleDocTemplate
 from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.pdfbase.pdfmetrics import stringWidth
 import time
 
@@ -1466,7 +1468,8 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             y -= 8
         c.setStrokeColorRGB(0.6, 0.7, 0.8)
         c.setLineWidth(0.5)
-        c.line(margin, y, width - margin, y)
+        line_end = min(width - margin - 112, margin + (width - 2 * margin) * 0.75)
+        c.line(margin, y, line_end, y)
         return y - 12
 
     def draw_footer(c, page_num):
@@ -1478,7 +1481,8 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
     def draw_section_separator(y_pos):
         c.setStrokeColorRGB(0.65, 0.75, 0.85)
         c.setLineWidth(0.25)
-        c.line(margin, y_pos, width - margin, y_pos)
+        line_end = min(width - margin - 112, margin + (width - 2 * margin) * 0.75)
+        c.line(margin, y_pos, line_end, y_pos)
 
     def draw_section_title(y_pos, text, subtitle=None, title_size=16, subtitle_size=9):
         c.setFillColorRGB(0.0, 0.0, 0.0)
@@ -1492,7 +1496,8 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             subtitle_width = stringWidth(subtitle, small_font, subtitle_size)
             c.setStrokeColorRGB(0.78, 0.85, 0.92)
             c.setLineWidth(0.2)
-            c.line(margin, y_pos - 2, margin + subtitle_width, y_pos - 2)
+            subtitle_end = min(width - margin - 112, margin + max(subtitle_width + 18, (width - 2 * margin) * 0.55))
+            c.line(margin, y_pos - 2, subtitle_end, y_pos - 2)
             y_pos -= subtitle_size + 6
         c.setFillColorRGB(0.0, 0.0, 0.0)
         return y_pos
@@ -1585,7 +1590,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
         table_x = margin + max(0, (max_width - table_width) / 2)
         table.drawOn(c, table_x, y - table_height)
         return page_num
-    page_num = 1
+    page_num = 0
 
     def draw_image_page(section, img_key, caption_key, page_num):
         img_bytes = section.get(img_key)
@@ -1726,12 +1731,19 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             section_repeat = True
 
     # --- Iterar secciones ---
-    for section in sections:
-        page_num += 1
-        y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
+    current_y = None
 
-        section_title_text = section.get("title", "")
-        section_text = section.get("text", "")
+    def _start_new_content_page():
+        nonlocal page_num
+        if page_num > 0:
+            draw_footer(c, page_num)
+            c.showPage()
+        page_num += 1
+        return draw_header(c, include_meta=False, include_filters=False, title_size=14)
+
+    for section in sections:
+        section_title_text = (section.get("title", "") or "").strip()
+        section_text = (section.get("text", "") or "").strip()
         table_data = section.get("table_data")
         estimated_block = 22 + estimate_text_height(section_text, leading=11) + 12
         if table_data and table_data[0] and table_data[1]:

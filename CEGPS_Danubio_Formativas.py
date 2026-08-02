@@ -1493,7 +1493,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             c.setStrokeColorRGB(0.78, 0.85, 0.92)
             c.setLineWidth(0.2)
             c.line(margin, y_pos - 2, margin + subtitle_width, y_pos - 2)
-            y_pos -= subtitle_size + 2
+            y_pos -= subtitle_size + 6
         c.setFillColorRGB(0.0, 0.0, 0.0)
         return y_pos
 
@@ -1585,16 +1585,6 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
         table_x = margin + max(0, (max_width - table_width) / 2)
         table.drawOn(c, table_x, y - table_height)
         return page_num
-    # --- Portada ---
-    c.setFont(title_font, 28)
-    c.drawCentredString(width / 2, height - 2.5 * inch, title)
-    c.setFont(small_font, 12)
-    c.drawCentredString(width / 2, height - 2.5 * inch - 28, f"Autor: {author} | Fecha: {fecha_text}")
-    if filters_text:
-        c.setFont(small_font, 10)
-        draw_wrapped_text(c, filters_text, margin, height - 2.5 * inch - 60, int(width - 2 * margin), 11, height, margin)
-    c.showPage()
-
     page_num = 1
 
     def draw_image_page(section, img_key, caption_key, page_num):
@@ -1699,6 +1689,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             if table_height <= available:
                 table.drawOn(c, margin, y - table_height)
                 y -= table_height + 6
+                draw_footer(c, page_num)
                 return y, page_num
 
             parts = table.split(max_width, available)
@@ -1724,6 +1715,7 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
                 if len(parts) > 1:
                     table = parts[1]
                     continue
+                draw_footer(c, page_num)
                 return y, page_num
 
             draw_footer(c, page_num)
@@ -1776,6 +1768,11 @@ def build_report_pdf_multi(title, author, logo_bytes, sections, fecha_text, filt
             y -= 2
             draw_section_separator(y)
             y -= 8
+            draw_footer(c, page_num)
+            c.showPage()
+            page_num += 1
+            y = draw_header(c, include_meta=False, include_filters=False, title_size=14)
+            y = draw_section_title(y, section.get("table_caption", section_title_text), subtitle="Tabla resumida del apartado", title_size=13, subtitle_size=8)
             y, page_num = draw_table_block(section, page_num, y)
         else:
             draw_footer(c, page_num)

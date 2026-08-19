@@ -2997,7 +2997,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
         metricas_validas = [m for m in metricas_promedios if m in df.columns]
         metric_sel = metricas_validas[0] if metricas_validas else None
         return html.Div([
-            html.H4("Carga cr?nica por Categor?a", style={
+            html.H4("carga cronica por categoria", style={
                 "color": "#a3e3d0",
                 "marginBottom": "8px",
                 "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
@@ -3005,7 +3005,7 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
                 "letterSpacing": "0.4px"
             }),
             html.Div(
-                "Seleccion? una m?trica para ver la matriz Activity Tags ? Game Tags usando los ?ltimos 28 d?as cargados.",
+                "selecciona una metrica para ver la matriz activity tags x game tags usando los ultimos 28 dias cargados.",
                 style={
                     "color": "#edf1f2",
                     "marginBottom": "14px",
@@ -5023,8 +5023,8 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
     if matrix_df is None or matrix_df.empty:
         return html.Div([
             html.Div([
-                html.Div("Vista de la matriz", style={"color": "#a3e3d0", "fontWeight": "700"}),
-                html.Div(f"Categor?a: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
+                html.Div("vista de la matriz", style={"color": "#a3e3d0", "fontWeight": "700"}),
+                html.Div(f"categoria: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
             ], style={"display": "flex", "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap", "marginBottom": "10px"}),
             html.Div("No hay datos para construir la matriz con los filtros actuales.", style={"color": "#edf1f2", "padding": "18px"})
         ], style={
@@ -5113,8 +5113,8 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
 
     return html.Div([
         html.Div([
-            html.Div("Matriz de carga cr?nica", style={"color": "#a3e3d0", "fontWeight": "700", "fontSize": "14px"}),
-            html.Div(f"Categor?a: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
+            html.Div("matriz de carga cronica", style={"color": "#a3e3d0", "fontWeight": "700", "fontSize": "14px"}),
+            html.Div(f"categoria: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
         ], style={"display": "flex", "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap", "marginBottom": "10px"}),
         dcc.Loading(data_table, type="default")
     ], style={"display": "flex", "flexDirection": "column", "gap": "10px"})

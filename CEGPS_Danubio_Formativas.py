@@ -271,6 +271,7 @@ tab_titles = {
     "actividad": "Actividad_por_Jugador",
     "actividad_comparativa": "Actividad_Comparativa_Individual",
     "actividad_promedios": "Actividad_Promedios",
+    "carga_cronica_categoria": "Carga_Cronica_por_Categoria",
     "acwr": "ACWR_Zona_Segura",
     "plyr_vs_plyr": "PLYR_vs_PLYR",
     "informe": "Informe"
@@ -281,6 +282,7 @@ informe_sections = [
     {"label": "Actividad", "value": "actividad"},
     {"label": "Actividad Comparativa Individual", "value": "actividad_comparativa"},
     {"label": "Actividad/Promedios", "value": "actividad_promedios"},
+    {"label": "Carga crónica por Categoría", "value": "carga_cronica_categoria"},
     {"label": "ACWR", "value": "acwr"},
     {"label": "PLYR vs PLYR", "value": "plyr_vs_plyr"},
     {"label": "Comparativo", "value": "comparativas"},
@@ -357,6 +359,8 @@ def build_chart_title(tab, categorias, metricas, referencia):
         title = "Actividad comparativa individual"
     elif tab == "actividad_promedios":
         title = "Actividad / Promedios"
+    elif tab == "carga_cronica_categoria":
+        title = "Carga crónica por Categoría"
     elif tab == "plyr_vs_plyr":
         title = "Comparativa Jugador vs Jugador"
 
@@ -746,6 +750,7 @@ def section_title(section_value):
         "actividad": "Actividad",
         "actividad_comparativa": "Actividad Comparativa Individual",
         "actividad_promedios": "Actividad/Promedios",
+        "carga_cronica_categoria": "Carga crónica por Categoría",
         "acwr": "ACWR",
         "maximos_rendimientos": "Máximos Rendimientos",
         "plyr_vs_plyr": "PLYR vs PLYR",
@@ -881,6 +886,76 @@ def build_actividad_comparativa_report_fig(dff, fecha_dt):
     )
     fig.for_each_annotation(lambda a: a.update(text=a.text.split('=')[-1]))
     return fig
+
+
+def _normalize_selection_values(values):
+    if values is None:
+        return []
+    if isinstance(values, str):
+        return [values]
+    return [value for value in values if value not in (None, "")]
+
+
+def _build_carga_cronica_categoria_matrix(categorias, metric_name, source_df=None):
+    metric_name = (metric_name or "").strip()
+    if not metric_name or metric_name not in df.columns:
+        metric_name = next((m for m in metricas_promedios if m in df.columns), None)
+    if not metric_name:
+        return None
+
+    base_df = source_df if source_df is not None else df
+    dff = base_df.copy()
+    if categorias:
+        categorias = _normalize_selection_values(categorias)
+        if categorias:
+            dff = dff[dff["Category"].isin(categorias)]
+    if dff.empty or "Date" not in dff.columns:
+        return None
+
+    dff = dff.copy()
+    dff["Date"] = pd.to_datetime(dff["Date"], errors="coerce")
+    dff = dff[dff["Date"].notna()]
+    if dff.empty:
+        return None
+
+    if "Activity Tags" not in dff.columns or "Game Tags" not in dff.columns:
+        return None
+
+    fecha_base = pd.to_datetime(dff["Date"].max()).normalize()
+    fecha_inicio = fecha_base - pd.Timedelta(days=27)
+    dff = dff[dff["Date"].dt.normalize().between(fecha_inicio, fecha_base)]
+    if dff.empty:
+        return None
+
+    dff = dff[dff["Activity Tags"].notna() & dff["Game Tags"].notna()]
+    if dff.empty or metric_name not in dff.columns:
+        return None
+
+    pivot = dff.pivot_table(
+        index="Activity Tags",
+        columns="Game Tags",
+        values=metric_name,
+        aggfunc="mean"
+    )
+    if pivot.empty:
+        return None
+
+    pivot = pivot.sort_index()
+    pivot = pivot.reindex(sorted([c for c in pivot.columns.tolist() if str(c).strip()]), axis=1)
+    pivot = pivot.fillna(0).round(2)
+    pivot.index.name = "Activity Tags"
+    return pivot.reset_index()
+
+
+def build_carga_cronica_categoria_report_fig(categorias, metric_name):
+    matrix_df = _build_carga_cronica_categoria_matrix(categorias, metric_name)
+    if matrix_df is None or matrix_df.empty:
+        return go.Figure()
+
+    header = matrix_df.columns.tolist()
+    rows = matrix_df.to_dict(orient="records")
+    title = f"Carga cr?nica por Categor?a - {metric_name or 'M?trica'}"
+    return build_plotly_table(header, rows, title)
 
 
 def build_actividad_promedios_report_fig(dff, fecha_dt):
@@ -2139,6 +2214,38 @@ app.layout = html.Div([
                 "marginBottom":"1px"
             }
         ),
+
+        dcc.Tab(
+            label="CARGA CRÓNICA POR CATEGORÍA",
+            value="carga_cronica_categoria",
+            className="tab-item",
+            selected_className="tab-item-selected",
+            style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#edf1f2",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"2px 6px",
+                "marginBottom":"1px"
+            },
+            selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#a3e3d0",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"2px 6px",
+                "backgroundColor":"#011c24",
+                "marginBottom":"1px"
+            }
+        ),
         
         dcc.Tab(
                     label="MAXIMOS RENDIMIENTOS",
@@ -2885,6 +2992,89 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
     metricas = [m for m in metricas if m in dff.columns]
     referencia = referencia or "Category"
     fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+
+    if tab == "carga_cronica_categoria":
+        metricas_validas = [m for m in metricas_promedios if m in df.columns]
+        metric_sel = metricas_validas[0] if metricas_validas else None
+        return html.Div([
+            html.H4("Carga cr?nica por Categor?a", style={
+                "color": "#a3e3d0",
+                "marginBottom": "8px",
+                "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
+                "fontWeight": "700",
+                "letterSpacing": "0.4px"
+            }),
+            html.Div(
+                "Seleccion? una m?trica para ver la matriz Activity Tags ? Game Tags usando los ?ltimos 28 d?as cargados.",
+                style={
+                    "color": "#edf1f2",
+                    "marginBottom": "14px",
+                    "fontSize": "13px",
+                    "lineHeight": "1.45",
+                    "maxWidth": "900px"
+                }
+            ),
+            dcc.Tabs(
+                id="carga-cronica-metrica-tabs",
+                value=metric_sel,
+                className="tab-menu",
+                vertical=False,
+                style={
+                    "display": "flex",
+                    "flexWrap": "wrap",
+                    "gap": "6px",
+                    "background": "transparent",
+                    "border": "none",
+                    "marginBottom": "14px",
+                },
+                children=[
+                    dcc.Tab(
+                        label=m,
+                        value=m,
+                        className="tab-item",
+                        selected_className="tab-item-selected",
+                        style={
+                            "whiteSpace": "normal",
+                            "overflow": "hidden",
+                            "textOverflow": "ellipsis",
+                            "color": "#edf1f2",
+                            "fontSize": "11px",
+                            "textAlign": "center",
+                            "fontWeight": "600",
+                            "borderTop": "1px solid rgba(137,188,239,.18)",
+                            "padding": "2px 6px",
+                            "marginBottom": "1px",
+                        },
+                        selected_style={
+                            "whiteSpace": "normal",
+                            "overflow": "hidden",
+                            "textOverflow": "ellipsis",
+                            "color": "#a3e3d0",
+                            "fontSize": "11px",
+                            "textAlign": "center",
+                            "fontWeight": "600",
+                            "borderTop": "1px solid #a3e3d0",
+                            "padding": "2px 6px",
+                            "backgroundColor": "#011c24",
+                            "marginBottom": "1px",
+                        },
+                    )
+                    for m in metricas_validas
+                ]
+            ),
+            html.Div(id="carga-cronica-output")
+        ], style={
+            "padding": "22px",
+            "background": "#0b0c0e",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "24px",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+            "minWidth": "1000px",
+            "overflowX": "auto",
+            "maxWidth": "1000px",
+            "maxHeight": "720px",
+            "overflowY": "auto"
+        })
     
     # COMPARATIVAS
     if tab == "comparativas":
@@ -4378,6 +4568,7 @@ def _build_table_download_request_payload(
     periodtags,
     fecha_actividad,
     file_format,
+    carga_cronica_metric=None,
 ):
     return {
         "tab": tab,
@@ -4392,6 +4583,7 @@ def _build_table_download_request_payload(
         "periodtags": periodtags,
         "fecha_actividad": fecha_actividad,
         "file_format": file_format,
+        "carga_cronica_metric": carga_cronica_metric,
     }
 
 
@@ -4702,7 +4894,8 @@ def _create_tab_graph_figure(
     jugador_1=None,
     jugador_2=None,
     game_tags=None,
-    period_tags=None
+    period_tags=None,
+    carga_cronica_metric=None
 ):
     metricas = metricas or ["Distance"]
     metricas = [m for m in metricas if m in dff.columns]
@@ -4793,6 +4986,10 @@ def _create_tab_graph_figure(
             return None
         fecha_dt = pd.to_datetime(fecha_actividad).normalize()
         return build_actividad_promedios_report_fig(dff, fecha_dt)
+
+    if tab == "carga_cronica_categoria":
+        metric_sel = carga_cronica_metric or (metricas[0] if metricas else None)
+        return build_carga_cronica_categoria_report_fig(categorias, metric_sel)
     
     if tab == "plyr_vs_plyr":
         return build_plyr_vs_plyr(
@@ -4807,12 +5004,106 @@ def _create_tab_graph_figure(
     return None
 
 
+@app.callback(
+    Output("carga-cronica-output", "children"),
+    Input("carga-cronica-metrica-tabs", "value"),
+    Input("categoria", "value"),
+    Input("tabs", "value"),
+    prevent_initial_call=False
+)
+def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
+    if tab != "carga_cronica_categoria":
+        return no_update
+
+    metric_name = metric_name or next((m for m in metricas_promedios if m in df.columns), None)
+    matrix_df = _build_carga_cronica_categoria_matrix(categorias, metric_name)
+    categoria_text = summarize_items(categorias, max_items=10, default="Todas")
+
+    if matrix_df is None or matrix_df.empty:
+        return html.Div([
+            html.Div([
+                html.Div("Vista de la matriz", style={"color": "#a3e3d0", "fontWeight": "700"}),
+                html.Div(f"Categor?a: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
+            ], style={"display": "flex", "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap", "marginBottom": "10px"}),
+            html.Div("No hay datos para construir la matriz con los filtros actuales.", style={"color": "#edf1f2", "padding": "18px"})
+        ], style={
+            "padding": "16px",
+            "background": "#0b0c0e",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "18px",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+        })
+
+    columns = []
+    for idx, col in enumerate(matrix_df.columns):
+        if idx == 0:
+            columns.append({"name": col, "id": col})
+        else:
+            columns.append({"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}})
+
+    data_table = dash_table.DataTable(
+        data=matrix_df.to_dict("records"),
+        columns=columns,
+        fixed_rows={"headers": True},
+        fixed_columns={"headers": True, "data": 1},
+        sort_action="native",
+        page_action="none",
+        style_table={
+            "overflowX": "auto",
+            "maxHeight": "620px",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "16px",
+            "backgroundColor": "#0b0c0e",
+            "width": "100%",
+            "tableLayout": "auto",
+        },
+        style_header={
+            "backgroundColor": "#011c24",
+            "color": "#a3e3d0",
+            "fontWeight": "700",
+            "textAlign": "center",
+            "whiteSpace": "normal",
+            "height": "auto",
+            "lineHeight": "16px",
+            "padding": "8px",
+            "borderBottom": "1px solid rgba(137,188,239,0.18)",
+        },
+        style_cell={
+            "backgroundColor": "#0b0c0e",
+            "color": "#edf1f2",
+            "fontSize": "12px",
+            "textAlign": "center",
+            "minWidth": "120px",
+            "width": "120px",
+            "maxWidth": "220px",
+            "whiteSpace": "normal",
+            "height": "auto",
+            "padding": "6px",
+            "border": "none",
+        },
+        style_data_conditional=[
+            {"if": {"row_index": "odd"}, "backgroundColor": "#0e141a"},
+            {"if": {"column_id": "Activity Tags"}, "textAlign": "left", "fontWeight": "600", "backgroundColor": "#081319"},
+        ],
+    )
+
+    return html.Div([
+        html.Div([
+            html.Div("Matriz de carga cr?nica", style={"color": "#a3e3d0", "fontWeight": "700", "fontSize": "14px"}),
+            html.Div(f"Categor?a: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
+        ], style={"display": "flex", "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap", "marginBottom": "10px"}),
+        dcc.Loading(data_table, type="default")
+    ], style={"display": "flex", "flexDirection": "column", "gap": "10px"})
+
+
 def _get_tab_filename(tab, referencia):
     if tab == "comparativas":
         referencia_label = referencia if isinstance(referencia, str) else "Grafico"
         return f"comparativas_{referencia_label.replace(' ', '_')}"
     if tab == "plyr_vs_plyr":
         return "plyr_vs_plyr"
+    if tab == "carga_cronica_categoria":
+        return "carga_cronica_categoria"
     return tab.replace("_", "-")
 
 
@@ -4857,6 +5148,7 @@ def _build_graph_download(fig, filename, format):
     State("jugador_2", "value"),
     State("game_tags", "value"),
     State("period_tags", "value"),
+    State("carga-cronica-metrica-tabs", "value"),
     prevent_initial_call=True
 )
 def descargar_grafico(
@@ -4876,6 +5168,7 @@ def descargar_grafico(
     jugador_2,
     game_tags,
     period_tags,
+    carga_cronica_metric,
 ):
     if not n_clicks_png:
         return no_update
@@ -4896,6 +5189,7 @@ def descargar_grafico(
         jugador_2=jugador_2,
         game_tags=game_tags,
         period_tags=period_tags,
+        carga_cronica_metric=carga_cronica_metric,
     )
 
     if fig is None or not getattr(fig, "data", None):
@@ -4947,6 +5241,13 @@ def build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad=
         promedio_jugador = dff.groupby("Player Name")[metricas_base].mean(numeric_only=True).reset_index()
         return resumen_fecha.merge(promedio_jugador, on="Player Name", how="outer", suffixes=("", "_Promedio")).fillna(0)
 
+    if tab == "carga_cronica_categoria":
+        metric_name = metricas[0] if metricas else None
+        matrix_df = _build_carga_cronica_categoria_matrix(None, metric_name, source_df=dff)
+        if matrix_df is None:
+            return pd.DataFrame()
+        return matrix_df
+
     if tab == "acwr":
         metricas_acwr = ["Distance","Player Load","Acceleration Efforts","Sprint Distance",
                          "High Speed Distance","Sprint Efforts","High Speed Efforts","Impacts"]
@@ -4991,12 +5292,14 @@ def build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad=
     State("gametag", "value"),
     State("periodtag", "value"),
     State("fecha-actividad", "date"),
+    State("carga-cronica-metrica-tabs", "value"),
     prevent_initial_call=True
 )
 def descargar_tabla_csv_xlsx(
     csv_clicks, xlsx_clicks,
     tab, categorias, metricas, referencia,
-    rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad
+    rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad,
+    carga_cronica_metric
 ):
     ctx = dash.callback_context
     if not ctx.triggered:
@@ -5015,20 +5318,26 @@ def descargar_tabla_csv_xlsx(
     if periodtags and isinstance(periodtags, str):
         periodtags = [periodtags]
 
-    dff = df.copy()
-    if categorias:
-        dff = dff[dff["Category"].isin(categorias)]
-    dff = apply_rango_dias_filter(dff, rango_dias)
-    if jugadores:
-        dff = dff[dff["Player Name"].isin(jugadores)]
-    if athlete:
-        dff = dff[dff["Athlete Tags"].isin(athlete)]
-    if activitytags:
-        dff = dff[dff["Activity Tags"].isin(activitytags)]
-    if gametags:
-        dff = dff[dff["Game Tags"].isin(gametags)]
-    if periodtags:
-        dff = dff[dff["Period Tags"].isin(periodtags)]
+    if tab == "carga_cronica_categoria":
+        metricas = [carga_cronica_metric] if carga_cronica_metric else metricas
+        dff = df.copy()
+        if categorias:
+            dff = dff[dff["Category"].isin(categorias)]
+    else:
+        dff = df.copy()
+        if categorias:
+            dff = dff[dff["Category"].isin(categorias)]
+        dff = apply_rango_dias_filter(dff, rango_dias)
+        if jugadores:
+            dff = dff[dff["Player Name"].isin(jugadores)]
+        if athlete:
+            dff = dff[dff["Athlete Tags"].isin(athlete)]
+        if activitytags:
+            dff = dff[dff["Activity Tags"].isin(activitytags)]
+        if gametags:
+            dff = dff[dff["Game Tags"].isin(gametags)]
+        if periodtags:
+            dff = dff[dff["Period Tags"].isin(periodtags)]
 
     metricas = metricas or ["Distance"]
     referencia = referencia or "Category"
@@ -5093,6 +5402,7 @@ def download_table_file(token):
         periodtags = payload.get("periodtags")
         fecha_actividad = payload.get("fecha_actividad")
         file_format = payload.get("file_format")
+        carga_cronica_metric = payload.get("carga_cronica_metric")
 
         if categorias and isinstance(categorias, str):
             categorias = [categorias]
@@ -5106,20 +5416,26 @@ def download_table_file(token):
         if periodtags and isinstance(periodtags, str):
             periodtags = [periodtags]
 
-        dff = df.copy()
-        if categorias:
-            dff = dff[dff["Category"].isin(categorias)]
-        dff = apply_rango_dias_filter(dff, rango_dias)
-        if jugadores:
-            dff = dff[dff["Player Name"].isin(jugadores)]
-        if athlete:
-            dff = dff[dff["Athlete Tags"].isin(athlete)]
-        if activitytags:
-            dff = dff[dff["Activity Tags"].isin(activitytags)]
-        if gametags:
-            dff = dff[dff["Game Tags"].isin(gametags)]
-        if periodtags:
-            dff = dff[dff["Period Tags"].isin(periodtags)]
+        if tab == "carga_cronica_categoria":
+            metricas = [carga_cronica_metric] if carga_cronica_metric else metricas
+            dff = df.copy()
+            if categorias:
+                dff = dff[dff["Category"].isin(categorias)]
+        else:
+            dff = df.copy()
+            if categorias:
+                dff = dff[dff["Category"].isin(categorias)]
+            dff = apply_rango_dias_filter(dff, rango_dias)
+            if jugadores:
+                dff = dff[dff["Player Name"].isin(jugadores)]
+            if athlete:
+                dff = dff[dff["Athlete Tags"].isin(athlete)]
+            if activitytags:
+                dff = dff[dff["Activity Tags"].isin(activitytags)]
+            if gametags:
+                dff = dff[dff["Game Tags"].isin(gametags)]
+            if periodtags:
+                dff = dff[dff["Period Tags"].isin(periodtags)]
 
         metricas = metricas or ["Distance"]
         referencia = referencia or "Category"
@@ -5131,7 +5447,10 @@ def download_table_file(token):
         fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else None
 
         if file_format == "png":
-            fig_table = build_section_report_table_fig(tab, dff, fecha_dt, categorias)
+            if tab == "carga_cronica_categoria":
+                fig_table = build_carga_cronica_categoria_report_fig(categorias, metricas[0] if metricas else None)
+            else:
+                fig_table = build_section_report_table_fig(tab, dff, fecha_dt, categorias)
             if fig_table is None or not getattr(fig_table, "data", None):
                 return ("", 404)
             png_bytes = fig_to_png_bytes(fig_table, width=1600, height=900, scale=2)
@@ -5145,7 +5464,10 @@ def download_table_file(token):
                 max_age=0,
             )
         elif file_format == "pdf":
-            fig_to_export = build_section_report_table_fig(tab, dff, fecha_dt, categorias)
+            if tab == "carga_cronica_categoria":
+                fig_to_export = build_carga_cronica_categoria_report_fig(categorias, metricas[0] if metricas else None)
+            else:
+                fig_to_export = build_section_report_table_fig(tab, dff, fecha_dt, categorias)
             if fig_to_export is None or not getattr(fig_to_export, "data", None):
                 return ("", 404)
             png_bytes = fig_to_png_bytes(fig_to_export, width=1600, height=900, scale=2)
@@ -5192,12 +5514,14 @@ def download_table_file(token):
     State("gametag", "value"),
     State("periodtag", "value"),
     State("fecha-actividad", "date"),
+    State("carga-cronica-metrica-tabs", "value"),
     prevent_initial_call=True
 )
 def descargar_tabla_png_pdf(
     png_clicks, pdf_clicks,
     tab, categorias, metricas, referencia,
-    rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad
+    rango_dias, jugadores, athlete, activitytags, gametags, periodtags, fecha_actividad,
+    carga_cronica_metric
 ):
     if not png_clicks and not pdf_clicks:
         return no_update
@@ -5223,6 +5547,7 @@ def descargar_tabla_png_pdf(
         periodtags,
         fecha_actividad,
         "png" if trigger_id == "download-table-png" else "pdf",
+        carga_cronica_metric,
     )
     token = _store_report_request(payload)
     return f"/download-table-file/{token}"

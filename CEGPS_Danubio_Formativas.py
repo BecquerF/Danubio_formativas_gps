@@ -954,7 +954,7 @@ def build_carga_cronica_categoria_report_fig(categorias, metric_name):
 
     header = matrix_df.columns.tolist()
     rows = matrix_df.to_dict(orient="records")
-    title = f"Carga cr?nica por Categor?a - {metric_name or 'M?trica'}"
+    title = f"Carga crónica por Categoría - {metric_name or 'Métrica'}"
     return build_plotly_table(header, rows, title)
 
 
@@ -980,7 +980,7 @@ def build_actividad_promedios_report_fig(dff, fecha_dt):
         return go.Figure()
 
     resumen = dff_28.groupby(group_cols, dropna=False)[metrics].mean(numeric_only=True).reset_index().round(2)
-    melted = resumen.melt(id_vars=group_cols, value_vars=metrics, var_name="M?trica", value_name="Valor")
+    melted = resumen.melt(id_vars=group_cols, value_vars=metrics, var_name="Métrica", value_name="Valor")
     if melted.empty:
         return go.Figure()
 
@@ -989,14 +989,14 @@ def build_actividad_promedios_report_fig(dff, fecha_dt):
         melted,
         x="Valor",
         y="Etiqueta",
-        color="M?trica",
+        color="Métrica",
         orientation="h",
         barmode="group",
         template="plotly_dark",
         color_discrete_sequence=["#48f788", "#89bcef", "#f1a3fd", "#a3e3d0", "#edf1f2", "#f96e83", "#f4c95d"],
     )
     fig.update_layout(
-        title={"text": "Actividad / Promedios - ?ltimos 28 d?as", "font": {"color": "#f5f5f5", "size": 18}},
+        title={"text": "Actividad / Promedios - Últimos 28 días", "font": {"color": "#f5f5f5", "size": 18}},
         paper_bgcolor="#0b0c0e",
         plot_bgcolor="#0b0c0e",
         font={"color": "#f5f5f5"},
@@ -3069,9 +3069,10 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
             "border": "1px solid rgba(137,188,239,0.18)",
             "borderRadius": "24px",
             "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
-            "minWidth": "1000px",
-            "overflowX": "auto",
-            "maxWidth": "1000px",
+            "minWidth": "0",
+            "width": "100%",
+            "maxWidth": "100%",
+            "overflowX": "hidden",
             "maxHeight": "720px",
             "overflowY": "auto"
         })
@@ -5041,21 +5042,43 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
         else:
             columns.append({"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}})
 
+    n_cols = len(matrix_df.columns)
+    first_width = 24 if n_cols <= 6 else 20 if n_cols <= 10 else 18
+    remaining_width = max(10, 100 - first_width)
+    other_width = remaining_width / max(1, n_cols - 1)
+    cell_conditional = [
+        {
+            "if": {"column_id": "Activity Tags"},
+            "textAlign": "left",
+            "fontWeight": "600",
+            "backgroundColor": "#081319",
+            "width": f"{first_width}%",
+            "minWidth": "180px",
+            "maxWidth": "none",
+        }
+    ]
+    for col in matrix_df.columns[1:]:
+        cell_conditional.append({
+            "if": {"column_id": col},
+            "width": f"{other_width:.3f}%",
+            "minWidth": "72px",
+            "maxWidth": "none",
+        })
+
     data_table = dash_table.DataTable(
         data=matrix_df.to_dict("records"),
         columns=columns,
-        fixed_rows={"headers": True},
-        fixed_columns={"headers": True, "data": 1},
         sort_action="native",
         page_action="none",
         style_table={
-            "overflowX": "auto",
+            "overflowX": "hidden",
             "maxHeight": "620px",
             "border": "1px solid rgba(137,188,239,0.18)",
             "borderRadius": "16px",
             "backgroundColor": "#0b0c0e",
             "width": "100%",
-            "tableLayout": "auto",
+            "minWidth": "0",
+            "tableLayout": "fixed",
         },
         style_header={
             "backgroundColor": "#011c24",
@@ -5073,17 +5096,18 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
             "color": "#edf1f2",
             "fontSize": "12px",
             "textAlign": "center",
-            "minWidth": "120px",
-            "width": "120px",
-            "maxWidth": "220px",
+            "minWidth": "0",
+            "width": "auto",
+            "maxWidth": "none",
             "whiteSpace": "normal",
             "height": "auto",
             "padding": "6px",
             "border": "none",
+            "lineHeight": "1.25",
         },
+        style_cell_conditional=cell_conditional,
         style_data_conditional=[
             {"if": {"row_index": "odd"}, "backgroundColor": "#0e141a"},
-            {"if": {"column_id": "Activity Tags"}, "textAlign": "left", "fontWeight": "600", "backgroundColor": "#081319"},
         ],
     )
 

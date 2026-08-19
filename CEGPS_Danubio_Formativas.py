@@ -922,32 +922,68 @@ def _build_carga_cronica_categoria_matrix(categorias, metric_name, source_df=Non
         return None
 
     latest_date = dff["Date"].max().normalize()
-    records = []
     ordered = dff.sort_values("Date")
-    for (activity_tag, game_tag), group in ordered.groupby(["Activity Tags", "Game Tags"], dropna=False):
-        values = group[metric_name].tolist()
-        if not values:
-            continue
-        last_value = values[-1]
-        chronic_values = values[:-1][-28:]
-        chronic_value = sum(chronic_values) / len(chronic_values) if chronic_values else last_value
-        records.append({
-            "Activity Tags": str(activity_tag),
-            "Game Tags": str(game_tag),
-            "Value": f"{last_value:.2f} / {chronic_value:.2f}",
-        })
+    activity_tags = sorted(
+        ordered["Activity Tags"].dropna().astype(str).unique().tolist(),
+        key=lambda x: x.lower(),
+    )
+    game_tags = sorted(
+        ordered["Game Tags"].dropna().astype(str).unique().tolist(),
+        key=lambda x: x.lower(),
+    )
+    if not activity_tags or not game_tags:
+        return None
+
+    ratio_cols = [f"__ratio_{idx}" for idx in range(len(game_tags))]
+    records = []
+    for activity_tag in activity_tags:
+        row = {"Activity Tags": activity_tag}
+        activity_df = ordered[ordered["Activity Tags"].astype(str) == activity_tag]
+        for idx, game_tag in enumerate(game_tags):
+            ratio_col = ratio_cols[idx]
+            cell_df = activity_df[activity_df["Game Tags"].astype(str) == game_tag].sort_values("Date")
+            if cell_df.empty:
+                row[game_tag] = ""
+                row[ratio_col] = None
+                continue
+
+            values = cell_df[metric_name].tolist()
+            last_value = values[-1]
+            chronic_values = values[:-1][-28:]
+            chronic_value = sum(chronic_values) / len(chronic_values) if chronic_values else last_value
+            if chronic_value in (0, None) or pd.isna(chronic_value):
+                ratio = None
+                pct_diff = None
+            else:
+                ratio = last_value / chronic_value
+                pct_diff = (ratio - 1) * 100
+
+            if chronic_value is None or pd.isna(chronic_value):
+                display_value = f"{last_value:.2f} | - | -"
+            elif pct_diff is None:
+                display_value = f"{last_value:.2f} | {chronic_value:.2f} | -"
+            else:
+                display_value = f"{last_value:.2f} | {chronic_value:.2f} | {pct_diff:+.1f}%"
+
+            row[game_tag] = display_value
+            row[ratio_col] = ratio
+        records.append(row)
 
     if not records:
         return None
 
-    matrix = pd.DataFrame(records).pivot(index="Activity Tags", columns="Game Tags", values="Value")
-    matrix = matrix.sort_index()
-    matrix = matrix.reindex(sorted(matrix.columns, key=lambda x: str(x)), axis=1)
-    matrix = matrix.fillna("")
-    matrix.index.name = "Activity Tags"
-    matrix = matrix.reset_index()
+    matrix = pd.DataFrame(records)
+    visible_columns = ["Activity Tags"] + game_tags
+    hidden_columns = ratio_cols
+    for col in visible_columns + hidden_columns:
+        if col not in matrix.columns:
+            matrix[col] = ""
+    matrix = matrix[visible_columns + hidden_columns]
     matrix.attrs["latest_date"] = latest_date
     matrix.attrs["metric_name"] = metric_name
+    matrix.attrs["visible_columns"] = visible_columns
+    matrix.attrs["hidden_columns"] = hidden_columns
+    matrix.attrs["game_tags"] = game_tags
     return matrix
 
 
@@ -956,9 +992,11 @@ def build_carga_cronica_categoria_report_fig(categorias, metric_name):
     if matrix_df is None or matrix_df.empty:
         return go.Figure()
 
-    header = matrix_df.columns.tolist()
-    rows = matrix_df.to_dict(orient="records")
-    title = f"Carga crónica por Categoría - {metric_name or 'Métrica'}"
+    header = matrix_df.attrs.get("visible_columns") or [
+        col for col in matrix_df.columns if not str(col).startswith("__ratio_")
+    ]
+    rows = matrix_df[header].to_dict(orient="records")
+    title = f"Carga cronica por Categoria - {metric_name or 'Metrica'}"
     return build_plotly_table(header, rows, title)
 
 
@@ -5039,37 +5077,71 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
             "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
         })
 
-    columns = []
-    for idx, col in enumerate(matrix_df.columns):
-        if idx == 0:
-            columns.append({"name": col, "id": col})
-        else:
-            columns.append({"name": col, "id": col})
-
-    n_cols = max(1, len(matrix_df.columns))
-    first_width = 24 if n_cols <= 6 else 20 if n_cols <= 10 else 18
-    other_width = max(2, (100 - first_width) / max(1, n_cols - 1))
+    visible_columns = matrix_df.attrs.get("visible_columns") or [
+        col for col in matrix_df.columns if not str(col).startswith("__ratio_")
+    ]
+    hidden_columns = matrix_df.attrs.get("hidden_columns") or [
+        col for col in matrix_df.columns if str(col).startswith("__ratio_")
+    ]
+    game_columns = [col for col in visible_columns if col != "Activity Tags"]
+    columns = [{"name": col, "id": col} for col in visible_columns + hidden_columns]
+    n_games = max(1, len(game_columns))
+    first_width = 48 if n_games <= 4 else 44 if n_games <= 8 else 40
+    other_width = max(8, (100 - first_width) / n_games)
     cell_conditional = [
         {
             "if": {"column_id": "Activity Tags"},
             "textAlign": "left",
-            "fontWeight": "600",
+            "fontWeight": "700",
             "backgroundColor": "#081319",
             "width": f"{first_width}%",
+            "minWidth": "260px",
+            "maxWidth": "520px",
         }
     ]
-    for col in matrix_df.columns[1:]:
+    for col in game_columns:
         cell_conditional.append({
             "if": {"column_id": col},
             "width": f"{other_width:.3f}%",
+            "minWidth": "92px",
+            "maxWidth": "140px",
         })
 
     latest_date = matrix_df.attrs.get("latest_date")
     latest_text = latest_date.strftime("%d/%m/%Y") if latest_date is not None else "n/a"
 
+    style_data_conditional = [
+        {"if": {"row_index": "odd"}, "backgroundColor": "#0e141a"},
+    ]
+    for idx, game_col in enumerate(game_columns):
+        ratio_col = hidden_columns[idx] if idx < len(hidden_columns) else None
+        if not ratio_col:
+            continue
+        style_data_conditional.extend([
+            {
+                "if": {
+                    "column_id": game_col,
+                    "filter_query": f"{{{ratio_col}}} >= 0.8 && {{{ratio_col}}} <= 1.3",
+                },
+                "backgroundColor": "#10311f",
+                "color": "#dcfce7",
+                "fontWeight": "600",
+            },
+            {
+                "if": {
+                    "column_id": game_col,
+                    "filter_query": f"{{{ratio_col}}} < 0.8 || {{{ratio_col}}} > 1.3",
+                },
+                "backgroundColor": "#3a1111",
+                "color": "#fee2e2",
+                "fontWeight": "600",
+            },
+        ])
+
     data_table = dash_table.DataTable(
         data=matrix_df.to_dict("records"),
         columns=columns,
+        hidden_columns=hidden_columns,
         sort_action="native",
         page_action="none",
         style_table={
@@ -5094,23 +5166,21 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
             "borderBottom": "1px solid rgba(137,188,239,0.18)",
         },
         style_cell={
-            "backgroundColor": "#0b0c0e",
-            "color": "#edf1f2",
-            "fontSize": "11px",
-            "textAlign": "center",
-            "minWidth": "0",
-            "width": "auto",
-            "maxWidth": "none",
-            "whiteSpace": "normal",
-            "height": "auto",
-            "padding": "6px",
-            "border": "none",
-            "lineHeight": "1.25",
+        "backgroundColor": "#0b0c0e",
+        "color": "#edf1f2",
+        "fontSize": "11px",
+        "textAlign": "center",
+        "minWidth": "0",
+        "width": "auto",
+        "maxWidth": "none",
+        "whiteSpace": "nowrap",
+        "height": "auto",
+        "padding": "6px",
+        "border": "none",
+        "lineHeight": "1.25",
         },
         style_cell_conditional=cell_conditional,
-        style_data_conditional=[
-            {"if": {"row_index": "odd"}, "backgroundColor": "#0e141a"},
-        ],
+        style_data_conditional=style_data_conditional,
     )
 
     return html.Div([
@@ -5273,7 +5343,10 @@ def build_download_export_frame(tab, dff, metricas, referencia, fecha_actividad=
         matrix_df = _build_carga_cronica_categoria_matrix(None, metric_name, source_df=dff)
         if matrix_df is None:
             return pd.DataFrame()
-        return matrix_df
+        visible_columns = matrix_df.attrs.get("visible_columns") or [
+            col for col in matrix_df.columns if not str(col).startswith("__ratio_")
+        ]
+        return matrix_df[visible_columns].copy()
 
     if tab == "acwr":
         metricas_acwr = ["Distance","Player Load","Acceleration Efforts","Sprint Distance",

@@ -885,25 +885,47 @@ def build_actividad_comparativa_report_fig(dff, fecha_dt):
 
 def build_actividad_promedios_report_fig(dff, fecha_dt):
     metrics = [m for m in metricas_promedios if m in dff.columns]
-    dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
-    if dff_fecha.empty or not metrics:
+    if "Date" not in dff.columns or not metrics or dff.empty:
         return go.Figure()
 
-    promedio = dff_fecha[metrics].mean(numeric_only=True).reset_index()
-    promedio.columns = ["Métrica", "Valor"]
+    dff = dff.copy()
+    dff["Date"] = pd.to_datetime(dff["Date"], errors="coerce")
+    dff = dff[dff["Date"].notna()]
+    if dff.empty:
+        return go.Figure()
+
+    fecha_base = pd.to_datetime(dff["Date"].max()).normalize()
+    fecha_inicio = fecha_base - pd.Timedelta(days=27)
+    dff_28 = dff[dff["Date"].dt.normalize().between(fecha_inicio, fecha_base)]
+    if dff_28.empty:
+        return go.Figure()
+
+    group_cols = [c for c in ["Category", "Game Tags"] if c in dff_28.columns]
+    if not group_cols:
+        return go.Figure()
+
+    resumen = dff_28.groupby(group_cols, dropna=False)[metrics].mean(numeric_only=True).reset_index().round(2)
+    melted = resumen.melt(id_vars=group_cols, value_vars=metrics, var_name="M?trica", value_name="Valor")
+    if melted.empty:
+        return go.Figure()
+
+    melted["Etiqueta"] = melted[group_cols].astype(str).agg(" | ".join, axis=1)
     fig = px.bar(
-        promedio,
+        melted,
         x="Valor",
-        y="Métrica",
+        y="Etiqueta",
+        color="M?trica",
         orientation="h",
+        barmode="group",
         template="plotly_dark",
-        color_discrete_sequence=["#edf1f2"]
+        color_discrete_sequence=["#48f788", "#89bcef", "#f1a3fd", "#a3e3d0", "#edf1f2", "#f96e83", "#f4c95d"],
     )
     fig.update_layout(
-        title={"text": f"Actividad / Promedios {fecha_dt.strftime('%d/%m/%Y')}", "font": {"color": "#f5f5f5", "size": 18}},
+        title={"text": "Actividad / Promedios - ?ltimos 28 d?as", "font": {"color": "#f5f5f5", "size": 18}},
         paper_bgcolor="#0b0c0e",
         plot_bgcolor="#0b0c0e",
-        font={"color": "#f5f5f5"}
+        font={"color": "#f5f5f5"},
+        legend=dict(orientation="h", yanchor="bottom", y=-0.22, xanchor="center", x=0.5),
     )
     return fig
 
@@ -1079,15 +1101,38 @@ def build_section_report_table_fig(section, dff, fecha_dt, categorias):
         if "Date" not in dff.columns:
             return None
         metrics = [m for m in metricas_promedios if m in dff.columns]
-        dff_fecha = dff[dff["Date"].dt.normalize() == fecha_dt]
-        if dff_fecha.empty or not metrics:
+        if not metrics:
             return None
-        promedio = dff_fecha[metrics].mean(numeric_only=True).reset_index()
-        promedio.columns = ["Métrica", "Valor"]
-        promedio["Valor"] = promedio["Valor"].round(2)
-        rows = promedio.to_dict(orient="records")
-        return build_plotly_table(["Métrica", "Valor"], rows, f"Tabla de Actividad / Promedios {fecha_dt.strftime('%d/%m/%Y')}")
-    
+
+        dff = dff.copy()
+        dff["Date"] = pd.to_datetime(dff["Date"], errors="coerce")
+        dff = dff[dff["Date"].notna()]
+        if dff.empty:
+            return None
+
+        fecha_base = pd.to_datetime(dff["Date"].max()).normalize()
+        fecha_inicio = fecha_base - pd.Timedelta(days=27)
+        dff_28 = dff[dff["Date"].dt.normalize().between(fecha_inicio, fecha_base)]
+        if dff_28.empty:
+            return None
+
+        group_cols = [c for c in ["Category", "Game Tags"] if c in dff_28.columns]
+        if not group_cols:
+            return None
+
+        resumen = (
+            dff_28.groupby(group_cols, dropna=False)[metrics]
+            .mean(numeric_only=True)
+            .reset_index()
+            .round(2)
+        )
+        resumen = resumen.sort_values(group_cols).reset_index(drop=True)
+
+        cols = group_cols + metrics
+        rows = resumen[cols].to_dict(orient="records")
+        header = cols
+        return header, rows
+
     if section == "maximos_rendimientos":
         metrics = [m for m in metricas_promedios if m in dff.columns]
         if dff.empty or not metrics:

@@ -911,40 +911,44 @@ def _build_carga_cronica_categoria_matrix(categorias, metric_name, source_df=Non
             dff = dff[dff["Category"].isin(categorias)]
     if dff.empty or "Date" not in dff.columns:
         return None
-
-    dff = dff.copy()
-    dff["Date"] = pd.to_datetime(dff["Date"], errors="coerce")
-    dff = dff[dff["Date"].notna()]
-    if dff.empty:
-        return None
-
     if "Activity Tags" not in dff.columns or "Game Tags" not in dff.columns:
         return None
 
-    fecha_base = pd.to_datetime(dff["Date"].max()).normalize()
-    fecha_inicio = fecha_base - pd.Timedelta(days=27)
-    dff = dff[dff["Date"].dt.normalize().between(fecha_inicio, fecha_base)]
+    dff = dff.copy()
+    dff["Date"] = pd.to_datetime(dff["Date"], errors="coerce")
+    dff[metric_name] = pd.to_numeric(dff[metric_name], errors="coerce")
+    dff = dff[dff["Date"].notna() & dff[metric_name].notna()]
     if dff.empty:
         return None
 
-    dff = dff[dff["Activity Tags"].notna() & dff["Game Tags"].notna()]
-    if dff.empty or metric_name not in dff.columns:
+    latest_date = dff["Date"].max().normalize()
+    records = []
+    ordered = dff.sort_values("Date")
+    for (activity_tag, game_tag), group in ordered.groupby(["Activity Tags", "Game Tags"], dropna=False):
+        values = group[metric_name].tolist()
+        if not values:
+            continue
+        last_value = values[-1]
+        chronic_values = values[:-1][-28:]
+        chronic_value = sum(chronic_values) / len(chronic_values) if chronic_values else last_value
+        records.append({
+            "Activity Tags": str(activity_tag),
+            "Game Tags": str(game_tag),
+            "Value": f"{last_value:.2f} / {chronic_value:.2f}",
+        })
+
+    if not records:
         return None
 
-    pivot = dff.pivot_table(
-        index="Activity Tags",
-        columns="Game Tags",
-        values=metric_name,
-        aggfunc="mean"
-    )
-    if pivot.empty:
-        return None
-
-    pivot = pivot.sort_index()
-    pivot = pivot.reindex(sorted([c for c in pivot.columns.tolist() if str(c).strip()]), axis=1)
-    pivot = pivot.fillna(0).round(2)
-    pivot.index.name = "Activity Tags"
-    return pivot.reset_index()
+    matrix = pd.DataFrame(records).pivot(index="Activity Tags", columns="Game Tags", values="Value")
+    matrix = matrix.sort_index()
+    matrix = matrix.reindex(sorted(matrix.columns, key=lambda x: str(x)), axis=1)
+    matrix = matrix.fillna("")
+    matrix.index.name = "Activity Tags"
+    matrix = matrix.reset_index()
+    matrix.attrs["latest_date"] = latest_date
+    matrix.attrs["metric_name"] = metric_name
+    return matrix
 
 
 def build_carga_cronica_categoria_report_fig(categorias, metric_name):
@@ -5026,7 +5030,7 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
                 html.Div("vista de la matriz", style={"color": "#a3e3d0", "fontWeight": "700"}),
                 html.Div(f"categoria: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
             ], style={"display": "flex", "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap", "marginBottom": "10px"}),
-            html.Div("No hay datos para construir la matriz con los filtros actuales.", style={"color": "#edf1f2", "padding": "18px"})
+            html.Div("no hay datos para construir la matriz con los filtros actuales.", style={"color": "#edf1f2", "padding": "18px"})
         ], style={
             "padding": "16px",
             "background": "#0b0c0e",
@@ -5040,12 +5044,11 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
         if idx == 0:
             columns.append({"name": col, "id": col})
         else:
-            columns.append({"name": col, "id": col, "type": "numeric", "format": {"specifier": ".2f"}})
+            columns.append({"name": col, "id": col})
 
-    n_cols = len(matrix_df.columns)
+    n_cols = max(1, len(matrix_df.columns))
     first_width = 24 if n_cols <= 6 else 20 if n_cols <= 10 else 18
-    remaining_width = max(10, 100 - first_width)
-    other_width = remaining_width / max(1, n_cols - 1)
+    other_width = max(2, (100 - first_width) / max(1, n_cols - 1))
     cell_conditional = [
         {
             "if": {"column_id": "Activity Tags"},
@@ -5053,17 +5056,16 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
             "fontWeight": "600",
             "backgroundColor": "#081319",
             "width": f"{first_width}%",
-            "minWidth": "180px",
-            "maxWidth": "none",
         }
     ]
     for col in matrix_df.columns[1:]:
         cell_conditional.append({
             "if": {"column_id": col},
             "width": f"{other_width:.3f}%",
-            "minWidth": "72px",
-            "maxWidth": "none",
         })
+
+    latest_date = matrix_df.attrs.get("latest_date")
+    latest_text = latest_date.strftime("%d/%m/%Y") if latest_date is not None else "n/a"
 
     data_table = dash_table.DataTable(
         data=matrix_df.to_dict("records"),
@@ -5094,7 +5096,7 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
         style_cell={
             "backgroundColor": "#0b0c0e",
             "color": "#edf1f2",
-            "fontSize": "12px",
+            "fontSize": "11px",
             "textAlign": "center",
             "minWidth": "0",
             "width": "auto",
@@ -5116,6 +5118,7 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
             html.Div("matriz de carga cronica", style={"color": "#a3e3d0", "fontWeight": "700", "fontSize": "14px"}),
             html.Div(f"categoria: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
         ], style={"display": "flex", "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap", "marginBottom": "10px"}),
+        html.Div(f"comparacion por combo: last / chronic 28 | latest session: {latest_text}", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "10px"}),
         dcc.Loading(data_table, type="default")
     ], style={"display": "flex", "flexDirection": "column", "gap": "10px"})
 

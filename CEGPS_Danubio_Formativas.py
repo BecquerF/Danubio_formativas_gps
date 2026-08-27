@@ -5085,27 +5085,38 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
     ]
     game_columns = [col for col in visible_columns if col != "Activity Tags"]
     columns = [{"name": col, "id": col} for col in visible_columns + hidden_columns]
-    n_games = max(1, len(game_columns))
-    first_width = 105 if n_games <= 4 else 95 if n_games <= 8 else 90
-    other_width = 118 if n_games <= 8 else 108
-    min_table_width = first_width + (other_width * max(1, len(game_columns))) + 40
+
+    def _calc_col_width(col_name, is_activity=False):
+        if is_activity:
+            values = matrix_df[col_name].astype(str).tolist() if col_name in matrix_df.columns else []
+            longest = max([len(col_name)] + [len(v) for v in values] + [12])
+            return max(80, min(150, 14 + longest * 4))
+        values = matrix_df[col_name].astype(str).tolist() if col_name in matrix_df.columns else []
+        longest = max([len(col_name)] + [len(v) for v in values] + [18])
+        return max(110, min(240, 20 + longest * 6))
+
+    col_widths = {"Activity Tags": _calc_col_width("Activity Tags", is_activity=True)}
+    for col in game_columns:
+        col_widths[col] = _calc_col_width(col)
+
+    min_table_width = sum(col_widths.values()) + 30
     cell_conditional = [
         {
             "if": {"column_id": "Activity Tags"},
             "textAlign": "left",
             "fontWeight": "700",
             "backgroundColor": "#081319",
-            "width": f"{first_width}px",
-            "minWidth": f"{first_width}px",
-            "maxWidth": f"{first_width}px",
+            "width": f"{col_widths['Activity Tags']}px",
+            "minWidth": f"{col_widths['Activity Tags']}px",
+            "maxWidth": f"{col_widths['Activity Tags']}px",
         }
     ]
     for col in game_columns:
         cell_conditional.append({
             "if": {"column_id": col},
-            "width": f"{other_width}px",
-            "minWidth": f"{other_width}px",
-            "maxWidth": f"{other_width}px",
+            "width": f"{col_widths[col]}px",
+            "minWidth": f"{col_widths[col]}px",
+            "maxWidth": f"{col_widths[col]}px",
         })
 
     latest_date = matrix_df.attrs.get("latest_date")
@@ -5155,7 +5166,7 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
             "backgroundColor": "#0b0c0e",
             "width": "100%",
             "minWidth": f"{min_table_width}px",
-            "tableLayout": "fixed",
+            "tableLayout": "auto",
         },
         style_header={
             "backgroundColor": "#011c24",
@@ -5183,6 +5194,7 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
         "padding": "3px 4px",
         "border": "none",
         "lineHeight": "1.15",
+        "verticalAlign": "middle",
         },
         style_cell_conditional=cell_conditional,
         style_data_conditional=style_data_conditional,

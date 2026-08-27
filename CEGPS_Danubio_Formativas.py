@@ -5086,25 +5086,26 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
     game_columns = [col for col in visible_columns if col != "Activity Tags"]
     columns = [{"name": col, "id": col} for col in visible_columns + hidden_columns]
     n_games = max(1, len(game_columns))
-    first_width = 48 if n_games <= 4 else 44 if n_games <= 8 else 40
-    other_width = max(8, (100 - first_width) / n_games)
+    first_width = 105 if n_games <= 4 else 95 if n_games <= 8 else 90
+    other_width = 118 if n_games <= 8 else 108
+    min_table_width = first_width + (other_width * max(1, len(game_columns))) + 40
     cell_conditional = [
         {
             "if": {"column_id": "Activity Tags"},
             "textAlign": "left",
             "fontWeight": "700",
             "backgroundColor": "#081319",
-            "width": f"{first_width}%",
-            "minWidth": "260px",
-            "maxWidth": "520px",
+            "width": f"{first_width}px",
+            "minWidth": f"{first_width}px",
+            "maxWidth": f"{first_width}px",
         }
     ]
     for col in game_columns:
         cell_conditional.append({
             "if": {"column_id": col},
-            "width": f"{other_width:.3f}%",
-            "minWidth": "92px",
-            "maxWidth": "140px",
+            "width": f"{other_width}px",
+            "minWidth": f"{other_width}px",
+            "maxWidth": f"{other_width}px",
         })
 
     latest_date = matrix_df.attrs.get("latest_date")
@@ -5142,16 +5143,18 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
         data=matrix_df.to_dict("records"),
         columns=columns,
         hidden_columns=hidden_columns,
+        fixed_columns={"headers": True, "data": 1},
         sort_action="native",
         page_action="none",
         style_table={
-            "overflowX": "hidden",
+            "overflowX": "auto",
+            "overflowY": "auto",
             "maxHeight": "620px",
             "border": "1px solid rgba(137,188,239,0.18)",
             "borderRadius": "16px",
             "backgroundColor": "#0b0c0e",
             "width": "100%",
-            "minWidth": "0",
+            "minWidth": f"{min_table_width}px",
             "tableLayout": "fixed",
         },
         style_header={
@@ -5174,10 +5177,12 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
         "width": "auto",
         "maxWidth": "none",
         "whiteSpace": "nowrap",
-        "height": "auto",
-        "padding": "6px",
+        "overflow": "hidden",
+        "textOverflow": "ellipsis",
+        "height": "26px",
+        "padding": "3px 4px",
         "border": "none",
-        "lineHeight": "1.25",
+        "lineHeight": "1.15",
         },
         style_cell_conditional=cell_conditional,
         style_data_conditional=style_data_conditional,

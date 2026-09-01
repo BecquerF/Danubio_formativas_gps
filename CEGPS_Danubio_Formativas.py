@@ -271,6 +271,7 @@ tab_titles = {
     "actividad": "Actividad_por_Jugador",
     "actividad_comparativa": "Actividad_Comparativa_Individual",
     "actividad_promedios": "Actividad_Promedios",
+    "carga_cronica": "Carga_Cronica",
     "carga_cronica_categoria": "Carga_Cronica_por_Categoria",
     "acwr": "ACWR_Zona_Segura",
     "plyr_vs_plyr": "PLYR_vs_PLYR",
@@ -282,6 +283,7 @@ informe_sections = [
     {"label": "Actividad", "value": "actividad"},
     {"label": "Actividad Comparativa Individual", "value": "actividad_comparativa"},
     {"label": "Actividad/Promedios", "value": "actividad_promedios"},
+    {"label": "Carga crónica", "value": "carga_cronica"},
     {"label": "Carga crónica por Categoría", "value": "carga_cronica_categoria"},
     {"label": "ACWR", "value": "acwr"},
     {"label": "PLYR vs PLYR", "value": "plyr_vs_plyr"},
@@ -359,6 +361,8 @@ def build_chart_title(tab, categorias, metricas, referencia):
         title = "Actividad comparativa individual"
     elif tab == "actividad_promedios":
         title = "Actividad / Promedios"
+    elif tab == "carga_cronica":
+        title = "Carga crónica"
     elif tab == "carga_cronica_categoria":
         title = "Carga crónica por Categoría"
     elif tab == "plyr_vs_plyr":
@@ -750,6 +754,7 @@ def section_title(section_value):
         "actividad": "Actividad",
         "actividad_comparativa": "Actividad Comparativa Individual",
         "actividad_promedios": "Actividad/Promedios",
+        "carga_cronica": "Carga crónica",
         "carga_cronica_categoria": "Carga crónica por Categoría",
         "acwr": "ACWR",
         "maximos_rendimientos": "Máximos Rendimientos",
@@ -987,6 +992,87 @@ def _build_carga_cronica_categoria_matrix(categorias, metric_name, source_df=Non
     return matrix
 
 
+def _build_carga_cronica_simple_matrix(categorias, metric_name, source_df=None):
+    """Construye matriz de carga crónica simplificada (solo promedios de 28 días sin comparación)"""
+    metric_name = (metric_name or "").strip()
+    if not metric_name or metric_name not in df.columns:
+        metric_name = next((m for m in metricas_promedios if m in df.columns), None)
+    if not metric_name:
+        return None
+
+    base_df = source_df if source_df is not None else df
+    dff = base_df.copy()
+    if categorias:
+        categorias = _normalize_selection_values(categorias)
+        if categorias:
+            dff = dff[dff["Category"].isin(categorias)]
+    if dff.empty or "Date" not in dff.columns:
+        return None
+    if "Activity Tags" not in dff.columns or "Game Tags" not in dff.columns:
+        return None
+
+    dff = dff.copy()
+    dff["Date"] = pd.to_datetime(dff["Date"], errors="coerce")
+    dff[metric_name] = pd.to_numeric(dff[metric_name], errors="coerce")
+    dff = dff[dff["Date"].notna() & dff[metric_name].notna()]
+    if dff.empty:
+        return None
+
+    latest_date = dff["Date"].max().normalize()
+    fecha_inicio = latest_date - pd.Timedelta(days=27)
+    dff_28 = dff[dff["Date"].dt.normalize().between(fecha_inicio, latest_date)]
+    if dff_28.empty:
+        return None
+
+    ordered = dff_28.sort_values("Date")
+    activity_tags = sorted(
+        ordered["Activity Tags"].dropna().astype(str).unique().tolist(),
+        key=lambda x: x.lower(),
+    )
+    game_tags = sorted(
+        ordered["Game Tags"].dropna().astype(str).unique().tolist(),
+        key=lambda x: x.lower(),
+    )
+    if not activity_tags or not game_tags:
+        return None
+
+    records = []
+    for activity_tag in activity_tags:
+        row = {"Activity Tags": activity_tag}
+        activity_df = ordered[ordered["Activity Tags"].astype(str) == activity_tag]
+        for game_tag in game_tags:
+            cell_df = activity_df[activity_df["Game Tags"].astype(str) == game_tag]
+            if cell_df.empty:
+                row[game_tag] = ""
+                continue
+
+            values = cell_df[metric_name].tolist()
+            chronic_value = sum(values) / len(values) if values else None
+
+            if chronic_value is None or pd.isna(chronic_value):
+                display_value = "-"
+            else:
+                display_value = f"{chronic_value:.2f}"
+
+            row[game_tag] = display_value
+        records.append(row)
+
+    if not records:
+        return None
+
+    matrix = pd.DataFrame(records)
+    visible_columns = ["Activity Tags"] + game_tags
+    for col in visible_columns:
+        if col not in matrix.columns:
+            matrix[col] = ""
+    matrix = matrix[visible_columns]
+    matrix.attrs["latest_date"] = latest_date
+    matrix.attrs["metric_name"] = metric_name
+    matrix.attrs["visible_columns"] = visible_columns
+    matrix.attrs["game_tags"] = game_tags
+    return matrix
+
+
 def build_carga_cronica_categoria_report_fig(categorias, metric_name):
     matrix_df = _build_carga_cronica_categoria_matrix(categorias, metric_name)
     if matrix_df is None or matrix_df.empty:
@@ -997,6 +1083,20 @@ def build_carga_cronica_categoria_report_fig(categorias, metric_name):
     ]
     rows = matrix_df[header].to_dict(orient="records")
     title = f"Carga cronica por Categoria - {metric_name or 'Metrica'}"
+    return build_plotly_table(header, rows, title)
+
+
+def build_carga_cronica_simple_report_fig(categorias, metric_name):
+    """Construye figura de reporte para carga crónica simplificada"""
+    matrix_df = _build_carga_cronica_simple_matrix(categorias, metric_name)
+    if matrix_df is None or matrix_df.empty:
+        return go.Figure()
+
+    header = matrix_df.attrs.get("visible_columns") or [
+        col for col in matrix_df.columns
+    ]
+    rows = matrix_df[header].to_dict(orient="records")
+    title = f"Carga cronica - {metric_name or 'Metrica'} (últimos 28 días)"
     return build_plotly_table(header, rows, title)
 
 
@@ -2258,6 +2358,38 @@ app.layout = html.Div([
         ),
 
         dcc.Tab(
+            label="CARGA CRÓNICA",
+            value="carga_cronica",
+            className="tab-item",
+            selected_className="tab-item-selected",
+            style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#edf1f2",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid rgba(137,188,239,.18)",
+                "padding":"2px 6px",
+                "marginBottom":"1px"
+            },
+            selected_style={
+                "whiteSpace": "normal",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "color":"#a3e3d0",
+                "fontSize":"11px",
+                "textAlign":"center",
+                "fontWeight":"600",
+                "borderTop":"1px solid #a3e3d0",
+                "padding":"2px 6px",
+                "backgroundColor":"#011c24",
+                "marginBottom":"1px"
+            }
+        ),
+
+        dcc.Tab(
             label="CARGA CRÓNICA POR CATEGORÍA",
             value="carga_cronica_categoria",
             className="tab-item",
@@ -3034,6 +3166,90 @@ def actualizar_tab(tab, categorias, metricas, referencia, rango_dias, jugadores,
     metricas = [m for m in metricas if m in dff.columns]
     referencia = referencia or "Category"
     fecha_dt = pd.to_datetime(fecha_actividad).normalize() if fecha_actividad else dff["Date"].max().normalize()
+
+    if tab == "carga_cronica":
+        metricas_validas = [m for m in metricas_promedios if m in df.columns]
+        metric_sel = metricas_validas[0] if metricas_validas else None
+        return html.Div([
+            html.H4("carga cronica", style={
+                "color": "#a3e3d0",
+                "marginBottom": "8px",
+                "fontFamily": "'Clash Display Semibold', 'Helvetica Neue'",
+                "fontWeight": "700",
+                "letterSpacing": "0.4px"
+            }),
+            html.Div(
+                "selecciona una metrica para ver la matriz activity tags x game tags usando los ultimos 28 dias cargados. sin comparacion con ultima actividad.",
+                style={
+                    "color": "#edf1f2",
+                    "marginBottom": "14px",
+                    "fontSize": "13px",
+                    "lineHeight": "1.45",
+                    "maxWidth": "900px"
+                }
+            ),
+            dcc.Tabs(
+                id="carga-cronica-simple-metrica-tabs",
+                value=metric_sel,
+                className="tab-menu",
+                vertical=False,
+                style={
+                    "display": "flex",
+                    "flexWrap": "wrap",
+                    "gap": "6px",
+                    "background": "transparent",
+                    "border": "none",
+                    "marginBottom": "14px",
+                },
+                children=[
+                    dcc.Tab(
+                        label=m,
+                        value=m,
+                        className="tab-item",
+                        selected_className="tab-item-selected",
+                        style={
+                            "whiteSpace": "normal",
+                            "overflow": "hidden",
+                            "textOverflow": "ellipsis",
+                            "color": "#edf1f2",
+                            "fontSize": "11px",
+                            "textAlign": "center",
+                            "fontWeight": "600",
+                            "borderTop": "1px solid rgba(137,188,239,.18)",
+                            "padding": "2px 6px",
+                            "marginBottom": "1px",
+                        },
+                        selected_style={
+                            "whiteSpace": "normal",
+                            "overflow": "hidden",
+                            "textOverflow": "ellipsis",
+                            "color": "#a3e3d0",
+                            "fontSize": "11px",
+                            "textAlign": "center",
+                            "fontWeight": "600",
+                            "borderTop": "1px solid #a3e3d0",
+                            "padding": "2px 6px",
+                            "backgroundColor": "#011c24",
+                            "marginBottom": "1px",
+                        },
+                    )
+                    for m in metricas_validas
+                ]
+            ),
+            html.Div(id="carga-cronica-simple-output")
+        ], style={
+            "padding": "22px",
+            "background": "#0b0c0e",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "24px",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+            "minWidth": "0",
+            "width": "100%",
+            "maxWidth": "100%",
+            "overflowX": "hidden",
+            "maxHeight": "720px",
+            "overflowY": "auto"
+        })
 
     if tab == "carga_cronica_categoria":
         metricas_validas = [m for m in metricas_promedios if m in df.columns]
@@ -5206,6 +5422,141 @@ def actualizar_carga_cronica_categoria(metric_name, categorias, tab):
             html.Div(f"categoria: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
         ], style={"display": "flex", "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap", "marginBottom": "10px"}),
         html.Div(f"comparacion por combo: last / chronic 28 | latest session: {latest_text}", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "10px"}),
+        dcc.Loading(data_table, type="default")
+    ], style={"display": "flex", "flexDirection": "column", "gap": "10px"})
+
+
+@app.callback(
+    Output("carga-cronica-simple-output", "children"),
+    Input("carga-cronica-simple-metrica-tabs", "value"),
+    Input("categoria", "value"),
+    Input("tabs", "value"),
+    prevent_initial_call=False
+)
+def actualizar_carga_cronica_simple(metric_name, categorias, tab):
+    if tab != "carga_cronica":
+        return no_update
+
+    metric_name = metric_name or next((m for m in metricas_promedios if m in df.columns), None)
+    matrix_df = _build_carga_cronica_simple_matrix(categorias, metric_name)
+    categoria_text = summarize_items(categorias, max_items=10, default="Todas")
+
+    if matrix_df is None or matrix_df.empty:
+        return html.Div([
+            html.Div([
+                html.Div("vista de la matriz", style={"color": "#a3e3d0", "fontWeight": "700"}),
+                html.Div(f"categoria: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
+            ], style={"display": "flex", "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap", "marginBottom": "10px"}),
+            html.Div("no hay datos para construir la matriz con los filtros actuales.", style={"color": "#edf1f2", "padding": "18px"})
+        ], style={
+            "padding": "16px",
+            "background": "#0b0c0e",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "18px",
+            "boxShadow": "0 18px 40px rgba(0,0,0,0.25)",
+        })
+
+    visible_columns = matrix_df.attrs.get("visible_columns") or [
+        col for col in matrix_df.columns
+    ]
+    game_columns = [col for col in visible_columns if col != "Activity Tags"]
+    columns = [{"name": col, "id": col} for col in visible_columns]
+
+    def _calc_col_width(col_name, is_activity=False):
+        if is_activity:
+            values = matrix_df[col_name].astype(str).tolist() if col_name in matrix_df.columns else []
+            longest = max([len(col_name)] + [len(v) for v in values] + [12])
+            return max(80, min(150, 14 + longest * 4))
+        values = matrix_df[col_name].astype(str).tolist() if col_name in matrix_df.columns else []
+        longest = max([len(col_name)] + [len(v) for v in values] + [18])
+        return max(110, min(240, 20 + longest * 6))
+
+    col_widths = {"Activity Tags": _calc_col_width("Activity Tags", is_activity=True)}
+    for col in game_columns:
+        col_widths[col] = _calc_col_width(col)
+
+    min_table_width = sum(col_widths.values()) + 30
+    cell_conditional = [
+        {
+            "if": {"column_id": "Activity Tags"},
+            "textAlign": "left",
+            "fontWeight": "700",
+            "backgroundColor": "#081319",
+            "width": f"{col_widths['Activity Tags']}px",
+            "minWidth": f"{col_widths['Activity Tags']}px",
+            "maxWidth": f"{col_widths['Activity Tags']}px",
+        }
+    ]
+    for col in game_columns:
+        cell_conditional.append({
+            "if": {"column_id": col},
+            "width": f"{col_widths[col]}px",
+            "minWidth": f"{col_widths[col]}px",
+            "maxWidth": f"{col_widths[col]}px",
+        })
+
+    latest_date = matrix_df.attrs.get("latest_date")
+    latest_text = latest_date.strftime("%d/%m/%Y") if latest_date is not None else "n/a"
+
+    style_data_conditional = [
+        {"if": {"row_index": "odd"}, "backgroundColor": "#0e141a"},
+    ]
+
+    data_table = dash_table.DataTable(
+        data=matrix_df.to_dict("records"),
+        columns=columns,
+        fixed_columns={"headers": True, "data": 1},
+        sort_action="native",
+        page_action="none",
+        style_table={
+            "overflowX": "auto",
+            "overflowY": "auto",
+            "maxHeight": "620px",
+            "border": "1px solid rgba(137,188,239,0.18)",
+            "borderRadius": "16px",
+            "backgroundColor": "#0b0c0e",
+            "width": "100%",
+            "minWidth": f"{min_table_width}px",
+            "tableLayout": "auto",
+        },
+        style_header={
+            "backgroundColor": "#011c24",
+            "color": "#a3e3d0",
+            "fontWeight": "700",
+            "textAlign": "center",
+            "whiteSpace": "normal",
+            "height": "auto",
+            "lineHeight": "16px",
+            "padding": "8px",
+            "borderBottom": "1px solid rgba(137,188,239,0.18)",
+        },
+        style_cell={
+        "backgroundColor": "#0b0c0e",
+        "color": "#edf1f2",
+        "fontSize": "11px",
+        "textAlign": "center",
+        "minWidth": "0",
+        "width": "auto",
+        "maxWidth": "none",
+        "whiteSpace": "nowrap",
+        "overflow": "hidden",
+        "textOverflow": "ellipsis",
+        "height": "26px",
+        "padding": "3px 4px",
+        "border": "none",
+        "lineHeight": "1.15",
+        "verticalAlign": "middle",
+        },
+        style_cell_conditional=cell_conditional,
+        style_data_conditional=style_data_conditional,
+    )
+
+    return html.Div([
+        html.Div([
+            html.Div("carga cronica", style={"color": "#a3e3d0", "fontWeight": "700", "fontSize": "14px"}),
+            html.Div(f"categoria: {categoria_text}", style={"color": "#edf1f2", "fontSize": "13px"})
+        ], style={"display": "flex", "justifyContent": "space-between", "gap": "12px", "flexWrap": "wrap", "marginBottom": "10px"}),
+        html.Div(f"promedios últimos 28 días | latest session: {latest_text}", style={"color": "#a3e3d0", "fontSize": "12px", "marginBottom": "10px"}),
         dcc.Loading(data_table, type="default")
     ], style={"display": "flex", "flexDirection": "column", "gap": "10px"})
 
